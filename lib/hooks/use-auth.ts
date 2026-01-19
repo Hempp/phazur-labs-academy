@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { User, Session } from '@supabase/supabase-js'
+import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { User as AppUser, UserRole } from '@/types'
 
@@ -90,7 +90,7 @@ export function useAuth(): UseAuthReturn {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
         if (event === 'SIGNED_IN' && session?.user) {
           const profile = await fetchProfile(session.user.id)
           setState({

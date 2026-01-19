@@ -236,8 +236,7 @@ export default function DiscussionsPage() {
                   <div className="flex items-start gap-4">
                     {/* Author Avatar */}
                     <UserAvatar
-                      name={discussion.author.name}
-                      src={discussion.author.avatar}
+                      user={{ name: discussion.author.name, avatar_url: discussion.author.avatar }}
                       size="md"
                     />
 
@@ -248,7 +247,7 @@ export default function DiscussionsPage() {
                           {/* Badges */}
                           <div className="flex items-center gap-2 mb-1">
                             {discussion.isPinned && (
-                              <Badge variant="primary\" className="text-xs">
+                              <Badge variant="primary" className="text-xs">
                                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                   <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
                                 </svg>
