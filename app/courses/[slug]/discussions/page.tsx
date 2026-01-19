@@ -435,7 +435,7 @@ export default function DiscussionsPage() {
                 ].map((user, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <span className="text-sm font-medium text-gray-400 w-4">{i + 1}</span>
-                    <UserAvatar name={user.name} src={user.avatar} size="sm" />
+                    <UserAvatar user={{ name: user.name, avatar_url: user.avatar }} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 text-sm truncate">
                         {user.name}

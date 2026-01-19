@@ -237,7 +237,7 @@ export default function DiscussionDetailPage() {
           <div className="p-6">
             {/* Author */}
             <div className="flex items-start gap-4 mb-4">
-              <UserAvatar name={discussion.author.name} src={discussion.author.avatar} size="lg" />
+              <UserAvatar user={{ name: discussion.author.name, avatar_url: discussion.author.avatar }} size="lg" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900">{discussion.author.name}</span>
@@ -340,7 +340,7 @@ export default function DiscussionDetailPage() {
               <div className="p-6">
                 {/* Author */}
                 <div className="flex items-start gap-4 mb-4">
-                  <UserAvatar name={reply.author.name} src={reply.author.avatar} size="md" />
+                  <UserAvatar user={{ name: reply.author.name, avatar_url: reply.author.avatar }} size="md" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900">{reply.author.name}</span>
