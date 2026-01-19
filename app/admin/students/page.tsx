@@ -1,0 +1,575 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Search,
+  Filter,
+  Download,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  UserPlus,
+  Mail,
+  Eye,
+  Edit,
+  Trash2,
+  Ban,
+  CheckCircle,
+  XCircle,
+  Clock,
+  TrendingUp,
+  Users,
+  GraduationCap,
+  Calendar,
+  ArrowUpDown,
+  SlidersHorizontal
+} from 'lucide-react'
+
+// Mock student data
+const students = [
+  {
+    id: '1',
+    name: 'Sarah Johnson',
+    email: 'sarah.johnson@email.com',
+    avatar: null,
+    enrolledCourses: 5,
+    completedCourses: 3,
+    progress: 78,
+    totalSpent: 499,
+    status: 'active',
+    joinDate: '2024-01-15',
+    lastActive: '2 hours ago',
+    plan: 'Premium'
+  },
+  {
+    id: '2',
+    name: 'Michael Chen',
+    email: 'michael.chen@email.com',
+    avatar: null,
+    enrolledCourses: 3,
+    completedCourses: 2,
+    progress: 92,
+    totalSpent: 299,
+    status: 'active',
+    joinDate: '2024-02-20',
+    lastActive: '1 day ago',
+    plan: 'Basic'
+  },
+  {
+    id: '3',
+    name: 'Emily Rodriguez',
+    email: 'emily.r@email.com',
+    avatar: null,
+    enrolledCourses: 8,
+    completedCourses: 8,
+    progress: 100,
+    totalSpent: 899,
+    status: 'active',
+    joinDate: '2023-11-10',
+    lastActive: '5 minutes ago',
+    plan: 'Enterprise'
+  },
+  {
+    id: '4',
+    name: 'David Kim',
+    email: 'david.kim@email.com',
+    avatar: null,
+    enrolledCourses: 2,
+    completedCourses: 0,
+    progress: 15,
+    totalSpent: 99,
+    status: 'inactive',
+    joinDate: '2024-03-01',
+    lastActive: '2 weeks ago',
+    plan: 'Basic'
+  },
+  {
+    id: '5',
+    name: 'Amanda Foster',
+    email: 'amanda.f@email.com',
+    avatar: null,
+    enrolledCourses: 4,
+    completedCourses: 1,
+    progress: 45,
+    totalSpent: 349,
+    status: 'active',
+    joinDate: '2024-01-28',
+    lastActive: '3 hours ago',
+    plan: 'Premium'
+  },
+  {
+    id: '6',
+    name: 'James Wilson',
+    email: 'james.w@email.com',
+    avatar: null,
+    enrolledCourses: 1,
+    completedCourses: 0,
+    progress: 5,
+    totalSpent: 0,
+    status: 'suspended',
+    joinDate: '2024-03-10',
+    lastActive: '1 month ago',
+    plan: 'Free Trial'
+  },
+  {
+    id: '7',
+    name: 'Lisa Thompson',
+    email: 'lisa.t@email.com',
+    avatar: null,
+    enrolledCourses: 6,
+    completedCourses: 4,
+    progress: 82,
+    totalSpent: 649,
+    status: 'active',
+    joinDate: '2023-12-05',
+    lastActive: '30 minutes ago',
+    plan: 'Premium'
+  },
+  {
+    id: '8',
+    name: 'Robert Martinez',
+    email: 'robert.m@email.com',
+    avatar: null,
+    enrolledCourses: 2,
+    completedCourses: 2,
+    progress: 100,
+    totalSpent: 199,
+    status: 'active',
+    joinDate: '2024-02-14',
+    lastActive: '1 hour ago',
+    plan: 'Basic'
+  },
+]
+
+const statusColors = {
+  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  inactive: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  suspended: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
+
+const planColors = {
+  'Free Trial': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  'Basic': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  'Premium': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  'Enterprise': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+}
+
+export default function StudentsPage() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [planFilter, setPlanFilter] = useState('all')
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+  const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null)
+
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         student.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || student.status === statusFilter
+    const matchesPlan = planFilter === 'all' || student.plan === planFilter
+    return matchesSearch && matchesStatus && matchesPlan
+  })
+
+  const toggleSelectAll = () => {
+    if (selectedStudents.length === filteredStudents.length) {
+      setSelectedStudents([])
+    } else {
+      setSelectedStudents(filteredStudents.map(s => s.id))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelectedStudents(prev =>
+      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    )
+  }
+
+  // Stats calculations
+  const totalStudents = students.length
+  const activeStudents = students.filter(s => s.status === 'active').length
+  const avgProgress = Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length)
+  const totalRevenue = students.reduce((acc, s) => acc + s.totalSpent, 0)
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Students</h1>
+          <p className="text-muted-foreground">Manage and monitor student accounts</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <Download className="h-4 w-4" />
+            Export
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+            <UserPlus className="h-4 w-4" />
+            Add Student
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Students</p>
+              <p className="text-2xl font-bold mt-1">{totalStudents.toLocaleString()}</p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+          <div className="flex items-center gap-1 mt-3 text-sm text-green-600">
+            <TrendingUp className="h-4 w-4" />
+            <span>+12% this month</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Active Students</p>
+              <p className="text-2xl font-bold mt-1">{activeStudents}</p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+          <div className="flex items-center gap-1 mt-3 text-sm text-muted-foreground">
+            <span>{Math.round((activeStudents / totalStudents) * 100)}% of total</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Avg. Progress</p>
+              <p className="text-2xl font-bold mt-1">{avgProgress}%</p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
+            <div
+              className="bg-purple-500 h-2 rounded-full"
+              style={{ width: `${avgProgress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Revenue</p>
+              <p className="text-2xl font-bold mt-1">${totalRevenue.toLocaleString()}</p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+          </div>
+          <div className="flex items-center gap-1 mt-3 text-sm text-green-600">
+            <TrendingUp className="h-4 w-4" />
+            <span>+8% this month</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters & Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search students by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            {/* Quick Filters */}
+            <div className="flex items-center gap-3">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+
+              <select
+                value={planFilter}
+                onChange={(e) => setPlanFilter(e.target.value)}
+                className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">All Plans</option>
+                <option value="Free Trial">Free Trial</option>
+                <option value="Basic">Basic</option>
+                <option value="Premium">Premium</option>
+                <option value="Enterprise">Enterprise</option>
+              </select>
+
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                  showFilters
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+              </button>
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Join Date</label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Min Progress</label>
+                <input
+                  type="number"
+                  placeholder="0%"
+                  min="0"
+                  max="100"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Min Courses</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Last Active</label>
+                <select className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary">
+                  <option value="all">Any time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This week</option>
+                  <option value="month">This month</option>
+                  <option value="inactive">Inactive (30+ days)</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bulk Actions */}
+        {selectedStudents.length > 0 && (
+          <div className="p-3 bg-primary/5 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4">
+            <span className="text-sm font-medium">{selectedStudents.length} selected</span>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                <Mail className="h-4 w-4 inline mr-1" />
+                Email
+              </button>
+              <button className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                <Ban className="h-4 w-4 inline mr-1" />
+                Suspend
+              </button>
+              <button className="px-3 py-1.5 text-sm bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100">
+                <Trash2 className="h-4 w-4 inline mr-1" />
+                Delete
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left p-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                </th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                  <button className="flex items-center gap-1 hover:text-foreground">
+                    Student
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Plan</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                  <button className="flex items-center gap-1 hover:text-foreground">
+                    Progress
+                    <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Courses</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Last Active</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">Revenue</th>
+                <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.map((student) => (
+                <tr
+                  key={student.id}
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                >
+                  <td className="p-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedStudents.includes(student.id)}
+                      onChange={() => toggleSelect(student.id)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white font-semibold">
+                        {student.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="font-medium">{student.name}</p>
+                        <p className="text-sm text-muted-foreground">{student.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${planColors[student.plan as keyof typeof planColors]}`}>
+                      {student.plan}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            student.progress === 100
+                              ? 'bg-green-500'
+                              : student.progress >= 50
+                              ? 'bg-primary'
+                              : 'bg-amber-500'
+                          }`}
+                          style={{ width: `${student.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium w-10">{student.progress}%</span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="text-sm">
+                      <span className="font-medium">{student.completedCourses}</span>
+                      <span className="text-muted-foreground">/{student.enrolledCourses}</span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[student.status as keyof typeof statusColors]}`}>
+                      {student.status === 'active' && <CheckCircle className="h-3 w-3" />}
+                      {student.status === 'inactive' && <Clock className="h-3 w-3" />}
+                      {student.status === 'suspended' && <XCircle className="h-3 w-3" />}
+                      {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className="text-sm text-muted-foreground">{student.lastActive}</span>
+                  </td>
+                  <td className="p-4">
+                    <span className="font-medium">${student.totalSpent}</span>
+                  </td>
+                  <td className="p-4">
+                    <div className="relative flex justify-end">
+                      <button
+                        onClick={() => setActionMenuOpen(actionMenuOpen === student.id ? null : student.id)}
+                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                      {actionMenuOpen === student.id && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
+                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <Eye className="h-4 w-4" />
+                            View Profile
+                          </button>
+                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <Edit className="h-4 w-4" />
+                            Edit Details
+                          </button>
+                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <Mail className="h-4 w-4" />
+                            Send Email
+                          </button>
+                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <GraduationCap className="h-4 w-4" />
+                            View Courses
+                          </button>
+                          <hr className="my-1 border-gray-200 dark:border-gray-700" />
+                          {student.status !== 'suspended' ? (
+                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                              <Ban className="h-4 w-4" />
+                              Suspend Account
+                            </button>
+                          ) : (
+                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20">
+                              <CheckCircle className="h-4 w-4" />
+                              Reactivate
+                            </button>
+                          )}
+                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <Trash2 className="h-4 w-4" />
+                            Delete Account
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-muted-foreground">
+            Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredStudents.length}</span> of{' '}
+            <span className="font-medium">{students.length}</span> students
+          </p>
+          <div className="flex items-center gap-2">
+            <button className="p-2 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm">1</button>
+            <button className="px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">2</button>
+            <button className="px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">3</button>
+            <span className="text-muted-foreground">...</span>
+            <button className="px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">12</button>
+            <button className="p-2 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <defs>
+    <linearGradient id="music-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+  <circle cx="20" cy="52" r="10" fill="url(#music-grad)"/>
+  <rect x="28" y="22" width="4" height="32" fill="url(#music-grad)"/>
+  <path d="M32 22 Q45 18 45 28 L32 32" fill="url(#music-grad)"/>
+  <text x="55" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">MUSIC</text>
+  <text x="55" y="55" font-family="Arial, sans-serif" font-size="14" fill="#7c3aed">Maven</text>
+</svg>

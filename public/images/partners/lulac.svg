@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <defs>
+    <linearGradient id="lulac-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626"/>
+      <stop offset="50%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#16a34a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="35" cy="40" r="25" fill="none" stroke="#1e293b" stroke-width="3"/>
+  <circle cx="35" cy="40" r="20" fill="#1e293b"/>
+  <text x="20" y="46" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">LULAC</text>
+  <text x="70" y="38" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">LULAC</text>
+  <text x="70" y="52" font-family="Arial, sans-serif" font-size="8" fill="#64748b">League of United Latin</text>
+  <text x="70" y="62" font-family="Arial, sans-serif" font-size="8" fill="#64748b">American Citizens</text>
+</svg>

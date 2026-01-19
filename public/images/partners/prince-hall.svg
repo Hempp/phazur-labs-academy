@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <defs>
+    <linearGradient id="prince-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c2d12"/>
+      <stop offset="100%" style="stop-color:#b45309"/>
+    </linearGradient>
+  </defs>
+  <polygon points="35,15 45,35 65,35 50,48 55,68 35,55 15,68 20,48 5,35 25,35" fill="url(#prince-grad)"/>
+  <text x="75" y="38" font-family="Georgia, serif" font-size="16" font-weight="bold" fill="#7c2d12">Prince Hall</text>
+  <text x="75" y="54" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Masonic Lodge</text>
+</svg>

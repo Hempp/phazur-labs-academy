@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <defs>
+    <linearGradient id="ucla-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="15" width="55" height="50" rx="4" fill="url(#ucla-grad)"/>
+  <text x="18" y="38" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#fbbf24">UCLA</text>
+  <text x="18" y="54" font-family="Arial, sans-serif" font-size="11" fill="white">BRUINS</text>
+  <text x="75" y="45" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1d4ed8">UCLA Bruins</text>
+</svg>
