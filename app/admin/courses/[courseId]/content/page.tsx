@@ -265,7 +265,7 @@ export default function CourseContentPage() {
                                 </span>
                               </>
                             )}
-                            {item.type === 'quiz' && (
+                            {item.type === 'quiz' && 'questions' in item && (
                               <span>{item.questions} questions</span>
                             )}
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[item.status as keyof typeof statusConfig].color}`}>
