@@ -78,6 +78,9 @@ export default function VerifyPage() {
             <Link href="/courses" className="text-gray-600 hover:text-gray-900 text-sm">
               Browse Courses
             </Link>
+            <Link href="/partners" className="text-gray-600 hover:text-gray-900 text-sm">
+              Partners
+            </Link>
             <Link
               href="/enterprise"
               className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"

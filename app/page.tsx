@@ -141,11 +141,11 @@ export default function HomePage() {
             <Link href="/enterprise" className="text-sm font-medium hover:text-primary transition-colors">
               Enterprise
             </Link>
+            <Link href="/partners" className="text-sm font-medium hover:text-primary transition-colors">
+              Partners
+            </Link>
             <Link href="/verify" className="text-sm font-medium hover:text-primary transition-colors">
               Verify Certificate
-            </Link>
-            <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
-              Pricing
             </Link>
           </div>
 
