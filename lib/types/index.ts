@@ -156,6 +156,102 @@ export interface AssignmentSubmission {
   graded_at?: string
 }
 
+// Quiz types
+export interface Quiz {
+  id: string
+  lesson_id: string
+  course_id: string
+  title: string
+  description?: string
+  time_limit_minutes?: number
+  passing_score: number
+  max_attempts: number
+  shuffle_questions: boolean
+  show_correct_answers: boolean
+  questions: QuizQuestion[]
+  created_at: string
+  updated_at: string
+}
+
+export interface QuizQuestion {
+  id: string
+  quiz_id: string
+  question: string
+  question_type: 'multiple_choice' | 'true_false' | 'multiple_select'
+  options: QuizOption[]
+  explanation?: string
+  points: number
+  order: number
+}
+
+export interface QuizOption {
+  id: string
+  question_id: string
+  text: string
+  is_correct: boolean
+}
+
+// Assignment types
+export interface Assignment {
+  id: string
+  lesson_id: string
+  course_id: string
+  title: string
+  description: string
+  instructions: string
+  due_days_after_enrollment?: number
+  max_score: number
+  submission_types: ('file' | 'url' | 'text')[]
+  allowed_file_types?: string[]
+  max_file_size_mb?: number
+  rubric?: AssignmentRubric[]
+  resources?: AssignmentResource[]
+  created_at: string
+  updated_at: string
+}
+
+export interface AssignmentRubric {
+  id: string
+  criteria: string
+  description: string
+  max_points: number
+}
+
+export interface AssignmentResource {
+  id: string
+  title: string
+  type: 'file' | 'link' | 'template'
+  url: string
+}
+
+// Video Content types (for AI-generated videos)
+export interface VideoContent {
+  id: string
+  lesson_id: string
+  title: string
+  description?: string
+  script: string
+  avatar_id: string
+  avatar_name: string
+  voice_id: string
+  status: 'draft' | 'generating' | 'ready' | 'failed'
+  video_url?: string
+  thumbnail_url?: string
+  duration_seconds?: number
+  heygen_video_id?: string
+  error_message?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface VideoAvatar {
+  id: string
+  name: string
+  preview_url: string
+  gender: 'male' | 'female'
+  style: 'professional' | 'casual' | 'friendly'
+}
+
 // Certificate types
 export interface Certificate {
   id: string
