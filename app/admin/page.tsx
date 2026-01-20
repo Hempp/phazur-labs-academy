@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import {
   Users,
@@ -25,78 +25,161 @@ import {
   Calendar,
   Filter
 } from 'lucide-react'
+import {
+  courses,
+  students,
+  enrollments,
+  activities,
+  liveTrainings,
+  getAdminDashboardStats,
+  getUpcomingLiveTrainings,
+} from '@/lib/data/store'
 
-// Mock data for dashboard
-const stats = [
-  {
-    name: 'Total Students',
-    value: '12,847',
-    change: '+12.5%',
-    changeType: 'positive',
-    icon: Users,
-    color: 'bg-blue-500',
-  },
-  {
-    name: 'Active Courses',
-    value: '156',
-    change: '+8.2%',
-    changeType: 'positive',
-    icon: BookOpen,
-    color: 'bg-violet-500',
-  },
-  {
-    name: 'Course Completions',
-    value: '3,429',
-    change: '+23.1%',
-    changeType: 'positive',
-    icon: GraduationCap,
-    color: 'bg-emerald-500',
-  },
-  {
-    name: 'Monthly Revenue',
-    value: '$89,420',
-    change: '+18.7%',
-    changeType: 'positive',
-    icon: DollarSign,
-    color: 'bg-amber-500',
-  },
-]
-
-const recentStudents = [
-  { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', course: 'Full-Stack Development', progress: 78, status: 'active', avatar: 'S' },
-  { id: 2, name: 'Michael Chen', email: 'michael@example.com', course: 'AI & Machine Learning', progress: 45, status: 'active', avatar: 'M' },
-  { id: 3, name: 'Emily Davis', email: 'emily@example.com', course: 'Data Science Pro', progress: 92, status: 'active', avatar: 'E' },
-  { id: 4, name: 'James Wilson', email: 'james@example.com', course: 'Cloud Architecture', progress: 34, status: 'inactive', avatar: 'J' },
-  { id: 5, name: 'Anna Martinez', email: 'anna@example.com', course: 'Cybersecurity Fundamentals', progress: 67, status: 'active', avatar: 'A' },
-]
-
-const topCourses = [
-  { id: 1, name: 'Full-Stack Web Development', students: 2847, completionRate: 78, revenue: '$142,350', rating: 4.9 },
-  { id: 2, name: 'AI & Machine Learning Engineering', students: 2134, completionRate: 65, revenue: '$213,400', rating: 4.8 },
-  { id: 3, name: 'Data Science & Analytics', students: 1892, completionRate: 72, revenue: '$94,600', rating: 4.9 },
-  { id: 4, name: 'Cloud Architecture & DevOps', students: 1567, completionRate: 81, revenue: '$78,350', rating: 4.7 },
-]
-
-const recentActivities = [
-  { id: 1, type: 'enrollment', message: 'New enrollment in "Full-Stack Development"', time: '2 minutes ago', icon: UserPlus },
-  { id: 2, type: 'completion', message: 'Sarah Johnson completed "React Advanced"', time: '15 minutes ago', icon: CheckCircle2 },
-  { id: 3, type: 'upload', message: 'New video uploaded to "AI Fundamentals"', time: '1 hour ago', icon: Video },
-  { id: 4, type: 'certificate', message: 'Certificate issued to Michael Chen', time: '2 hours ago', icon: Award },
-  { id: 5, type: 'quiz', message: '23 students completed "Python Basics" quiz', time: '3 hours ago', icon: Target },
-]
-
-const engagementData = [
-  { day: 'Mon', students: 2400 },
-  { day: 'Tue', students: 1398 },
-  { day: 'Wed', students: 3800 },
-  { day: 'Thu', students: 3908 },
-  { day: 'Fri', students: 4800 },
-  { day: 'Sat', students: 3800 },
-  { day: 'Sun', students: 2300 },
-]
+// Activity icon mapping
+const activityIcons = {
+  enrollment: UserPlus,
+  completion: CheckCircle2,
+  video_upload: Video,
+  certificate: Award,
+  quiz: Target,
+  assignment: Target,
+  course_created: BookOpen,
+  live_training: Calendar,
+}
 
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState('7d')
+
+  // Get stats from shared store
+  const dashboardStats = useMemo(() => getAdminDashboardStats(), [])
+  const upcomingTrainings = useMemo(() => getUpcomingLiveTrainings(), [])
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Stats from shared data
+  const stats = [
+    {
+      name: 'Total Students',
+      value: formatNumber(dashboardStats.total_students),
+      change: '+12.5%',
+      changeType: 'positive',
+      icon: Users,
+      color: 'bg-blue-500',
+    },
+    {
+      name: 'Active Courses',
+      value: dashboardStats.published_courses.toString(),
+      change: '+8.2%',
+      changeType: 'positive',
+      icon: BookOpen,
+      color: 'bg-violet-500',
+    },
+    {
+      name: 'Course Completions',
+      value: formatNumber(dashboardStats.total_completions),
+      change: '+23.1%',
+      changeType: 'positive',
+      icon: GraduationCap,
+      color: 'bg-emerald-500',
+    },
+    {
+      name: 'Monthly Revenue',
+      value: formatCurrency(dashboardStats.monthly_revenue),
+      change: '+18.7%',
+      changeType: 'positive',
+      icon: DollarSign,
+      color: 'bg-amber-500',
+    },
+  ]
+
+  // Top courses from shared data
+  const topCourses = useMemo(() => {
+    return courses
+      .filter(c => c.status === 'published')
+      .sort((a, b) => b.enrolled_students - a.enrolled_students)
+      .slice(0, 4)
+      .map(course => ({
+        id: course.id,
+        name: course.title,
+        students: course.enrolled_students,
+        completionRate: course.completion_rate,
+        revenue: formatCurrency(course.revenue),
+        rating: course.rating,
+      }))
+  }, [])
+
+  // Recent students with enrollments from shared data
+  const recentStudents = useMemo(() => {
+    return enrollments
+      .sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime())
+      .slice(0, 5)
+      .map(enrollment => ({
+        id: enrollment.id,
+        name: enrollment.student.full_name,
+        email: enrollment.student.email,
+        course: enrollment.course.title,
+        progress: enrollment.progress_percentage,
+        status: enrollment.status === 'active' ? 'active' : 'inactive',
+        avatar: enrollment.student.full_name.charAt(0),
+      }))
+  }, [])
+
+  // Recent activities from shared data
+  const recentActivities = useMemo(() => {
+    return activities
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5)
+      .map(activity => {
+        const Icon = activityIcons[activity.type] || Activity
+        const now = new Date()
+        const activityDate = new Date(activity.created_at)
+        const diffMs = now.getTime() - activityDate.getTime()
+        const diffMins = Math.floor(diffMs / 60000)
+        const diffHours = Math.floor(diffMins / 60)
+        const diffDays = Math.floor(diffHours / 24)
+
+        let time = ''
+        if (diffMins < 60) {
+          time = `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
+        } else if (diffHours < 24) {
+          time = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
+        } else {
+          time = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+        }
+
+        return {
+          id: activity.id,
+          type: activity.type,
+          message: activity.message,
+          time,
+          icon: Icon,
+        }
+      })
+  }, [])
+
+  // Mock engagement data (would come from analytics in production)
+  const engagementData = [
+    { day: 'Mon', students: 2400 },
+    { day: 'Tue', students: 1398 },
+    { day: 'Wed', students: 3800 },
+    { day: 'Thu', students: 3908 },
+    { day: 'Fri', students: 4800 },
+    { day: 'Sat', students: 3800 },
+    { day: 'Sun', students: 2300 },
+  ]
 
   return (
     <div className="space-y-8">
@@ -157,6 +240,39 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Upcoming Live Trainings Banner */}
+      {upcomingTrainings.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-500 to-violet-600 rounded-xl p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-xl">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Upcoming Live Training</h3>
+                <p className="text-white/80">{upcomingTrainings[0].title}</p>
+                <p className="text-sm text-white/60">
+                  {new Date(upcomingTrainings[0].scheduled_start).toLocaleString('en-US', {
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin/live-training"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              <span>View All</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">
@@ -221,11 +337,12 @@ export default function AdminDashboard() {
             {recentActivities.map((activity) => (
               <div key={activity.id} className="flex items-start gap-3">
                 <div className={`p-2 rounded-lg ${
-                  activity.type === 'enrollment' ? 'bg-blue-100 text-blue-600' :
-                  activity.type === 'completion' ? 'bg-emerald-100 text-emerald-600' :
-                  activity.type === 'upload' ? 'bg-violet-100 text-violet-600' :
-                  activity.type === 'certificate' ? 'bg-amber-100 text-amber-600' :
-                  'bg-gray-100 text-gray-600'
+                  activity.type === 'enrollment' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                  activity.type === 'completion' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                  activity.type === 'video_upload' ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' :
+                  activity.type === 'certificate' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
+                  activity.type === 'live_training' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                  'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                 }`}>
                   <activity.icon className="h-4 w-4" />
                 </div>
@@ -270,8 +387,8 @@ export default function AdminDashboard() {
                       <p className="font-medium truncate">{student.name}</p>
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         student.status === 'active'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                       }`}>
                         {student.status}
                       </span>
@@ -334,7 +451,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-sm">
                     <span>⭐</span>
                     <span className="font-medium">{course.rating}</span>
                   </div>
@@ -348,7 +465,7 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-primary to-violet-600 rounded-xl p-6 text-white">
         <h3 className="font-semibold text-lg mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Link
             href="/admin/courses/create"
             className="flex items-center gap-3 p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
@@ -369,6 +486,13 @@ export default function AdminDashboard() {
           >
             <UserPlus className="h-6 w-6" />
             <span className="font-medium">Invite Students</span>
+          </Link>
+          <Link
+            href="/admin/live-training"
+            className="flex items-center gap-3 p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+          >
+            <Calendar className="h-6 w-6" />
+            <span className="font-medium">Schedule Live</span>
           </Link>
           <Link
             href="/admin/quizzes/create"
