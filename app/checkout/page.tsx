@@ -22,7 +22,7 @@ import {
 import { useCartStore } from '@/lib/stores/cart-store'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { formatPrice } from '@/lib/stripe-client'
-import { toast } from 'sonner'
+import toast from 'react-hot-toast'
 
 export default function CheckoutPage() {
   const router = useRouter()
