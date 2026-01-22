@@ -1,0 +1,282 @@
+# Supabase Plugin Configuration
+# NEXUS-PRIME v3.0
+
+name: supabase-plugin
+version: "1.0.0"
+description: "Complete Supabase integration plugin for NEXUS-PRIME"
+author: "NEXUS-PRIME"
+
+# ═══════════════════════════════════════════════════════════════
+# PLUGIN METADATA
+# ═══════════════════════════════════════════════════════════════
+
+metadata:
+  id: nexus-supabase
+  category: backend
+  tags:
+    - supabase
+    - database
+    - authentication
+    - storage
+    - serverless
+    - realtime
+    - baas
+  compatibility:
+    nexus_prime: ">=3.0.0"
+    supabase_cli: ">=1.100.0"
+
+# ═══════════════════════════════════════════════════════════════
+# PLUGIN ACTIVATION
+# ═══════════════════════════════════════════════════════════════
+
+activation:
+  auto_detect:
+    files:
+      - supabase/config.toml
+      - supabase.ts
+      - lib/supabase.ts
+      - src/lib/supabase.ts
+    env_vars:
+      - SUPABASE_URL
+      - NEXT_PUBLIC_SUPABASE_URL
+  commands:
+    - /deploy-supabase
+    - /supabase-team
+    - /nexus-deploy SUPA-MASTER
+
+# ═══════════════════════════════════════════════════════════════
+# RESOURCES
+# ═══════════════════════════════════════════════════════════════
+
+resources:
+  agents:
+    - SUPA-MASTER
+    - AUTH-GUARD
+    - DATA-FORGE
+    - STORE-KEEPER
+    - EDGE-RUNNER
+    - REALTIME-SYNC
+    - ROW-GUARD
+    - VECTOR-SAGE
+
+  skills:
+    - team-supabase-master.yaml
+
+  commands:
+    - supabase.yaml
+
+  settings:
+    - supabase.yaml
+
+  hooks:
+    pre_migrate: hooks/supabase/pre-migrate.sh
+    post_migrate: hooks/supabase/post-migrate.sh
+    pre_deploy: hooks/supabase/pre-deploy.sh
+    post_deploy: hooks/supabase/post-deploy.sh
+
+  mcp_server:
+    path: mcp/supabase-server
+    entry: index.js
+
+# ═══════════════════════════════════════════════════════════════
+# FEATURES
+# ═══════════════════════════════════════════════════════════════
+
+features:
+  # Database
+  database:
+    enabled: true
+    capabilities:
+      - schema_design
+      - migrations
+      - query_optimization
+      - type_generation
+      - functions
+      - triggers
+
+  # Authentication
+  authentication:
+    enabled: true
+    capabilities:
+      - oauth_providers
+      - magic_links
+      - phone_auth
+      - mfa
+      - sso_saml
+      - custom_claims
+
+  # Storage
+  storage:
+    enabled: true
+    capabilities:
+      - bucket_management
+      - file_uploads
+      - image_transforms
+      - access_policies
+      - cdn_optimization
+
+  # Edge Functions
+  edge_functions:
+    enabled: true
+    capabilities:
+      - function_creation
+      - deployment
+      - local_dev
+      - secrets_management
+      - webhooks
+
+  # Realtime
+  realtime:
+    enabled: true
+    capabilities:
+      - postgres_changes
+      - broadcast
+      - presence
+      - subscriptions
+
+  # Security
+  security:
+    enabled: true
+    capabilities:
+      - rls_policies
+      - security_audit
+      - access_testing
+
+  # AI/Vectors
+  vectors:
+    enabled: true
+    capabilities:
+      - pgvector
+      - embeddings
+      - semantic_search
+      - rag_pipeline
+
+# ═══════════════════════════════════════════════════════════════
+# TEMPLATES
+# ═══════════════════════════════════════════════════════════════
+
+templates:
+  project:
+    nextjs:
+      name: "Next.js + Supabase Starter"
+      files:
+        - src/lib/supabase.ts
+        - src/types/supabase.ts
+        - middleware.ts
+
+    sveltekit:
+      name: "SvelteKit + Supabase Starter"
+      files:
+        - src/lib/supabase.ts
+        - src/lib/types/supabase.ts
+
+    nuxt:
+      name: "Nuxt + Supabase Starter"
+      files:
+        - plugins/supabase.ts
+        - types/supabase.ts
+
+  schema:
+    - user_profiles
+    - multi_tenant
+    - blog
+    - ecommerce
+    - chat
+
+  functions:
+    - hello_world
+    - stripe_webhook
+    - send_email
+    - openai_completion
+    - cron_job
+
+# ═══════════════════════════════════════════════════════════════
+# DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════
+
+dependencies:
+  cli:
+    supabase:
+      version: ">=1.100.0"
+      install: "npm install -g supabase"
+      check: "supabase --version"
+
+  optional:
+    deno:
+      version: ">=1.40.0"
+      purpose: "Edge function development"
+    sqlfluff:
+      purpose: "SQL linting"
+    jq:
+      purpose: "JSON processing"
+
+  npm:
+    "@supabase/supabase-js": "^2.45.0"
+    "@supabase/ssr": "^0.1.0"
+    "@supabase/auth-helpers-nextjs": "^0.8.0"
+
+# ═══════════════════════════════════════════════════════════════
+# WORKFLOWS
+# ═══════════════════════════════════════════════════════════════
+
+workflows:
+  new_project:
+    description: "Initialize new Supabase project"
+    steps:
+      - action: init
+        command: supabase init
+      - action: link
+        command: supabase link --project-ref {ref}
+        interactive: true
+      - action: generate_types
+        command: supabase gen types typescript
+      - action: setup_client
+        template: client_setup
+
+  migration:
+    description: "Database migration workflow"
+    hooks:
+      pre: pre-migrate.sh
+      post: post-migrate.sh
+    steps:
+      - action: create
+        command: supabase migration new {name}
+      - action: apply
+        command: supabase db push
+      - action: types
+        command: supabase gen types typescript
+
+  deployment:
+    description: "Deploy to production"
+    hooks:
+      pre: pre-deploy.sh
+      post: post-deploy.sh
+    steps:
+      - action: push_db
+        command: supabase db push
+      - action: deploy_functions
+        command: supabase functions deploy
+      - action: verify
+        command: supabase status
+
+# ═══════════════════════════════════════════════════════════════
+# EVENTS
+# ═══════════════════════════════════════════════════════════════
+
+events:
+  on_activate:
+    - check_cli_installed
+    - check_project_linked
+    - load_settings
+
+  on_file_change:
+    patterns:
+      - "supabase/migrations/*.sql"
+    actions:
+      - lint_migration
+      - suggest_type_regeneration
+
+  on_command:
+    "/supabase-*":
+      - log_command
+      - track_usage

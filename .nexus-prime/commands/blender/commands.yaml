@@ -1,0 +1,198 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Blender Commands Configuration
+#  Slash Commands for Blender Integration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+commands:
+  version: "1.0.0"
+  category: "blender"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Core Deployment Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  deployment:
+    - command: "/deploy-blender"
+      description: "Deploy full Blender Master Team"
+      activates: ["MESH-MASTER", "SHADER-WIZARD", "ANIM-GURU", "RIG-MASTER", "SIM-GURU", "NODE-ARCHITECT", "RENDER-MASTER"]
+      action: "activate_team"
+
+    - command: "/blender"
+      description: "Quick access to Blender operations"
+      aliases: ["/bpy", "/b3d"]
+      action: "blender_menu"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Agent-Specific Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  agents:
+    - command: "/blender-model"
+      description: "Deploy MESH-MASTER for modeling"
+      activates: ["MESH-MASTER"]
+      aliases: ["/mesh", "/model"]
+
+    - command: "/blender-material"
+      description: "Deploy SHADER-WIZARD for materials"
+      activates: ["SHADER-WIZARD"]
+      aliases: ["/shader", "/material", "/mat"]
+
+    - command: "/blender-animate"
+      description: "Deploy ANIM-GURU for animation"
+      activates: ["ANIM-GURU"]
+      aliases: ["/animate", "/anim"]
+
+    - command: "/blender-rig"
+      description: "Deploy RIG-MASTER for rigging"
+      activates: ["RIG-MASTER"]
+      aliases: ["/rig", "/armature"]
+
+    - command: "/blender-sim"
+      description: "Deploy SIM-GURU for simulations"
+      activates: ["SIM-GURU"]
+      aliases: ["/sim", "/physics"]
+
+    - command: "/blender-nodes"
+      description: "Deploy NODE-ARCHITECT for geometry nodes"
+      activates: ["NODE-ARCHITECT"]
+      aliases: ["/geonodes", "/nodes"]
+
+    - command: "/blender-render"
+      description: "Deploy RENDER-MASTER for rendering"
+      activates: ["RENDER-MASTER"]
+      aliases: ["/render", "/cycles", "/eevee"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Script Execution Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  scripts:
+    - command: "/blender-run [script]"
+      description: "Execute Blender Python script"
+      action: "execute_script"
+      parameters:
+        script: "Script name or path"
+
+    - command: "/blender-generate [type]"
+      description: "Generate 3D content"
+      action: "run_generator"
+      parameters:
+        type: "gallery | retail | office | showroom | custom"
+
+    - command: "/blender-batch [operation]"
+      description: "Batch process files"
+      action: "batch_process"
+      parameters:
+        operation: "render | convert | optimize"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Project Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  project:
+    - command: "/blender-new [type]"
+      description: "Create new Blender project"
+      action: "create_project"
+      parameters:
+        type: "arch-viz | character | product | motion | vfx"
+
+    - command: "/blender-setup"
+      description: "Configure Blender workspace"
+      action: "setup_workspace"
+
+    - command: "/blender-export [format]"
+      description: "Export scene"
+      action: "export_scene"
+      parameters:
+        format: "fbx | gltf | usd | obj | abc"
+
+    - command: "/blender-import [file]"
+      description: "Import external file"
+      action: "import_file"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Asset Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  assets:
+    - command: "/blender-asset [action]"
+      description: "Manage asset library"
+      action: "asset_manager"
+      parameters:
+        action: "list | add | import | search"
+
+    - command: "/blender-material-lib"
+      description: "Access material library"
+      action: "material_library"
+
+    - command: "/blender-hdri [name]"
+      description: "Load HDRI environment"
+      action: "load_hdri"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Render Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  rendering:
+    - command: "/blender-render-preview"
+      description: "Quick preview render"
+      action: "render_preview"
+      aliases: ["/preview"]
+
+    - command: "/blender-render-final"
+      description: "Final quality render"
+      action: "render_final"
+
+    - command: "/blender-render-animation"
+      description: "Render animation"
+      action: "render_animation"
+
+    - command: "/blender-render-settings [preset]"
+      description: "Apply render preset"
+      action: "apply_render_preset"
+      parameters:
+        preset: "preview | production | final"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Utility Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  utilities:
+    - command: "/blender-clean"
+      description: "Clean unused data blocks"
+      action: "clean_scene"
+
+    - command: "/blender-optimize"
+      description: "Optimize scene for performance"
+      action: "optimize_scene"
+
+    - command: "/blender-analyze"
+      description: "Analyze scene statistics"
+      action: "analyze_scene"
+
+    - command: "/blender-backup"
+      description: "Create incremental backup"
+      action: "backup_scene"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Help & Documentation
+  # ─────────────────────────────────────────────────────────────────────────────
+  help:
+    - command: "/blender-help"
+      description: "Show Blender commands help"
+      action: "show_help"
+
+    - command: "/blender-docs [topic]"
+      description: "Access Blender documentation"
+      action: "show_docs"
+      parameters:
+        topic: "modeling | materials | animation | rigging | rendering"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Command Aliases Summary
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#  /deploy-blender     - Full team deployment
+#  /blender           - Quick menu (/bpy, /b3d)
+#  /blender-model     - Modeling (/mesh, /model)
+#  /blender-material  - Materials (/shader, /mat)
+#  /blender-animate   - Animation (/animate, /anim)
+#  /blender-rig       - Rigging (/rig, /armature)
+#  /blender-sim       - Simulation (/sim, /physics)
+#  /blender-nodes     - Geometry Nodes (/geonodes, /nodes)
+#  /blender-render    - Rendering (/render, /cycles, /eevee)
+#
+# ═══════════════════════════════════════════════════════════════════════════════

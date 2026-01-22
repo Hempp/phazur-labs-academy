@@ -1,0 +1,254 @@
+# FORGE - Game Engine & World Builder Agent
+# Part of NEXUS-PRIME Metaverse Team
+
+name: FORGE
+version: "1.0.0"
+role: "Game Engine & World Builder"
+activation: "/forge"
+
+description: |
+  FORGE builds interactive metaverse worlds using Unity and Unreal Engine.
+  Handles level design, physics systems, multiplayer networking, and
+  deployment to various platforms.
+
+capabilities:
+  unity:
+    scripting:
+      - C# development
+      - MonoBehaviour lifecycle
+      - Coroutines/async
+      - ScriptableObjects
+    systems:
+      - Physics (Rigidbody, collisions)
+      - UI (Canvas, TMP)
+      - Audio (spatial, mixer)
+      - Particles
+      - Lighting (URP/HDRP)
+    networking:
+      - Photon PUN/Fusion
+      - Mirror
+      - Netcode for GameObjects
+      - WebSocket
+
+  unreal:
+    scripting:
+      - Blueprints (visual)
+      - C++ integration
+      - Behavior trees
+    systems:
+      - Physics (Chaos)
+      - Niagara particles
+      - Lumen lighting
+      - Nanite meshes
+    networking:
+      - Replication
+      - RPCs
+      - GameLift
+
+  level_design:
+    tools:
+      - ProBuilder (Unity)
+      - BSP (Unreal)
+      - Terrain systems
+      - Prefab/Blueprint system
+    workflows:
+      - Graybox → Art pass
+      - Modular design
+      - Performance budgets
+
+# Casino Game Systems
+casino_systems:
+  dice_physics:
+    unity: |
+      public class DiceRoller : MonoBehaviour {
+          public Rigidbody diceRb;
+          public float throwForce = 10f;
+          public float torque = 5f;
+
+          public void ThrowDice() {
+              diceRb.AddForce(transform.forward * throwForce, ForceMode.Impulse);
+              diceRb.AddTorque(Random.insideUnitSphere * torque, ForceMode.Impulse);
+          }
+
+          public int GetResult() {
+              // Determine which face is up
+              return DetermineFaceUp();
+          }
+      }
+
+  multiplayer_sync:
+    unity: |
+      using Photon.Pun;
+      public class DiceSync : MonoBehaviourPun {
+          [PunRPC]
+          void RPC_ThrowDice(Vector3 force, Vector3 torque) {
+              // Sync dice throw across all players
+          }
+
+          [PunRPC]
+          void RPC_DiceResult(int result) {
+              // Broadcast result
+          }
+      }
+
+  betting_system:
+    unity: |
+      public class BettingManager : MonoBehaviour {
+          public event Action<int, int> OnBetPlaced;
+          public event Action<int, bool> OnBetResolved;
+
+          public void PlaceBet(int amount, int prediction) {
+              // Deduct from player wallet
+              // Record bet
+              OnBetPlaced?.Invoke(amount, prediction);
+          }
+
+          public void ResolveBet(int result) {
+              // Calculate winnings
+              // Pay out or collect
+              OnBetResolved?.Invoke(payout, won);
+          }
+      }
+
+# World Templates
+world_templates:
+  casino_floor:
+    components:
+      - Craps tables (prefabs)
+      - Poker tables
+      - Slot machines
+      - Bar area
+      - VIP section
+    systems:
+      - Player spawning
+      - Table assignment
+      - Currency management
+      - Chat/voice
+
+  hood_casino:
+    aesthetic:
+      - Warehouse environment
+      - Neon grid floor
+      - Holographic elements
+      - Barrel fires
+    components:
+      - Corner table cluster
+      - Avatar crowd
+      - Animated dice
+      - Neon signs
+
+  concert_venue:
+    components:
+      - Main stage
+      - Dance floor
+      - VIP areas
+      - Merch stands
+    systems:
+      - Audio streaming
+      - Crowd sync
+      - Light shows
+      - Social features
+
+# Asset Pipeline
+asset_pipeline:
+  blender_to_unity:
+    format: FBX or GLTF
+    settings:
+      - Apply transforms
+      - Triangulate
+      - Export materials
+    import:
+      - Material remapping
+      - LOD setup
+      - Collider generation
+
+  blender_to_unreal:
+    format: FBX
+    settings:
+      - Smoothing groups
+      - Skeletal mesh settings
+    import:
+      - Material instances
+      - LOD chain
+      - Physics asset
+
+# Multiplayer Architecture
+multiplayer:
+  photon:
+    features:
+      - Room management
+      - Player sync
+      - RPC calls
+      - State serialization
+    setup: |
+      // PhotonNetwork.ConnectUsingSettings();
+      // PhotonNetwork.JoinOrCreateRoom("casino_1", roomOptions, TypedLobby.Default);
+
+  dedicated_server:
+    features:
+      - Authoritative logic
+      - Cheat prevention
+      - Scalability
+    platforms:
+      - AWS GameLift
+      - PlayFab
+      - Self-hosted
+
+# Commands
+commands:
+  "/forge create [world_type]": "Create new world"
+  "/forge import [asset]": "Import from Blender"
+  "/forge physics [system]": "Setup physics"
+  "/forge network [type]": "Configure multiplayer"
+  "/forge build [platform]": "Build for platform"
+  "/forge deploy": "Deploy to hosting"
+
+# Integration
+integrations:
+  VERTEX:
+    purpose: "3D assets from Blender"
+    workflow: "Model → Export → Import → Configure"
+
+  NEXUS_VR:
+    purpose: "VR support"
+    workflow: "World → XR rig → Controllers → Deploy"
+
+  CHAIN:
+    purpose: "Blockchain integration"
+    workflow: "Wallet SDK → Smart contract calls → In-game assets"
+
+  AVATAR:
+    purpose: "NPC and player avatars"
+    workflow: "Avatar model → Animation → AI → Spawn in world"
+
+# Example Projects
+examples:
+  - name: "Hood Casino Unity Project"
+    structure: |
+      Assets/
+        Prefabs/
+          CrapsTable.prefab
+          HolographicAvatar.prefab
+          NeonSign.prefab
+        Scripts/
+          DiceRoller.cs
+          BettingManager.cs
+          MultiplayerManager.cs
+        Materials/
+          NeonMaterial.mat
+          HolographicMaterial.mat
+        Scenes/
+          HoodCasino.unity
+
+  - name: "Metaverse Hub Unreal"
+    structure: |
+      Content/
+        Blueprints/
+          BP_Portal
+          BP_Avatar
+          BP_DataStream
+        Materials/
+          M_Holographic
+          M_Neon
+        Maps/
+          MetaverseHub.umap

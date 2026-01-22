@@ -1,0 +1,181 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Blender Hooks Configuration
+#  Event-driven automation for Blender workflows
+# ═══════════════════════════════════════════════════════════════════════════════
+
+hooks:
+  version: "1.0.0"
+  category: "blender"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  File Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  file_hooks:
+    on_file_save:
+      description: "Actions when .blend file is saved"
+      enabled: true
+      actions:
+        - name: "create_backup"
+          command: "cp {filepath} ~/.nexus-prime/blender/backups/{filename}_{timestamp}.blend"
+          condition: "always"
+        
+        - name: "generate_thumbnail"
+          command: "blender --background {filepath} --python ~/.nexus-prime/blender/scripts/generate_thumbnail.py"
+          condition: "if_project_file"
+
+    on_file_open:
+      description: "Actions when .blend file is opened"
+      enabled: true
+      actions:
+        - name: "validate_scene"
+          script: "validate_scene.py"
+          condition: "always"
+        
+        - name: "check_missing_assets"
+          script: "check_assets.py"
+          condition: "always"
+
+    on_file_export:
+      description: "Actions after export completes"
+      enabled: true
+      actions:
+        - name: "optimize_gltf"
+          command: "gltf-transform optimize {output_path}"
+          condition: "if_gltf_export"
+        
+        - name: "compress_textures"
+          script: "compress_textures.py"
+          condition: "if_includes_textures"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Render Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  render_hooks:
+    pre_render:
+      description: "Actions before rendering starts"
+      enabled: true
+      actions:
+        - name: "check_render_settings"
+          script: "validate_render_settings.py"
+          
+        - name: "free_memory"
+          command: "purge"
+
+    post_render:
+      description: "Actions after rendering completes"
+      enabled: true
+      actions:
+        - name: "notify_complete"
+          command: "osascript -e 'display notification \"Render Complete\" with title \"Blender\"'"
+          condition: "if_macos"
+          
+        - name: "auto_open"
+          command: "open {output_path}"
+          condition: "if_still_image"
+          enabled: false
+
+        - name: "upload_to_cloud"
+          script: "upload_render.py"
+          condition: "if_cloud_sync_enabled"
+          enabled: false
+
+    on_render_error:
+      description: "Actions when render fails"
+      enabled: true
+      actions:
+        - name: "save_error_log"
+          script: "save_render_log.py"
+          
+        - name: "notify_error"
+          command: "osascript -e 'display notification \"Render Failed\" with title \"Blender Error\"'"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Asset Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  asset_hooks:
+    on_asset_import:
+      description: "Actions when asset is imported"
+      enabled: true
+      actions:
+        - name: "apply_scale"
+          script: "apply_transforms.py"
+          
+        - name: "organize_collections"
+          script: "organize_imports.py"
+
+    on_material_create:
+      description: "Actions when new material is created"
+      enabled: true
+      actions:
+        - name: "add_to_library"
+          script: "add_material_to_library.py"
+          condition: "if_library_material"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Animation Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  animation_hooks:
+    on_animation_bake:
+      description: "Actions when animation is baked"
+      enabled: true
+      actions:
+        - name: "clean_fcurves"
+          script: "clean_animation.py"
+
+    on_simulation_cache:
+      description: "Actions when simulation is cached"
+      enabled: true
+      actions:
+        - name: "backup_cache"
+          command: "cp -r {cache_path} ~/.nexus-prime/blender/cache/{sim_name}_{timestamp}"
+          condition: "if_backup_enabled"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Project Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  project_hooks:
+    on_project_init:
+      description: "Actions when new project is initialized"
+      enabled: true
+      actions:
+        - name: "setup_folders"
+          script: "setup_project_structure.py"
+          
+        - name: "apply_presets"
+          script: "apply_project_presets.py"
+          
+        - name: "create_readme"
+          script: "create_project_readme.py"
+
+    on_project_complete:
+      description: "Actions when project is marked complete"
+      enabled: true
+      actions:
+        - name: "archive_project"
+          script: "archive_project.py"
+          
+        - name: "generate_report"
+          script: "generate_project_report.py"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Git Integration Hooks
+  # ─────────────────────────────────────────────────────────────────────────────
+  git_hooks:
+    pre_commit:
+      description: "Actions before git commit"
+      enabled: false
+      actions:
+        - name: "pack_external_data"
+          command: "blender --background {blend_file} --python-expr 'import bpy; bpy.ops.file.pack_all()'"
+          
+        - name: "generate_preview"
+          script: "generate_commit_preview.py"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Hook Scripts Location: ~/.nexus-prime/blender/scripts/hooks/
+#  All scripts receive context variables via environment:
+#    - BLEND_FILE: Current .blend file path
+#    - OUTPUT_PATH: Export/render output path
+#    - TIMESTAMP: Current timestamp
+#    - PROJECT_NAME: Project name if set
+# ═══════════════════════════════════════════════════════════════════════════════

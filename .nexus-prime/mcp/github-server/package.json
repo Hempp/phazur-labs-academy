@@ -1,0 +1,23 @@
+{
+  "name": "@nexus-prime/github-mcp-server",
+  "version": "1.0.0",
+  "description": "NEXUS-PRIME MCP server for GitHub API integration",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@octokit/graphql": "^7.0.0",
+    "@octokit/rest": "^20.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "github",
+    "nexus-prime"
+  ],
+  "author": "NEXUS-PRIME",
+  "license": "MIT"
+}

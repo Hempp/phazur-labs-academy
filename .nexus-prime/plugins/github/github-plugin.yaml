@@ -1,0 +1,221 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: GitHub Plugin Configuration
+#  Core plugin for GitHub Master Team integration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+plugin:
+  id: "github-master"
+  name: "GitHub Master Plugin"
+  version: "1.0.0"
+  description: "NEXUS-PRIME GitHub integration plugin"
+  author: "NEXUS-PRIME"
+  enabled: true
+
+# Core Features
+features:
+  gh_cli:
+    name: "GitHub CLI Integration"
+    description: "Core gh CLI commands and wrappers"
+    enabled: true
+    auto_install: true
+    min_version: "2.0.0"
+
+  git_hooks:
+    name: "Git Hooks (Husky)"
+    description: "Pre-commit, commit-msg, pre-push hooks"
+    enabled: true
+    manager: "husky"
+    hooks:
+      - pre-commit
+      - commit-msg
+      - pre-push
+      - post-merge
+
+  conventional_commits:
+    name: "Conventional Commits"
+    description: "Enforce conventional commit format"
+    enabled: true
+    tool: "commitlint"
+
+  lint_staged:
+    name: "Lint Staged"
+    description: "Run linters on staged files"
+    enabled: true
+
+# Security Plugins
+security_plugins:
+  dependabot:
+    name: "Dependabot"
+    description: "Automated dependency updates"
+    enabled: true
+    config:
+      ecosystems:
+        - npm
+        - pip
+        - github-actions
+      schedule: "weekly"
+      auto_merge: false
+
+  codeql:
+    name: "CodeQL"
+    description: "Code scanning with CodeQL"
+    enabled: true
+    config:
+      languages:
+        - javascript
+        - typescript
+        - python
+      schedule: "weekly"
+
+  secret_scanning:
+    name: "Secret Scanning"
+    description: "Detect secrets in commits"
+    enabled: true
+    config:
+      push_protection: true
+
+  gitleaks:
+    name: "Gitleaks"
+    description: "Git secret scanning tool"
+    enabled: true
+    run_in: "pre-commit"
+
+# Automation Plugins
+automation_plugins:
+  auto_merge:
+    name: "Auto-Merge"
+    description: "Auto-merge PRs meeting criteria"
+    enabled: false
+    config:
+      require_approvals: 2
+      require_passing_checks: true
+      allowed_authors:
+        - "dependabot[bot]"
+
+  stale_bot:
+    name: "Stale Bot"
+    description: "Close stale issues and PRs"
+    enabled: true
+    config:
+      days_before_stale: 60
+      days_before_close: 14
+      stale_label: "stale"
+      exempt_labels:
+        - "pinned"
+        - "security"
+
+  labeler:
+    name: "PR Labeler"
+    description: "Auto-label PRs by files changed"
+    enabled: true
+    config:
+      rules:
+        - pattern: "src/api/**"
+          label: "area: backend"
+        - pattern: "src/components/**"
+          label: "area: frontend"
+        - pattern: "docs/**"
+          label: "documentation"
+        - pattern: ".github/**"
+          label: "area: devops"
+
+  size_label:
+    name: "Size Label"
+    description: "Add size labels to PRs"
+    enabled: true
+    config:
+      xs: { max: 10 }
+      s: { max: 50 }
+      m: { max: 200 }
+      l: { max: 500 }
+      xl: { min: 501 }
+
+# Documentation Plugins
+documentation_plugins:
+  readme_generator:
+    name: "README Generator"
+    description: "Auto-generate README sections"
+    enabled: true
+    sections:
+      - badges
+      - installation
+      - usage
+      - contributing
+      - license
+
+  changelog_generator:
+    name: "Changelog Generator"
+    description: "Auto-generate CHANGELOG from commits"
+    enabled: true
+    config:
+      format: "keepachangelog"
+      commit_format: "conventional"
+
+  api_docs:
+    name: "API Documentation"
+    description: "Auto-deploy API docs to Pages"
+    enabled: false
+    generator: "typedoc"
+
+# CI/CD Plugins
+cicd_plugins:
+  semantic_release:
+    name: "Semantic Release"
+    description: "Automated versioning and releases"
+    enabled: false
+    config:
+      branches:
+        - main
+      plugins:
+        - "@semantic-release/commit-analyzer"
+        - "@semantic-release/release-notes-generator"
+        - "@semantic-release/changelog"
+        - "@semantic-release/npm"
+        - "@semantic-release/github"
+        - "@semantic-release/git"
+
+  release_drafter:
+    name: "Release Drafter"
+    description: "Draft releases based on merged PRs"
+    enabled: true
+    config:
+      template: |
+        ## What's Changed
+        $CHANGES
+
+# Notification Plugins
+notification_plugins:
+  slack:
+    name: "Slack Notifications"
+    description: "Send GitHub events to Slack"
+    enabled: false
+    config:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      events:
+        - push
+        - pull_request
+        - release
+        - issues
+
+  discord:
+    name: "Discord Notifications"
+    description: "Send GitHub events to Discord"
+    enabled: false
+
+# IDE Integration
+ide_integration:
+  vscode:
+    extensions:
+      - "github.vscode-pull-request-github"
+      - "github.copilot"
+      - "github.copilot-chat"
+      - "eamodio.gitlens"
+
+# MCP Server
+mcp_server:
+  enabled: true
+  command: "node"
+  args:
+    - "~/.nexus-prime/mcp/github-server/index.js"
+  env:
+    GITHUB_TOKEN: "${GITHUB_TOKEN}"

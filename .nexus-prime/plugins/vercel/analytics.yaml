@@ -1,0 +1,97 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Vercel Analytics Plugin
+#  Web Vitals and usage analytics
+# ═══════════════════════════════════════════════════════════════════════════════
+
+plugin:
+  id: "vercel-analytics"
+  name: "Vercel Analytics"
+  version: "1.0.0"
+  description: "Web Vitals and usage analytics integration"
+  team: "TEAM-VERCEL"
+  agent: "METRICS-WATCH"
+  enabled: true
+
+# Installation
+installation:
+  npm: "@vercel/analytics"
+  command: "npm install @vercel/analytics"
+  
+  setup:
+    nextjs_app_router: |
+      // app/layout.tsx
+      import { Analytics } from '@vercel/analytics/react'
+      
+      export default function RootLayout({ children }: { children: React.ReactNode }) {
+        return (
+          <html lang="en">
+            <body>
+              {children}
+              <Analytics />
+            </body>
+          </html>
+        )
+      }
+    
+    nextjs_pages_router: |
+      // pages/_app.tsx
+      import { Analytics } from '@vercel/analytics/react'
+      import type { AppProps } from 'next/app'
+      
+      export default function App({ Component, pageProps }: AppProps) {
+        return (
+          <>
+            <Component {...pageProps} />
+            <Analytics />
+          </>
+        )
+      }
+    
+    vanilla_js: |
+      // In your HTML or JS entry point
+      import { inject } from '@vercel/analytics'
+      inject()
+
+# Features
+features:
+  page_views:
+    enabled: true
+    auto_track: true
+  
+  custom_events:
+    enabled: true
+    example: |
+      import { track } from '@vercel/analytics'
+      
+      // Track custom event
+      track('button_clicked', {
+        button_id: 'signup',
+        page: '/home'
+      })
+  
+  web_vitals:
+    enabled: true
+    metrics:
+      - LCP  # Largest Contentful Paint
+      - FID  # First Input Delay
+      - CLS  # Cumulative Layout Shift
+      - INP  # Interaction to Next Paint
+      - TTFB # Time to First Byte
+
+# Configuration
+configuration:
+  mode: "production"  # or "development"
+  debug: false
+  
+  # Custom configuration
+  options: |
+    <Analytics 
+      mode="production"
+      beforeSend={(event) => {
+        // Filter or modify events
+        if (event.url.includes('/admin')) {
+          return null // Don't track admin pages
+        }
+        return event
+      }}
+    />

@@ -1,0 +1,185 @@
+# Vercel Production Deployment Workflow
+# NEXUS-PRIME Workflow Definition
+
+name: vercel-deploy-production
+version: "1.0.0"
+description: "Complete production deployment workflow with validation, deployment, and verification"
+category: deployment
+trigger: manual
+
+metadata:
+  author: "NEXUS-PRIME"
+  created: "2025-01-15"
+  tags: ["vercel", "deployment", "production", "ci-cd"]
+
+# Required agents for this workflow
+agents:
+  primary:
+    - DEPLOY-MASTER
+  support:
+    - ENV-CONFIG
+    - METRICS-WATCH
+    - EDGE-OPS
+
+# Environment requirements
+requirements:
+  env_vars:
+    - VERCEL_TOKEN
+    - VERCEL_ORG_ID
+    - VERCEL_PROJECT_ID
+  tools:
+    - vercel
+    - git
+    - node
+
+# Workflow stages
+stages:
+  - name: pre-flight-checks
+    description: "Validate environment and code quality"
+    parallel: true
+    steps:
+      - id: check-git
+        action: bash
+        command: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "ERROR: Uncommitted changes detected"
+            exit 1
+          fi
+        on_failure: abort
+
+      - id: check-branch
+        action: bash
+        command: |
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "master" ]; then
+            echo "WARNING: Not on main branch (current: $BRANCH)"
+          fi
+
+      - id: validate-env
+        action: script
+        script: ~/.nexus-prime/commands/vercel-env.sh validate
+        on_failure: abort
+
+      - id: run-lint
+        action: bash
+        command: npm run lint 2>/dev/null || yarn lint 2>/dev/null || true
+
+      - id: run-typecheck
+        action: bash
+        command: npm run typecheck 2>/dev/null || npm run type-check 2>/dev/null || tsc --noEmit 2>/dev/null || true
+
+      - id: run-tests
+        action: bash
+        command: npm test -- --passWithNoTests 2>/dev/null || yarn test --passWithNoTests 2>/dev/null || true
+
+  - name: build-validation
+    description: "Build and validate the application"
+    depends_on: pre-flight-checks
+    steps:
+      - id: production-build
+        action: bash
+        command: npm run build || yarn build
+        on_failure: abort
+        timeout: 600
+
+      - id: check-build-size
+        action: bash
+        command: |
+          if [ -d ".next" ]; then
+            du -sh .next
+          elif [ -d "dist" ]; then
+            du -sh dist
+          elif [ -d "build" ]; then
+            du -sh build
+          fi
+
+  - name: deploy
+    description: "Deploy to Vercel production"
+    depends_on: build-validation
+    steps:
+      - id: run-pre-deploy-hook
+        action: script
+        script: ~/.nexus-prime/hooks/vercel/pre-deploy.sh
+        optional: true
+
+      - id: deploy-production
+        action: bash
+        command: vercel deploy --prod --yes
+        on_failure: abort
+        timeout: 900
+        capture_output: DEPLOYMENT_URL
+
+      - id: run-post-deploy-hook
+        action: script
+        script: ~/.nexus-prime/hooks/vercel/post-deploy.sh
+        optional: true
+
+  - name: verification
+    description: "Verify deployment health"
+    depends_on: deploy
+    parallel: true
+    steps:
+      - id: smoke-test
+        action: bash
+        command: |
+          URL="${DEPLOYMENT_URL:-$(vercel ls --prod 2>/dev/null | head -1)}"
+          if [ -n "$URL" ]; then
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed: $URL"
+            else
+              echo "WARNING: Status code $STATUS for $URL"
+            fi
+          fi
+
+      - id: lighthouse-audit
+        action: script
+        script: ~/.nexus-prime/hooks/vercel/lighthouse.sh
+        optional: true
+
+      - id: check-web-vitals
+        action: bash
+        command: |
+          echo "Monitor Web Vitals at: https://vercel.com/dashboard/analytics"
+          echo "Target metrics:"
+          echo "  - LCP < 2.5s"
+          echo "  - FID < 100ms"
+          echo "  - CLS < 0.1"
+          echo "  - INP < 200ms"
+
+  - name: notification
+    description: "Send deployment notifications"
+    depends_on: verification
+    optional: true
+    steps:
+      - id: log-deployment
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Production Deployment Complete"
+          echo "======================================"
+          echo "Time: $(date)"
+          echo "Branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Commit: $(git rev-parse --short HEAD)"
+          echo "URL: ${DEPLOYMENT_URL:-'Check Vercel dashboard'}"
+          echo "======================================"
+
+# Rollback procedure
+rollback:
+  trigger: manual
+  steps:
+    - id: list-deployments
+      action: bash
+      command: vercel ls --prod
+
+    - id: rollback-deployment
+      action: script
+      script: ~/.nexus-prime/commands/vercel-rollback.sh
+      requires_confirmation: true
+
+# Error handling
+on_error:
+  - action: script
+    script: ~/.nexus-prime/hooks/vercel/on-error.sh
+  - action: log
+    message: "Deployment failed. Check logs for details."

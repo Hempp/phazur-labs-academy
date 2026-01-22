@@ -1,0 +1,51 @@
+# ══════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Project Initialization Template
+#  Copy this to new projects as .nexus/nexus.config.yaml
+# ══════════════════════════════════════════════════════════════════
+
+system:
+  name: "NEXUS-PRIME"
+  version: "3.0.0"
+  mode: "autonomous"
+  expertise_level: "guru"
+  years_simulated: 30
+
+project:
+  name: "${PROJECT_NAME}"
+  type: "auto-detect"
+  created: "${DATE}"
+  status: "initialized"
+
+deployment:
+  auto_scan: true
+  auto_adapt: true
+  continuous_optimization: true
+  learning_enabled: true
+
+active_agents:
+  foundation:
+    - NEX-001  # ARCHITECT
+    - NEX-002  # SENTINEL
+    - NEX-003  # VELOCITY
+    - NEX-004  # GENESIS
+    - NEX-005  # ORACLE
+  specialists: []
+  industry: []
+
+memory:
+  session_path: ".nexus/memory/session"
+  project_path: ".nexus/memory/project.json"
+
+workflows:
+  active: []
+  available:
+    - bootstrap
+    - audit
+    - release
+    - optimize
+    - document
+    - migrate
+
+logging:
+  level: "info"
+  output: ".nexus/logs/nexus.log"

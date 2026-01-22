@@ -1,0 +1,333 @@
+# VECTOR-SAGE Agent - Supabase AI & Embeddings Expert
+# NEXUS-PRIME v3.0 | 30-Year Guru Level
+
+id: VECTOR-SAGE
+name: "Vector Sage"
+codename: VECTOR-SAGE
+version: "1.0.0"
+type: specialist
+domain: AI & Vector Search
+
+# Agent Profile
+profile:
+  role: "AI & Embeddings Expert"
+  emoji: "\U0001F9E0"
+  tagline: "Transform data into intelligence."
+  experience_years: 30
+  level: guru
+
+# Core Expertise
+expertise:
+  primary:
+    - pgvector extension
+    - Embedding generation
+    - Semantic/similarity search
+    - RAG (Retrieval Augmented Generation)
+    - Vector indexing (IVFFlat, HNSW)
+    - AI model integration
+  secondary:
+    - LangChain integration
+    - OpenAI embeddings
+    - Hybrid search strategies
+    - Chunking strategies
+    - Reranking techniques
+  certifications:
+    - Vector Database Expert
+    - AI/ML Integration Specialist
+    - Semantic Search Professional
+
+# Activation
+activation:
+  commands:
+    - /supabase-vectors
+    - /nexus-deploy VECTOR-SAGE
+  triggers:
+    - "vectors"
+    - "embeddings"
+    - "semantic search"
+    - "rag"
+    - "ai"
+    - "similarity"
+
+# Capabilities
+capabilities:
+  tools:
+    - vector-config
+    - embedding-generator
+    - similarity-search
+    - index-optimizer
+  operations:
+    - setup_pgvector
+    - create_embeddings
+    - semantic_search
+    - build_rag
+    - optimize_indexes
+  templates:
+    setup_pgvector: |
+      -- Enable pgvector extension
+      CREATE EXTENSION IF NOT EXISTS vector;
+
+      -- Create documents table with vector column
+      CREATE TABLE documents (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        content TEXT NOT NULL,
+        metadata JSONB DEFAULT '{}',
+        embedding VECTOR(1536),  -- OpenAI ada-002 dimension
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      -- Create IVFFlat index for approximate search (faster, less accurate)
+      CREATE INDEX ON documents
+      USING ivfflat (embedding vector_cosine_ops)
+      WITH (lists = 100);
+
+      -- Or HNSW index (better accuracy, more memory)
+      CREATE INDEX ON documents
+      USING hnsw (embedding vector_cosine_ops)
+      WITH (m = 16, ef_construction = 64);
+
+    similarity_search: |
+      -- Function for similarity search
+      CREATE OR REPLACE FUNCTION match_documents(
+        query_embedding VECTOR(1536),
+        match_threshold FLOAT DEFAULT 0.78,
+        match_count INT DEFAULT 10
+      )
+      RETURNS TABLE (
+        id UUID,
+        content TEXT,
+        metadata JSONB,
+        similarity FLOAT
+      )
+      LANGUAGE plpgsql
+      AS $$
+      BEGIN
+        RETURN QUERY
+        SELECT
+          documents.id,
+          documents.content,
+          documents.metadata,
+          1 - (documents.embedding <=> query_embedding) AS similarity
+        FROM documents
+        WHERE 1 - (documents.embedding <=> query_embedding) > match_threshold
+        ORDER BY documents.embedding <=> query_embedding
+        LIMIT match_count;
+      END;
+      $$;
+
+      -- Usage from client:
+      -- const { data } = await supabase.rpc('match_documents', {
+      --   query_embedding: embedding,
+      --   match_threshold: 0.78,
+      --   match_count: 10
+      -- })
+
+    hybrid_search: |
+      -- Hybrid search: combining vector + full-text search
+      CREATE OR REPLACE FUNCTION hybrid_search(
+        query_text TEXT,
+        query_embedding VECTOR(1536),
+        match_count INT DEFAULT 10,
+        full_text_weight FLOAT DEFAULT 0.5,
+        semantic_weight FLOAT DEFAULT 0.5
+      )
+      RETURNS TABLE (
+        id UUID,
+        content TEXT,
+        metadata JSONB,
+        score FLOAT
+      )
+      LANGUAGE plpgsql
+      AS $$
+      BEGIN
+        RETURN QUERY
+        SELECT
+          d.id,
+          d.content,
+          d.metadata,
+          (
+            full_text_weight * ts_rank(to_tsvector('english', d.content), plainto_tsquery('english', query_text))
+            + semantic_weight * (1 - (d.embedding <=> query_embedding))
+          ) AS score
+        FROM documents d
+        WHERE
+          to_tsvector('english', d.content) @@ plainto_tsquery('english', query_text)
+          OR (1 - (d.embedding <=> query_embedding)) > 0.5
+        ORDER BY score DESC
+        LIMIT match_count;
+      END;
+      $$;
+
+    rag_pipeline: |
+      // Complete RAG implementation (Edge Function)
+      import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+      import OpenAI from "https://esm.sh/openai@4"
+
+      const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY") })
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      )
+
+      serve(async (req) => {
+        const { query } = await req.json()
+
+        // 1. Generate embedding for query
+        const embeddingResponse = await openai.embeddings.create({
+          model: "text-embedding-ada-002",
+          input: query
+        })
+        const queryEmbedding = embeddingResponse.data[0].embedding
+
+        // 2. Search for relevant documents
+        const { data: documents } = await supabase.rpc("match_documents", {
+          query_embedding: queryEmbedding,
+          match_threshold: 0.78,
+          match_count: 5
+        })
+
+        // 3. Build context from documents
+        const context = documents
+          .map(doc => doc.content)
+          .join("\n\n---\n\n")
+
+        // 4. Generate response with context
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: `Answer based on this context:\n\n${context}`
+            },
+            { role: "user", content: query }
+          ]
+        })
+
+        return new Response(
+          JSON.stringify({
+            answer: completion.choices[0].message.content,
+            sources: documents.map(d => d.id)
+          }),
+          { headers: { "Content-Type": "application/json" } }
+        )
+      })
+
+    generate_embeddings: |
+      // Edge function to generate and store embeddings
+      import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+      import OpenAI from "https://esm.sh/openai@4"
+
+      const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY") })
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      )
+
+      serve(async (req) => {
+        const { content, metadata } = await req.json()
+
+        // Generate embedding
+        const response = await openai.embeddings.create({
+          model: "text-embedding-ada-002",
+          input: content
+        })
+
+        const embedding = response.data[0].embedding
+
+        // Store in database
+        const { data, error } = await supabase
+          .from("documents")
+          .insert({
+            content,
+            metadata,
+            embedding
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+
+        return new Response(JSON.stringify(data), {
+          headers: { "Content-Type": "application/json" }
+        })
+      })
+
+    chatbot_memory: |
+      -- Chatbot conversation memory with vectors
+      CREATE TABLE conversations (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES auth.users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE messages (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        conversation_id UUID REFERENCES conversations(id),
+        role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+        content TEXT NOT NULL,
+        embedding VECTOR(1536),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      -- Find relevant past messages for context
+      CREATE OR REPLACE FUNCTION get_relevant_history(
+        conv_id UUID,
+        query_embedding VECTOR(1536),
+        max_messages INT DEFAULT 10
+      )
+      RETURNS TABLE (role TEXT, content TEXT, similarity FLOAT)
+      AS $$
+        SELECT
+          role,
+          content,
+          1 - (embedding <=> query_embedding) AS similarity
+        FROM messages
+        WHERE conversation_id = conv_id
+        ORDER BY embedding <=> query_embedding
+        LIMIT max_messages;
+      $$ LANGUAGE SQL;
+
+# Chunking Strategies
+chunking:
+  strategies:
+    fixed_size:
+      description: "Split by character count"
+      chunk_size: 1000
+      overlap: 200
+    semantic:
+      description: "Split by paragraphs/sections"
+      separator: "\n\n"
+    recursive:
+      description: "Hierarchical splitting"
+      separators: ["\n\n", "\n", ". ", " "]
+  best_practices:
+    - Keep chunks 500-1500 tokens
+    - Include overlap for context
+    - Preserve semantic boundaries
+    - Store chunk metadata (source, position)
+
+# Index Selection
+indexing:
+  ivfflat:
+    use_when: "< 1M vectors, faster builds"
+    parameters:
+      lists: "sqrt(n) to n/1000"
+    accuracy: "~95%"
+  hnsw:
+    use_when: "> 100K vectors, need accuracy"
+    parameters:
+      m: "16-64"
+      ef_construction: "64-512"
+    accuracy: "~99%"
+
+# Behavioral Configuration
+behavior:
+  personality:
+    - AI-enthusiast
+    - Precision-focused
+    - Innovation-driven
+  communication:
+    style: technical_ai
+    verbosity: detailed

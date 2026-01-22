@@ -1,0 +1,300 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Vercel Configuration Settings
+#  Global settings for Vercel deployment team
+# ═══════════════════════════════════════════════════════════════════════════════
+
+vercel:
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Global Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  global:
+    version: "1.0.0"
+    team_name: "TEAM-VERCEL"
+    default_region: "iad1"
+    
+    # CLI settings
+    cli:
+      auto_confirm: false
+      verbose: false
+      scope: null  # Default to personal account
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Deployment Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  deployment:
+    # Default deployment target
+    default_target: "preview"
+    
+    # Production branch
+    production_branch: "main"
+    
+    # Preview branches (auto-deploy)
+    preview_branches:
+      - "develop"
+      - "staging"
+      - "feature/*"
+      - "fix/*"
+    
+    # Excluded branches (no auto-deploy)
+    excluded_branches:
+      - "dependabot/*"
+      - "renovate/*"
+    
+    # Build settings
+    build:
+      cache: true
+      timeout: 600  # seconds
+      memory: 3008  # MB (max for hobby)
+    
+    # Deployment protection
+    protection:
+      production: true
+      preview: false
+      password_protection: false
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Environment Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  environments:
+    production:
+      auto_expose: true
+      encryption: "AES-256"
+      required_vars:
+        - DATABASE_URL
+        - NEXTAUTH_SECRET
+        - NEXTAUTH_URL
+    
+    preview:
+      auto_expose: true
+      encryption: "AES-256"
+      inherit_from: null
+    
+    development:
+      auto_expose: false
+      encryption: "AES-256"
+      local_file: ".env.local"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Domain Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  domains:
+    # Auto-assign custom domains
+    auto_assign: true
+    
+    # SSL settings
+    ssl:
+      auto_provision: true
+      hsts: true
+      min_tls_version: "1.2"
+    
+    # DNS records template
+    dns_template:
+      apex:
+        type: "A"
+        value: "76.76.21.21"
+      subdomain:
+        type: "CNAME"
+        value: "cname.vercel-dns.com"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Edge & Serverless Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  edge:
+    # Default runtime
+    default_runtime: "edge"  # or "nodejs"
+    
+    # Regions for edge functions
+    regions:
+      - "iad1"  # Washington, D.C.
+      - "sfo1"  # San Francisco
+      - "fra1"  # Frankfurt
+      - "hnd1"  # Tokyo
+    
+    # Function limits
+    functions:
+      max_duration: 30  # seconds (hobby: 10, pro: 60)
+      memory: 1024  # MB
+      max_size: "50mb"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Monitoring Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  monitoring:
+    # Analytics
+    analytics:
+      enabled: true
+      track_page_views: true
+      track_web_vitals: true
+    
+    # Speed Insights
+    speed_insights:
+      enabled: true
+      sample_rate: 1.0
+    
+    # Alerts
+    alerts:
+      error_rate_threshold: 0.01  # 1%
+      latency_p99_threshold: 2000  # ms
+      notify_channels:
+        - "email"
+        - "slack"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Security Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  security:
+    # Firewall
+    firewall:
+      enabled: true
+      attack_challenge: "managed"
+      rate_limiting: true
+    
+    # Trusted IPs (empty = all allowed)
+    trusted_ips: []
+    
+    # Headers
+    security_headers:
+      - key: "X-Content-Type-Options"
+        value: "nosniff"
+      - key: "X-Frame-Options"
+        value: "DENY"
+      - key: "X-XSS-Protection"
+        value: "1; mode=block"
+      - key: "Referrer-Policy"
+        value: "strict-origin-when-cross-origin"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Pre-deployment Checks
+  # ─────────────────────────────────────────────────────────────────────────────
+  pre_deployment_checks:
+    lint:
+      enabled: true
+      command: "npm run lint"
+      fail_on_error: true
+    
+    type_check:
+      enabled: true
+      command: "npm run type-check"
+      fail_on_error: true
+    
+    tests:
+      enabled: true
+      command: "npm test"
+      fail_on_error: false  # Warning only
+    
+    security_audit:
+      enabled: true
+      command: "npm audit --audit-level=high"
+      fail_on_error: false
+    
+    build:
+      enabled: true
+      command: "npm run build"
+      fail_on_error: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Framework Presets
+  # ─────────────────────────────────────────────────────────────────────────────
+  framework_presets:
+    nextjs:
+      build_command: "next build"
+      output_directory: ".next"
+      install_command: "npm ci"
+      dev_command: "next dev"
+      node_version: "20.x"
+    
+    remix:
+      build_command: "remix build"
+      output_directory: "build"
+      install_command: "npm ci"
+      dev_command: "remix dev"
+    
+    astro:
+      build_command: "astro build"
+      output_directory: "dist"
+      install_command: "npm ci"
+      dev_command: "astro dev"
+    
+    vite:
+      build_command: "vite build"
+      output_directory: "dist"
+      install_command: "npm ci"
+      dev_command: "vite dev"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Notification Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  notifications:
+    deployment_success:
+      enabled: true
+      channels: ["email"]
+    
+    deployment_failure:
+      enabled: true
+      channels: ["email", "slack"]
+    
+    domain_expiry:
+      enabled: true
+      days_before: [30, 7, 1]
+    
+    ssl_expiry:
+      enabled: true
+      days_before: [14, 7, 1]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Integration Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  integrations:
+    github:
+      enabled: true
+      pr_comments: true
+      deployment_status: true
+      branch_deployments: true
+    
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channels:
+        deployments: "#deployments"
+        alerts: "#alerts"
+    
+    sentry:
+      enabled: false
+      dsn: "${SENTRY_DSN}"
+      environment: "${VERCEL_ENV}"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Template: vercel.json
+# ═══════════════════════════════════════════════════════════════════════════════
+templates:
+  vercel_json:
+    nextjs: |
+      {
+        "$schema": "https://openapi.vercel.sh/vercel.json",
+        "framework": "nextjs",
+        "regions": ["iad1"],
+        "functions": {
+          "app/api/**/*.ts": {
+            "memory": 1024,
+            "maxDuration": 30
+          }
+        },
+        "headers": [
+          {
+            "source": "/(.*)",
+            "headers": [
+              { "key": "X-Content-Type-Options", "value": "nosniff" },
+              { "key": "X-Frame-Options", "value": "DENY" }
+            ]
+          }
+        ]
+      }
+    
+    static: |
+      {
+        "$schema": "https://openapi.vercel.sh/vercel.json",
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist",
+        "cleanUrls": true,
+        "trailingSlash": false
+      }

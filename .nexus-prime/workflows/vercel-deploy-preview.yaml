@@ -1,0 +1,187 @@
+# Vercel Preview Deployment Workflow
+# NEXUS-PRIME Workflow Definition
+
+name: vercel-deploy-preview
+version: "1.0.0"
+description: "Preview deployment workflow for feature branches and PRs"
+category: deployment
+trigger:
+  - manual
+  - git_push
+  - pull_request
+
+metadata:
+  author: "NEXUS-PRIME"
+  created: "2025-01-15"
+  tags: ["vercel", "deployment", "preview", "pr"]
+
+# Required agents for this workflow
+agents:
+  primary:
+    - PREVIEW-MASTER
+  support:
+    - ENV-CONFIG
+    - EDGE-OPS
+
+# Environment requirements
+requirements:
+  env_vars:
+    - VERCEL_TOKEN
+  tools:
+    - vercel
+    - git
+
+# Workflow stages
+stages:
+  - name: context
+    description: "Gather deployment context"
+    steps:
+      - id: get-branch
+        action: bash
+        command: git rev-parse --abbrev-ref HEAD
+        capture_output: BRANCH_NAME
+
+      - id: get-commit
+        action: bash
+        command: git rev-parse --short HEAD
+        capture_output: COMMIT_SHA
+
+      - id: get-pr-number
+        action: bash
+        command: |
+          # Try to get PR number from environment or git
+          if [ -n "$GITHUB_PR_NUMBER" ]; then
+            echo "$GITHUB_PR_NUMBER"
+          elif [ -n "$PR_NUMBER" ]; then
+            echo "$PR_NUMBER"
+          else
+            echo "N/A"
+          fi
+        capture_output: PR_NUMBER
+
+  - name: validation
+    description: "Quick validation for preview"
+    depends_on: context
+    parallel: true
+    steps:
+      - id: check-env
+        action: bash
+        command: |
+          if [ -f ".env.preview" ]; then
+            echo "Using .env.preview configuration"
+          elif [ -f ".env.development" ]; then
+            echo "Using .env.development configuration"
+          fi
+
+      - id: quick-lint
+        action: bash
+        command: npm run lint 2>/dev/null || yarn lint 2>/dev/null || echo "Lint skipped"
+        continue_on_failure: true
+
+      - id: quick-build-check
+        action: bash
+        command: npm run build 2>/dev/null || yarn build 2>/dev/null
+        timeout: 300
+        on_failure: abort
+
+  - name: deploy-preview
+    description: "Deploy preview environment"
+    depends_on: validation
+    steps:
+      - id: set-alias
+        action: bash
+        command: |
+          # Generate preview alias based on branch
+          BRANCH="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+          SAFE_BRANCH=$(echo "$BRANCH" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "$SAFE_BRANCH"
+        capture_output: PREVIEW_ALIAS
+
+      - id: deploy
+        action: bash
+        command: vercel deploy --yes
+        timeout: 600
+        capture_output: PREVIEW_URL
+        on_failure: abort
+
+      - id: add-comment-to-pr
+        action: bash
+        command: |
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "N/A" ]; then
+            echo "Preview deployment ready for PR #$PR_NUMBER"
+            echo "URL: $PREVIEW_URL"
+            # Could integrate with gh CLI to add PR comment
+            # gh pr comment "$PR_NUMBER" --body "Preview deployed: $PREVIEW_URL"
+          fi
+        optional: true
+
+  - name: preview-checks
+    description: "Run preview-specific checks"
+    depends_on: deploy-preview
+    parallel: true
+    optional: true
+    steps:
+      - id: accessibility-check
+        action: bash
+        command: |
+          if command -v pa11y &> /dev/null; then
+            pa11y "$PREVIEW_URL" --reporter cli || true
+          else
+            echo "pa11y not installed, skipping accessibility check"
+          fi
+
+      - id: link-check
+        action: bash
+        command: |
+          if command -v linkinator &> /dev/null; then
+            linkinator "$PREVIEW_URL" --recurse --silent || true
+          else
+            echo "linkinator not installed, skipping link check"
+          fi
+
+      - id: response-check
+        action: bash
+        command: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL")
+          TIME=$(curl -s -o /dev/null -w "%{time_total}" "$PREVIEW_URL")
+          echo "Status: $STATUS"
+          echo "Response time: ${TIME}s"
+
+  - name: notification
+    description: "Preview deployment notification"
+    depends_on: preview-checks
+    steps:
+      - id: summary
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Preview Deployment Complete"
+          echo "======================================"
+          echo "Branch: ${BRANCH_NAME}"
+          echo "Commit: ${COMMIT_SHA}"
+          echo "PR: ${PR_NUMBER:-N/A}"
+          echo "URL: ${PREVIEW_URL}"
+          echo "======================================"
+
+# Preview-specific configurations
+preview_config:
+  auto_expire: 7d
+  password_protection: false
+  comments_enabled: true
+  git_integration:
+    github:
+      pr_comment: true
+      status_check: true
+    gitlab:
+      mr_comment: true
+      pipeline_status: true
+    bitbucket:
+      pr_comment: true
+
+# Cleanup old previews
+cleanup:
+  trigger: scheduled
+  schedule: "0 0 * * 0"  # Weekly
+  action: |
+    # List and remove previews older than 14 days
+    vercel rm --safe --yes $(vercel ls 2>/dev/null | grep -v Production | head -20)

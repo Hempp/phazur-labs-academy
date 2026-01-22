@@ -1,0 +1,120 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Vercel Speed Insights Plugin
+#  Real-time performance monitoring
+# ═══════════════════════════════════════════════════════════════════════════════
+
+plugin:
+  id: "vercel-speed-insights"
+  name: "Vercel Speed Insights"
+  version: "1.0.0"
+  description: "Real User Monitoring and Core Web Vitals tracking"
+  team: "TEAM-VERCEL"
+  agent: "METRICS-WATCH"
+  enabled: true
+
+# Installation
+installation:
+  npm: "@vercel/speed-insights"
+  command: "npm install @vercel/speed-insights"
+  
+  setup:
+    nextjs_app_router: |
+      // app/layout.tsx
+      import { SpeedInsights } from '@vercel/speed-insights/next'
+      
+      export default function RootLayout({ children }: { children: React.ReactNode }) {
+        return (
+          <html lang="en">
+            <body>
+              {children}
+              <SpeedInsights />
+            </body>
+          </html>
+        )
+      }
+    
+    nextjs_pages_router: |
+      // pages/_app.tsx
+      import { SpeedInsights } from '@vercel/speed-insights/next'
+      
+      export default function App({ Component, pageProps }) {
+        return (
+          <>
+            <Component {...pageProps} />
+            <SpeedInsights />
+          </>
+        )
+      }
+    
+    react: |
+      // In your React app
+      import { SpeedInsights } from '@vercel/speed-insights/react'
+      
+      function App() {
+        return (
+          <>
+            {/* Your app */}
+            <SpeedInsights />
+          </>
+        )
+      }
+
+# Features
+features:
+  real_user_monitoring:
+    description: "Track actual user performance"
+    sample_rate: 1.0
+  
+  core_web_vitals:
+    lcp:
+      name: "Largest Contentful Paint"
+      threshold_good: 2500
+      threshold_poor: 4000
+    
+    fid:
+      name: "First Input Delay"
+      threshold_good: 100
+      threshold_poor: 300
+    
+    cls:
+      name: "Cumulative Layout Shift"
+      threshold_good: 0.1
+      threshold_poor: 0.25
+    
+    inp:
+      name: "Interaction to Next Paint"
+      threshold_good: 200
+      threshold_poor: 500
+    
+    ttfb:
+      name: "Time to First Byte"
+      threshold_good: 800
+      threshold_poor: 1800
+
+  geographic_breakdown:
+    enabled: true
+    regions:
+      - worldwide
+      - per_country
+      - per_region
+  
+  device_breakdown:
+    enabled: true
+    types:
+      - desktop
+      - mobile
+      - tablet
+
+# Configuration
+configuration:
+  sample_rate: 1.0  # 100% of traffic
+  
+  options: |
+    <SpeedInsights 
+      sampleRate={1.0}
+      route={pathname}
+      beforeSend={(data) => {
+        // Optional: modify or filter data
+        return data
+      }}
+    />

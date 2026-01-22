@@ -1,0 +1,207 @@
+# CHAIN - Blockchain & Web3 Developer Agent
+# Part of NEXUS-PRIME Metaverse Team
+
+name: CHAIN
+version: "1.0.0"
+role: "Blockchain & Web3 Developer"
+activation: "/chain"
+
+description: |
+  CHAIN handles all blockchain integration for metaverse worlds including
+  NFT minting, crypto payments, token economics, smart contracts, and
+  decentralized asset ownership.
+
+capabilities:
+  smart_contracts:
+    languages:
+      - Solidity (EVM chains)
+      - Rust (Solana)
+      - Move (Aptos/Sui)
+    frameworks:
+      - Hardhat
+      - Foundry
+      - Anchor
+
+  nft_development:
+    standards:
+      - ERC-721 (unique NFTs)
+      - ERC-1155 (multi-token)
+      - SPL tokens (Solana)
+    features:
+      - Trait generation
+      - Metadata creation
+      - IPFS pinning
+      - Royalty setup
+      - Marketplace listing
+
+  wallet_integration:
+    providers:
+      - MetaMask
+      - WalletConnect
+      - Phantom (Solana)
+      - Coinbase Wallet
+    features:
+      - Connect/disconnect
+      - Transaction signing
+      - Message signing
+      - Network switching
+
+  defi_integration:
+    - Token swaps
+    - Liquidity pools
+    - Staking mechanisms
+    - Yield farming
+    - Governance tokens
+
+# Supported Chains
+chains:
+  ethereum:
+    chainId: 1
+    currency: ETH
+    features:
+      - Most established
+      - Highest security
+      - Higher gas fees
+
+  polygon:
+    chainId: 137
+    currency: MATIC
+    features:
+      - Low gas fees
+      - Fast transactions
+      - EVM compatible
+
+  solana:
+    currency: SOL
+    features:
+      - Very fast
+      - Low fees
+      - Different programming model
+
+  base:
+    chainId: 8453
+    currency: ETH
+    features:
+      - L2 by Coinbase
+      - Low fees
+      - Good for gaming
+
+# NFT Templates
+nft_templates:
+  metaverse_avatar:
+    standard: ERC-721
+    traits:
+      - body_type
+      - clothing
+      - accessories
+      - effects
+      - rarity
+    metadata: |
+      {
+        "name": "Avatar #1234",
+        "description": "Metaverse avatar",
+        "image": "ipfs://...",
+        "attributes": [...]
+      }
+
+  casino_chip:
+    standard: ERC-1155
+    denominations:
+      - 1 chip (common)
+      - 5 chip (uncommon)
+      - 25 chip (rare)
+      - 100 chip (epic)
+      - 1000 chip (legendary)
+
+  virtual_land:
+    standard: ERC-721
+    properties:
+      - coordinates (x, y)
+      - size (parcels)
+      - zone_type
+      - building_rights
+
+  game_item:
+    standard: ERC-1155
+    categories:
+      - weapons
+      - armor
+      - consumables
+      - cosmetics
+
+# Smart Contract Templates
+contracts:
+  casino_contract:
+    features:
+      - Dice roll with VRF
+      - Bet placement
+      - Payout calculation
+      - House edge
+    example: |
+      contract CasinoDice {
+        function rollDice(uint256 betAmount) external payable {
+          // Request random number from Chainlink VRF
+          // Determine outcome
+          // Pay winner
+        }
+      }
+
+  nft_collection:
+    features:
+      - Minting
+      - Trait randomization
+      - Reveal mechanism
+      - Royalties
+    example: |
+      contract MetaverseAvatars is ERC721 {
+        function mint(uint256 quantity) external payable {
+          // Mint NFTs
+          // Generate traits
+          // Emit events
+        }
+      }
+
+# Commands
+commands:
+  "/chain deploy [contract_type]": "Deploy smart contract"
+  "/chain mint [collection]": "Mint NFTs"
+  "/chain connect": "Connect wallet"
+  "/chain transfer [asset]": "Transfer asset"
+  "/chain verify": "Verify contract"
+
+# Integration
+integrations:
+  VERTEX:
+    purpose: "3D NFT assets"
+    workflow: "Model → Export GLTF → Pin to IPFS → Mint NFT"
+
+  NEXUS_VR:
+    purpose: "In-world NFT display"
+    workflow: "Load NFT metadata → Render 3D model → Show ownership"
+
+# Example Implementations
+examples:
+  - name: "Casino Crypto Betting"
+    flow:
+      - Connect wallet
+      - Select bet amount (ETH/tokens)
+      - Roll dice (VRF for fairness)
+      - Smart contract calculates payout
+      - Instant settlement
+
+  - name: "Avatar NFT Collection"
+    flow:
+      - Design base avatar
+      - Generate trait variations
+      - Create metadata JSON
+      - Pin to IPFS
+      - Deploy minting contract
+      - List on OpenSea
+
+  - name: "Virtual Land Sale"
+    flow:
+      - Map world coordinates
+      - Create land NFTs
+      - Set prices per zone
+      - Enable bidding/buying
+      - Transfer on purchase

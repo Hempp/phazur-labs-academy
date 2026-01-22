@@ -1,0 +1,368 @@
+# Supabase Commands Configuration
+# NEXUS-PRIME v3.0
+
+name: supabase-commands
+version: "1.0.0"
+description: "Command definitions for Supabase operations"
+
+# ═══════════════════════════════════════════════════════════════
+# TEAM DEPLOYMENT COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+deployment:
+  - command: /deploy-supabase
+    description: "Deploy full Supabase Master Team"
+    action: activate_team
+    team: supabase-master-team
+    agents:
+      - SUPA-MASTER
+      - AUTH-GUARD
+      - DATA-FORGE
+      - STORE-KEEPER
+      - EDGE-RUNNER
+      - REALTIME-SYNC
+      - ROW-GUARD
+      - VECTOR-SAGE
+    response: |
+      🏗️ **SUPABASE MASTER TEAM DEPLOYED**
+
+      Active Agents:
+      • SUPA-MASTER - Lead Architect (coordinating)
+      • AUTH-GUARD - Authentication
+      • DATA-FORGE - Database
+      • STORE-KEEPER - Storage
+      • EDGE-RUNNER - Edge Functions
+      • REALTIME-SYNC - Real-time
+      • ROW-GUARD - RLS Security
+      • VECTOR-SAGE - AI/Vectors
+
+      Ready for commands. Try `/supabase-init` to start.
+
+  - command: /supabase-team
+    alias: /deploy-supabase
+
+  - command: /nexus-deploy SUPA-MASTER
+    description: "Deploy lead Supabase architect only"
+    action: deploy_agent
+    agent: SUPA-MASTER
+
+# ═══════════════════════════════════════════════════════════════
+# PROJECT MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+
+project:
+  - command: /supabase-init
+    description: "Initialize new Supabase project"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase init"
+    follow_up:
+      - "Project initialized"
+      - "Run `/supabase-link` to connect to existing project"
+
+  - command: /supabase-link
+    description: "Link to existing Supabase project"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase link --project-ref {project_ref}"
+    args:
+      project_ref:
+        required: true
+        description: "Project reference ID from Supabase dashboard"
+
+  - command: /supabase-start
+    description: "Start local Supabase services"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase start"
+
+  - command: /supabase-stop
+    description: "Stop local Supabase services"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase stop"
+
+  - command: /supabase-status
+    description: "Check Supabase services status"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase status"
+
+# ═══════════════════════════════════════════════════════════════
+# DATABASE COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+database:
+  - command: /supabase-db
+    description: "Database operations (push, pull, reset, diff)"
+    agent: DATA-FORGE
+    subcommands:
+      push:
+        description: "Push local migrations to remote"
+        cli_command: "supabase db push"
+        flags:
+          dry-run: "Preview without applying"
+      pull:
+        description: "Pull remote schema to local"
+        cli_command: "supabase db pull"
+      reset:
+        description: "Reset local database"
+        cli_command: "supabase db reset"
+        warning: "This will delete all local data!"
+      diff:
+        description: "Show schema differences"
+        cli_command: "supabase db diff"
+      lint:
+        description: "Lint database schema"
+        cli_command: "supabase db lint"
+
+  - command: /supabase-migrate
+    description: "Create new migration"
+    agent: DATA-FORGE
+    action: run_cli
+    cli_command: "supabase migration new {name}"
+    args:
+      name:
+        required: true
+        description: "Migration name (e.g., add_users_table)"
+
+  - command: /supabase-schema
+    description: "Generate schema from description"
+    agent: DATA-FORGE
+    action: generate_schema
+    interactive: true
+    prompts:
+      - "What kind of schema do you need?"
+      - "Template: user-profiles, multi-tenant, blog, ecommerce, chat"
+
+# ═══════════════════════════════════════════════════════════════
+# AUTHENTICATION COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+authentication:
+  - command: /supabase-auth
+    description: "Authentication configuration"
+    agent: AUTH-GUARD
+    subcommands:
+      providers:
+        description: "Configure OAuth providers"
+        action: configure_providers
+      users:
+        description: "Manage users"
+        action: manage_users
+      hooks:
+        description: "Configure auth hooks"
+        action: configure_hooks
+      mfa:
+        description: "Set up MFA"
+        action: setup_mfa
+
+# ═══════════════════════════════════════════════════════════════
+# STORAGE COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+storage:
+  - command: /supabase-storage
+    description: "Storage management"
+    agent: STORE-KEEPER
+    subcommands:
+      buckets:
+        description: "List/create buckets"
+        action: manage_buckets
+      policies:
+        description: "Manage storage policies"
+        action: manage_policies
+      upload:
+        description: "Upload files"
+        action: upload_files
+
+# ═══════════════════════════════════════════════════════════════
+# EDGE FUNCTIONS COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+functions:
+  - command: /supabase-functions
+    description: "Edge functions management"
+    agent: EDGE-RUNNER
+    subcommands:
+      new:
+        description: "Create new function"
+        cli_command: "supabase functions new {name}"
+      deploy:
+        description: "Deploy functions"
+        cli_command: "supabase functions deploy"
+      serve:
+        description: "Local development server"
+        cli_command: "supabase functions serve"
+      list:
+        description: "List deployed functions"
+        cli_command: "supabase functions list"
+      delete:
+        description: "Delete a function"
+        cli_command: "supabase functions delete {name}"
+
+  - command: /supabase-function
+    description: "Create new edge function with template"
+    agent: EDGE-RUNNER
+    action: create_function
+    args:
+      name:
+        required: true
+      template:
+        required: false
+        options:
+          - hello-world
+          - stripe-webhook
+          - send-email
+          - openai-completion
+          - cron-job
+
+# ═══════════════════════════════════════════════════════════════
+# REALTIME COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+realtime:
+  - command: /supabase-realtime
+    description: "Realtime configuration"
+    agent: REALTIME-SYNC
+    subcommands:
+      enable:
+        description: "Enable realtime for table"
+        action: enable_realtime
+        args:
+          table:
+            required: true
+      disable:
+        description: "Disable realtime"
+        action: disable_realtime
+      channels:
+        description: "Manage channels"
+        action: manage_channels
+
+# ═══════════════════════════════════════════════════════════════
+# SECURITY COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+security:
+  - command: /supabase-rls
+    description: "Row Level Security"
+    agent: ROW-GUARD
+    subcommands:
+      generate:
+        description: "Generate RLS policies"
+        action: generate_policies
+        args:
+          table:
+            required: true
+          type:
+            options:
+              - user-owned
+              - org-based
+              - role-based
+              - public-read
+      audit:
+        description: "Audit existing policies"
+        action: audit_policies
+      test:
+        description: "Test policy access"
+        action: test_policies
+
+# ═══════════════════════════════════════════════════════════════
+# AI/VECTOR COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+vectors:
+  - command: /supabase-vectors
+    description: "Vector/AI operations"
+    agent: VECTOR-SAGE
+    subcommands:
+      setup:
+        description: "Set up pgvector"
+        action: setup_pgvector
+      index:
+        description: "Create vector indexes"
+        action: create_indexes
+      search:
+        description: "Test similarity search"
+        action: test_search
+      rag:
+        description: "Set up RAG pipeline"
+        action: setup_rag
+
+# ═══════════════════════════════════════════════════════════════
+# UTILITY COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+utilities:
+  - command: /supabase-types
+    description: "Generate TypeScript types"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase gen types typescript --local > {output}"
+    args:
+      output:
+        default: "src/types/supabase.ts"
+
+  - command: /supabase-logs
+    description: "View project logs"
+    agent: SUPA-MASTER
+    action: run_cli
+    cli_command: "supabase logs {service}"
+    args:
+      service:
+        options:
+          - api
+          - db
+          - auth
+          - storage
+          - realtime
+          - functions
+
+  - command: /supabase-secrets
+    description: "Manage secrets"
+    agent: EDGE-RUNNER
+    subcommands:
+      list:
+        cli_command: "supabase secrets list"
+      set:
+        cli_command: "supabase secrets set {name}={value}"
+      unset:
+        cli_command: "supabase secrets unset {name}"
+
+  - command: /supabase-inspect
+    description: "Inspect database"
+    agent: DATA-FORGE
+    subcommands:
+      db-size:
+        cli_command: "supabase inspect db size"
+      table-sizes:
+        cli_command: "supabase inspect db table-sizes"
+      index-sizes:
+        cli_command: "supabase inspect db index-sizes"
+      blocking:
+        cli_command: "supabase inspect db blocking"
+
+# ═══════════════════════════════════════════════════════════════
+# WORKFLOW COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+workflows:
+  - command: /supabase-workflow-new
+    description: "New project workflow"
+    action: run_workflow
+    workflow: new_project
+    steps:
+      - /supabase-init
+      - /supabase-link
+      - /supabase-schema
+      - /supabase-rls generate
+      - /supabase-types
+
+  - command: /supabase-workflow-deploy
+    description: "Deployment workflow"
+    action: run_workflow
+    workflow: deploy
+    steps:
+      - /supabase-db push --dry-run
+      - /supabase-functions deploy
+      - /supabase-types

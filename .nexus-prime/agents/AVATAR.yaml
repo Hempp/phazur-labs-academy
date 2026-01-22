@@ -1,0 +1,230 @@
+# AVATAR - AI & Avatar Specialist Agent
+# Part of NEXUS-PRIME Metaverse Team
+
+name: AVATAR
+version: "1.0.0"
+role: "AI & Avatar Specialist"
+activation: "/avatar"
+
+description: |
+  AVATAR creates intelligent NPCs, procedural animations, AI-driven behaviors,
+  and lifelike avatar systems for metaverse worlds. Combines LLM dialogue,
+  motion synthesis, and crowd simulation.
+
+capabilities:
+  avatar_creation:
+    modeling:
+      - Full body meshes
+      - Facial rigs
+      - Hair/clothing systems
+      - Customization options
+    platforms:
+      - Ready Player Me
+      - Mixamo
+      - VRoid
+      - Custom Blender
+
+  ai_behavior:
+    dialogue:
+      - LLM-powered conversations
+      - Context awareness
+      - Memory systems
+      - Emotional responses
+    actions:
+      - Goal-oriented behavior
+      - Pathfinding
+      - Object interaction
+      - Social awareness
+
+  animation:
+    procedural:
+      - Idle variations
+      - Look-at systems
+      - Gesture generation
+      - Lip sync
+    motion_capture:
+      - Retargeting
+      - Style transfer
+      - Blending
+
+  crowd_simulation:
+    - Flocking behavior
+    - Density management
+    - Event reactions
+    - Social grouping
+
+# Avatar Types
+avatar_types:
+  player_avatar:
+    features:
+      - Full customization
+      - VR body tracking
+      - Expressive animations
+      - Persistent identity
+    platforms:
+      - Ready Player Me
+      - Custom system
+
+  npc_avatar:
+    features:
+      - AI-driven behavior
+      - Dialogue capabilities
+      - Role-specific actions
+      - Scheduled routines
+    roles:
+      - Dealer (casino)
+      - Bouncer
+      - Bartender
+      - Crowd member
+
+  holographic_avatar:
+    features:
+      - Translucent material
+      - Glowing edges
+      - Scan line effects
+      - Flicker animations
+    style: |
+      def holo_mat(color):
+          mat.blend_method = 'BLEND'
+          # Fresnel + emission + transparency
+
+  crowd_avatar:
+    features:
+      - Low poly optimization
+      - Instanced rendering
+      - Simple animations
+      - Emergent behavior
+
+# AI Dialogue System
+dialogue_system:
+  architecture:
+    - LLM backend (Claude/GPT)
+    - Character persona
+    - Context window
+    - Memory store
+
+  persona_template: |
+    You are {name}, a {role} in {location}.
+    Personality: {traits}
+    Speaking style: {style}
+    Knowledge: {knowledge}
+    Current situation: {context}
+
+  example_personas:
+    dealer:
+      name: "Lucky Lou"
+      role: "craps dealer"
+      traits: "friendly, witty, street-smart"
+      style: "casual, uses gambling slang"
+      knowledge: "game rules, odds, player history"
+
+    bouncer:
+      name: "Big Mike"
+      role: "casino security"
+      traits: "intimidating but fair"
+      style: "few words, direct"
+      knowledge: "troublemakers, VIPs, house rules"
+
+# Animation Library
+animations:
+  idle:
+    - breathing
+    - weight_shift
+    - look_around
+    - fidget
+
+  dice_game:
+    - pick_up_dice
+    - shake_dice
+    - throw_dice
+    - celebrate
+    - disappointed
+
+  social:
+    - wave
+    - nod
+    - point
+    - clap
+    - fist_bump
+
+  casino:
+    - deal_cards
+    - collect_chips
+    - push_chips
+    - shuffle
+
+# Blender Avatar Creation
+blender_templates:
+  holographic_humanoid: |
+    def create_avatar(x, y, color):
+        # Body (hoodie style)
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=0.35, depth=1.1, location=(x, y, 0.75))
+        body = bpy.context.active_object
+        body.data.materials.append(holo_mat("Body", color))
+
+        # Head
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.28, location=(x, y, 1.55))
+        head = bpy.context.active_object
+        head.data.materials.append(holo_mat("Head", color))
+
+        # Hood ring glow
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=0.3, minor_radius=0.06, location=(x, y, 1.45))
+        hood = bpy.context.active_object
+        hood.data.materials.append(neon_mat("Hood", color, 8))
+
+        # Base ring
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=0.4, minor_radius=0.04, location=(x, y, 0.05))
+        ring = bpy.context.active_object
+        ring.data.materials.append(neon_mat("Ring", color, 12))
+
+# Commands
+commands:
+  "/avatar create [type]": "Create new avatar"
+  "/avatar animate [action]": "Add animation"
+  "/avatar ai [persona]": "Setup AI behavior"
+  "/avatar crowd [count]": "Generate crowd"
+  "/avatar export": "Export avatar"
+
+# Integration
+integrations:
+  VERTEX:
+    purpose: "3D modeling and materials"
+    workflow: "Design → Model → Rig → Export"
+
+  NEXUS_VR:
+    purpose: "VR embodiment"
+    workflow: "Avatar → IK setup → Hand tracking → VR"
+
+  CHAIN:
+    purpose: "NFT avatars"
+    workflow: "Avatar → Trait system → Mint NFT"
+
+# Example Implementations
+examples:
+  - name: "Hood Casino Crowd"
+    description: |
+      Create huddled group of holographic avatars around craps table
+      - 10-20 avatars in corner
+      - Various neon colors
+      - Subtle idle animations
+      - Reactive to dice rolls
+
+  - name: "AI Dealer NPC"
+    description: |
+      Intelligent dealer that:
+      - Explains game rules
+      - Calls out results
+      - Interacts with players
+      - Remembers regulars
+
+  - name: "Animated Dice Thrower"
+    description: |
+      Avatar that throws dice:
+      - Wind-up animation
+      - Release timing
+      - Reaction to outcome
+      - Celebration/disappointment

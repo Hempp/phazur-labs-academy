@@ -1,0 +1,188 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Blender Settings Configuration
+#  Global settings for Blender integration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+settings:
+  version: "1.0.0"
+  category: "blender"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Blender Installation
+  # ─────────────────────────────────────────────────────────────────────────────
+  installation:
+    # Blender executable path (auto-detected or manually set)
+    blender_path:
+      macos: "/Applications/Blender.app/Contents/MacOS/Blender"
+      linux: "/usr/bin/blender"
+      windows: "C:\\Program Files\\Blender Foundation\\Blender 4.2\\blender.exe"
+
+    # Minimum required version
+    min_version: "4.0.0"
+    recommended_version: "4.2.0"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Paths Configuration
+  # ─────────────────────────────────────────────────────────────────────────────
+  paths:
+    scripts: "~/.nexus-prime/blender/scripts"
+    materials: "~/.nexus-prime/blender/materials"
+    presets: "~/.nexus-prime/blender/presets"
+    output: "~/.nexus-prime/blender/output"
+    cache: "~/.nexus-prime/blender/cache"
+    assets: "~/.nexus-prime/blender/assets"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Default Render Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  render:
+    defaults:
+      engine: "CYCLES"
+      device: "GPU"
+      samples: 128
+      resolution_x: 1920
+      resolution_y: 1080
+      resolution_percentage: 100
+      film_transparent: false
+
+    preview:
+      samples: 32
+      resolution_percentage: 50
+
+    production:
+      samples: 256
+      resolution_x: 1920
+      resolution_y: 1080
+
+    final:
+      samples: 1024
+      resolution_x: 3840
+      resolution_y: 2160
+
+    animation:
+      samples: 128
+      frame_rate: 30
+      codec: "H264"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Cycles Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  cycles:
+    device: "GPU"
+    feature_set: "SUPPORTED"
+    
+    light_paths:
+      max_bounces: 12
+      diffuse_bounces: 4
+      glossy_bounces: 4
+      transmission_bounces: 12
+      volume_bounces: 0
+      transparent_bounces: 8
+
+    denoising:
+      use_denoising: true
+      denoiser: "OPENIMAGEDENOISE"
+      denoising_input_passes: "RGB_ALBEDO_NORMAL"
+
+    performance:
+      use_auto_tile: true
+      tile_size: 2048
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Eevee Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  eevee:
+    taa_samples: 64
+    use_bloom: true
+    bloom_threshold: 0.8
+    use_ssr: true
+    use_gtao: true
+    gtao_distance: 0.2
+    use_soft_shadows: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Export Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  export:
+    gltf:
+      format: "GLB"
+      export_draco_mesh_compression: true
+      export_apply_modifiers: true
+      export_textures: true
+
+    fbx:
+      use_selection: false
+      apply_scale_options: "FBX_SCALE_ALL"
+      axis_forward: "-Z"
+      axis_up: "Y"
+
+    usd:
+      export_animation: true
+      export_materials: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Material Library Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  materials:
+    default_workflow: "metalness"
+    texture_resolution: 2048
+    use_displacement: true
+    
+    categories:
+      - architectural
+      - organic
+      - metals
+      - fabrics
+      - glass
+      - special_effects
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Simulation Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  simulation:
+    cloth:
+      quality: 5
+      collision_quality: 2
+      
+    fluid:
+      resolution_divisions: 64
+      use_adaptive_domain: true
+      
+    rigid_body:
+      steps_per_second: 60
+      solver_iterations: 10
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Automation Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  automation:
+    batch_render:
+      parallel_instances: 1
+      timeout_minutes: 30
+
+    auto_save:
+      enabled: true
+      interval_minutes: 5
+
+    backup:
+      enabled: true
+      max_backups: 10
+      backup_path: "~/.nexus-prime/blender/backups"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  MCP Server Settings
+  # ─────────────────────────────────────────────────────────────────────────────
+  mcp:
+    server_path: "~/.nexus-prime/mcp/blender-server"
+    auto_start: false
+    timeout_ms: 300000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Environment Variables
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#  BLENDER_PATH         - Path to Blender executable
+#  NEXUS_BLENDER_SCRIPTS - Path to NEXUS-PRIME Blender scripts
+#  BLENDER_OUTPUT       - Default output directory
+#
+# ═══════════════════════════════════════════════════════════════════════════════

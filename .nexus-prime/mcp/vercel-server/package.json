@@ -1,0 +1,28 @@
+{
+  "name": "vercel-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Vercel API integration - NEXUS-PRIME",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "vercel-mcp-server": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "vercel",
+    "deployment",
+    "nexus-prime"
+  ],
+  "author": "NEXUS-PRIME",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

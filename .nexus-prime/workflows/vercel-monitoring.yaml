@@ -1,0 +1,279 @@
+# Vercel Monitoring & Maintenance Workflow
+# NEXUS-PRIME Workflow Definition
+
+name: vercel-monitoring
+version: "1.0.0"
+description: "Monitor deployments, performance metrics, and maintain Vercel projects"
+category: monitoring
+trigger:
+  - scheduled
+  - manual
+
+metadata:
+  author: "NEXUS-PRIME"
+  created: "2025-01-15"
+  tags: ["vercel", "monitoring", "performance", "maintenance"]
+
+# Required agents for this workflow
+agents:
+  primary:
+    - METRICS-WATCH
+  support:
+    - DEPLOY-MASTER
+    - EDGE-OPS
+
+# Schedule (cron format)
+schedule:
+  health_check: "*/15 * * * *"  # Every 15 minutes
+  performance_report: "0 9 * * 1"  # Monday at 9 AM
+  cleanup: "0 0 * * 0"  # Sunday at midnight
+
+# Web Vitals thresholds
+thresholds:
+  lcp:
+    good: 2500
+    needs_improvement: 4000
+    poor: 4001
+  fid:
+    good: 100
+    needs_improvement: 300
+    poor: 301
+  cls:
+    good: 0.1
+    needs_improvement: 0.25
+    poor: 0.26
+  inp:
+    good: 200
+    needs_improvement: 500
+    poor: 501
+  ttfb:
+    good: 800
+    needs_improvement: 1800
+    poor: 1801
+
+# Workflow stages
+stages:
+  - name: health-check
+    description: "Check deployment health"
+    steps:
+      - id: get-production-url
+        action: bash
+        command: |
+          URL=$(vercel ls --prod 2>/dev/null | grep -oE 'https://[^ ]+' | head -1)
+          if [ -z "$URL" ]; then
+            URL=$(vercel inspect --prod 2>/dev/null | grep -oE 'https://[^ ]+' | head -1)
+          fi
+          echo "$URL"
+        capture_output: PROD_URL
+
+      - id: check-availability
+        action: bash
+        command: |
+          if [ -n "$PROD_URL" ]; then
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" --max-time 10)
+            RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$PROD_URL" --max-time 10)
+            echo "URL: $PROD_URL"
+            echo "Status: $STATUS"
+            echo "Response Time: ${RESPONSE_TIME}s"
+
+            if [ "$STATUS" != "200" ]; then
+              echo "WARNING: Non-200 status code detected!"
+              exit 1
+            fi
+
+            # Check response time (warn if > 3 seconds)
+            if (( $(echo "$RESPONSE_TIME > 3" | bc -l) )); then
+              echo "WARNING: Slow response time detected!"
+            fi
+          fi
+
+      - id: check-ssl
+        action: bash
+        command: |
+          if [ -n "$PROD_URL" ]; then
+            DOMAIN=$(echo "$PROD_URL" | sed 's|https://||' | cut -d'/' -f1)
+            EXPIRY=$(echo | openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+            if [ -n "$EXPIRY" ]; then
+              echo "SSL Certificate expires: $EXPIRY"
+
+              # Check if expiring within 30 days
+              EXPIRY_EPOCH=$(date -j -f "%b %d %T %Y %Z" "$EXPIRY" +%s 2>/dev/null || date -d "$EXPIRY" +%s 2>/dev/null)
+              NOW_EPOCH=$(date +%s)
+              DAYS_LEFT=$(( ($EXPIRY_EPOCH - $NOW_EPOCH) / 86400 ))
+
+              if [ "$DAYS_LEFT" -lt 30 ]; then
+                echo "WARNING: SSL certificate expires in $DAYS_LEFT days!"
+              fi
+            fi
+          fi
+
+  - name: performance-check
+    description: "Analyze performance metrics"
+    depends_on: health-check
+    steps:
+      - id: collect-metrics
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Performance Metrics"
+          echo "======================================"
+          echo ""
+          echo "Check Vercel Analytics Dashboard:"
+          echo "https://vercel.com/dashboard/analytics"
+          echo ""
+          echo "Target Web Vitals:"
+          echo "  LCP  < 2.5s (Largest Contentful Paint)"
+          echo "  FID  < 100ms (First Input Delay)"
+          echo "  CLS  < 0.1 (Cumulative Layout Shift)"
+          echo "  INP  < 200ms (Interaction to Next Paint)"
+          echo "  TTFB < 800ms (Time to First Byte)"
+          echo "======================================"
+
+      - id: lighthouse-check
+        action: bash
+        command: |
+          if command -v lighthouse &> /dev/null && [ -n "$PROD_URL" ]; then
+            lighthouse "$PROD_URL" \
+              --output=json \
+              --output-path=/tmp/lighthouse-report.json \
+              --chrome-flags="--headless" \
+              --only-categories=performance,accessibility,best-practices,seo
+
+            # Extract scores
+            PERF=$(jq '.categories.performance.score * 100' /tmp/lighthouse-report.json)
+            A11Y=$(jq '.categories.accessibility.score * 100' /tmp/lighthouse-report.json)
+            BP=$(jq '.categories["best-practices"].score * 100' /tmp/lighthouse-report.json)
+            SEO=$(jq '.categories.seo.score * 100' /tmp/lighthouse-report.json)
+
+            echo "Lighthouse Scores:"
+            echo "  Performance: ${PERF}%"
+            echo "  Accessibility: ${A11Y}%"
+            echo "  Best Practices: ${BP}%"
+            echo "  SEO: ${SEO}%"
+          else
+            echo "Lighthouse CLI not available or no production URL"
+          fi
+        optional: true
+
+  - name: deployment-audit
+    description: "Audit recent deployments"
+    depends_on: health-check
+    steps:
+      - id: list-recent-deployments
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Recent Deployments"
+          echo "======================================"
+          vercel ls --limit 10 2>/dev/null || echo "Unable to list deployments"
+
+      - id: check-deployment-errors
+        action: bash
+        command: |
+          # Check for recent deployment errors
+          echo ""
+          echo "Checking recent logs for errors..."
+          vercel logs --prod --limit 100 2>/dev/null | grep -i "error\|exception\|failed" | head -20 || echo "No recent errors found"
+
+  - name: resource-cleanup
+    description: "Clean up old resources"
+    trigger: manual
+    steps:
+      - id: list-old-previews
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Preview Deployments (potential cleanup)"
+          echo "======================================"
+          vercel ls 2>/dev/null | grep -v "Production" | tail -20
+
+      - id: cleanup-instructions
+        action: bash
+        command: |
+          echo ""
+          echo "To remove old deployments, run:"
+          echo "  vercel rm <deployment-url> --yes"
+          echo ""
+          echo "To remove all non-production deployments:"
+          echo "  vercel rm --safe --yes"
+
+  - name: report-generation
+    description: "Generate monitoring report"
+    depends_on:
+      - health-check
+      - performance-check
+      - deployment-audit
+    steps:
+      - id: generate-report
+        action: bash
+        command: |
+          REPORT_DATE=$(date +%Y-%m-%d)
+          REPORT_FILE="/tmp/vercel-report-${REPORT_DATE}.txt"
+
+          cat > "$REPORT_FILE" << EOF
+          ======================================
+          VERCEL DEPLOYMENT MONITORING REPORT
+          Date: $REPORT_DATE
+          ======================================
+
+          HEALTH STATUS
+          -------------
+          Production URL: ${PROD_URL:-'N/A'}
+          Status: Check above for details
+
+          RECOMMENDATIONS
+          ---------------
+          1. Review Web Vitals in Vercel Analytics
+          2. Check for any slow API routes
+          3. Ensure images are optimized
+          4. Review bundle size with @next/bundle-analyzer
+          5. Consider edge caching for static content
+
+          ACTIONS
+          -------
+          - Monitor: https://vercel.com/dashboard/analytics
+          - Logs: vercel logs --prod
+          - Deploy: vercel --prod
+
+          ======================================
+          EOF
+
+          cat "$REPORT_FILE"
+
+# Alert configuration
+alerts:
+  channels:
+    - type: console
+      enabled: true
+    - type: slack
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+    - type: email
+      enabled: false
+      recipients: ["${ALERT_EMAIL}"]
+
+  conditions:
+    - name: site-down
+      condition: "status != 200"
+      severity: critical
+      message: "Production site is not responding with 200 status"
+
+    - name: slow-response
+      condition: "response_time > 3"
+      severity: warning
+      message: "Production site response time is above 3 seconds"
+
+    - name: ssl-expiring
+      condition: "ssl_days_left < 30"
+      severity: warning
+      message: "SSL certificate expiring soon"
+
+    - name: poor-lcp
+      condition: "lcp > 4000"
+      severity: warning
+      message: "LCP is in poor range (>4s)"
+
+    - name: poor-cls
+      condition: "cls > 0.25"
+      severity: warning
+      message: "CLS is in poor range (>0.25)"

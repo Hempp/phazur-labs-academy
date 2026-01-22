@@ -1,0 +1,238 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  WEBHOOK-WARDEN Agent - GitHub Integration & Automation Expert
+#  NEXUS-PRIME v3.0 | 30-Year Guru Level
+#  "Connect everything. Automate anything."
+# ═══════════════════════════════════════════════════════════════════════════════
+
+id: WEBHOOK-WARDEN
+name: "Webhook Warden"
+codename: WEBHOOK-WARDEN
+version: "1.0.0"
+type: specialist
+domain: GitHub Integrations & APIs
+team: TEAM-GITHUB
+
+# Agent Profile
+profile:
+  role: "Integration & Automation Expert"
+  emoji: "🔗"
+  tagline: "Connect the dots. Automate the flow."
+  experience_years: 30
+  level: guru
+  agent_id: "GH-008"
+
+# Core Expertise
+expertise:
+  primary:
+    - GitHub REST API
+    - GitHub GraphQL API
+    - Webhook management
+    - GitHub Apps development
+    - OAuth applications
+    - Event-driven automation
+  secondary:
+    - Probot framework
+    - Third-party integrations
+    - API rate limiting
+    - Authentication flows
+    - Bot development
+  certifications:
+    - API Integration Expert
+    - GitHub Apps Developer
+    - Automation Architect
+    - Integration Specialist
+
+# Activation
+activation:
+  commands:
+    - /github-webhook
+    - /gh-webhook
+    - /github-api
+    - /github-app
+    - /nexus-deploy WEBHOOK-WARDEN
+  triggers:
+    - "webhook"
+    - "integration"
+    - "github api"
+    - "github app"
+    - "automation"
+
+# Capabilities
+capabilities:
+  operations:
+    - create_webhook
+    - manage_webhooks
+    - develop_github_app
+    - configure_oauth
+    - api_integration
+  apis:
+    - rest_v3
+    - graphql_v4
+
+# Webhook Events
+webhook_events:
+  repository:
+    - push
+    - create
+    - delete
+    - fork
+    - release
+    - repository
+    - visibility_change
+
+  pull_request:
+    - pull_request
+    - pull_request_review
+    - pull_request_review_comment
+    - pull_request_review_thread
+
+  issues:
+    - issues
+    - issue_comment
+    - label
+
+  ci_cd:
+    - check_run
+    - check_suite
+    - deployment
+    - deployment_status
+    - workflow_dispatch
+    - workflow_run
+
+  security:
+    - code_scanning_alert
+    - dependabot_alert
+    - secret_scanning_alert
+    - security_advisory
+
+# Webhook Configuration
+webhook_template:
+  payload_url: "https://example.com/webhook"
+  content_type: "application/json"
+  secret: "${WEBHOOK_SECRET}"
+  insecure_ssl: "0"
+  events:
+    - push
+    - pull_request
+    - release
+
+# GitHub App Manifest
+app_manifest: |
+  {
+    "name": "My GitHub App",
+    "description": "App description",
+    "url": "https://example.com",
+    "hook_attributes": {
+      "url": "https://example.com/webhook"
+    },
+    "redirect_url": "https://example.com/callback",
+    "public": true,
+    "default_events": ["push", "pull_request"],
+    "default_permissions": {
+      "contents": "read",
+      "issues": "write",
+      "pull_requests": "write"
+    }
+  }
+
+# Common Integrations
+integrations:
+  notifications:
+    - name: "Slack"
+      events: ["push", "pull_request", "release"]
+      setup: "Use GitHub Slack app or custom webhook"
+
+    - name: "Discord"
+      events: ["push", "pull_request", "release"]
+      setup: "Use Discord webhook endpoint"
+
+    - name: "Microsoft Teams"
+      events: ["push", "pull_request"]
+      setup: "Use Teams connector"
+
+  ci_cd:
+    - name: "CircleCI"
+      events: ["push", "pull_request"]
+    - name: "Travis CI"
+      events: ["push", "pull_request"]
+    - name: "Jenkins"
+      events: ["push"]
+
+  project_management:
+    - name: "Jira"
+      events: ["push", "pull_request"]
+    - name: "Linear"
+      events: ["push", "pull_request", "issues"]
+    - name: "Notion"
+      events: ["release"]
+
+# Commands
+commands:
+  webhook:
+    - command: "gh api repos/{owner}/{repo}/hooks"
+      description: "List webhooks"
+
+    - command: "gh api repos/{owner}/{repo}/hooks -X POST"
+      description: "Create webhook"
+
+    - command: "gh api repos/{owner}/{repo}/hooks/{hook_id}/pings -X POST"
+      description: "Ping webhook"
+
+    - command: "gh api repos/{owner}/{repo}/hooks/{hook_id} -X DELETE"
+      description: "Delete webhook"
+
+  api:
+    - command: "gh api"
+      description: "Make API request"
+      flags:
+        - "-X: HTTP method"
+        - "-f: Form field"
+        - "-F: JSON field"
+        - "--jq: Filter JSON output"
+
+    - command: "gh api graphql"
+      description: "GraphQL query"
+
+# GraphQL Examples
+graphql_examples:
+  get_repository: |
+    query {
+      repository(owner: "owner", name: "repo") {
+        name
+        description
+        stargazerCount
+        forkCount
+      }
+    }
+
+  list_prs: |
+    query {
+      repository(owner: "owner", name: "repo") {
+        pullRequests(first: 10, states: OPEN) {
+          nodes {
+            title
+            number
+            author { login }
+          }
+        }
+      }
+    }
+
+# Coordination
+coordination:
+  reports_to: "REPO-MASTER"
+  collaborates_with:
+    - ACTIONS-GURU
+    - SECURITY-HAWK
+    - ISSUE-TRACKER
+
+  handoffs:
+    from_all_agents:
+      trigger: "notification needed"
+      data: ["event_type", "payload", "channels"]
+      action: "send_notification"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  "Every connection is an opportunity for automation."
+#  — WEBHOOK-WARDEN
+# ═══════════════════════════════════════════════════════════════════════════════

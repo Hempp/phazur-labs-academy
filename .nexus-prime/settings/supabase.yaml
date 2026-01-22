@@ -1,0 +1,296 @@
+# Supabase Settings Configuration
+# NEXUS-PRIME v3.0
+
+name: supabase-settings
+version: "1.0.0"
+description: "Configuration settings for Supabase integration"
+
+# ═══════════════════════════════════════════════════════════════
+# ENVIRONMENT VARIABLES
+# ═══════════════════════════════════════════════════════════════
+
+environment:
+  required:
+    SUPABASE_URL:
+      description: "Supabase project URL"
+      example: "https://xxxxxxxxxxxxx.supabase.co"
+      source: "Supabase Dashboard > Settings > API"
+
+    SUPABASE_ANON_KEY:
+      description: "Supabase anonymous/public key"
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      source: "Supabase Dashboard > Settings > API"
+      client_safe: true
+
+    SUPABASE_SERVICE_ROLE_KEY:
+      description: "Supabase service role key (admin)"
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      source: "Supabase Dashboard > Settings > API"
+      client_safe: false
+      warning: "NEVER expose client-side!"
+
+  optional:
+    SUPABASE_DB_URL:
+      description: "Direct database connection URL"
+      example: "postgresql://postgres:password@db.xxx.supabase.co:5432/postgres"
+      source: "Supabase Dashboard > Settings > Database"
+
+    SUPABASE_PROJECT_REF:
+      description: "Project reference ID"
+      example: "xxxxxxxxxxxxx"
+      source: "Supabase Dashboard URL"
+
+    SUPABASE_ACCESS_TOKEN:
+      description: "Personal access token for CLI"
+      source: "Supabase Dashboard > Access Tokens"
+
+# ═══════════════════════════════════════════════════════════════
+# PROJECT DEFAULTS
+# ═══════════════════════════════════════════════════════════════
+
+project:
+  # Local development
+  local:
+    workdir: "./supabase"
+    migrations_dir: "./supabase/migrations"
+    functions_dir: "./supabase/functions"
+    seed_file: "./supabase/seed.sql"
+
+  # Type generation
+  types:
+    output: "src/types/supabase.ts"
+    auto_generate: true
+    on_migration: true
+
+  # Schema defaults
+  schema:
+    default: "public"
+    extensions:
+      - uuid-ossp
+      - moddatetime
+      - pgcrypto
+
+# ═══════════════════════════════════════════════════════════════
+# DATABASE SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+database:
+  # Migration settings
+  migrations:
+    format: "timestamped"  # timestamped or sequential
+    naming: "{timestamp}_{description}"
+    auto_backup: true
+
+  # Connection pooling
+  pooling:
+    mode: "transaction"  # transaction or session
+    default_pool_size: 15
+
+  # Query settings
+  query:
+    statement_timeout: "30s"
+    lock_timeout: "10s"
+
+  # Extensions to auto-enable
+  extensions:
+    always:
+      - uuid-ossp
+      - moddatetime
+    on_demand:
+      - vector
+      - postgis
+      - pg_trgm
+      - pgcrypto
+
+# ═══════════════════════════════════════════════════════════════
+# AUTHENTICATION SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+auth:
+  # Session settings
+  session:
+    access_token_lifetime: 3600  # 1 hour
+    refresh_token_lifetime: 604800  # 7 days
+    auto_refresh: true
+
+  # OAuth providers (enable in Dashboard)
+  providers:
+    google:
+      enabled: false
+      scopes: ["email", "profile"]
+    github:
+      enabled: false
+      scopes: ["user:email"]
+    discord:
+      enabled: false
+      scopes: ["identify", "email"]
+    apple:
+      enabled: false
+      scopes: ["name", "email"]
+
+  # Email settings
+  email:
+    confirm_email: true
+    double_confirm: false
+    secure_password_change: true
+
+  # MFA settings
+  mfa:
+    enabled: false
+    factors: ["totp"]
+
+# ═══════════════════════════════════════════════════════════════
+# STORAGE SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+storage:
+  # Default bucket settings
+  buckets:
+    default_public: false
+    default_file_size_limit: 52428800  # 50MB
+
+  # Image transformations
+  transformations:
+    enabled: true
+    default_quality: 80
+    supported_formats:
+      - jpeg
+      - png
+      - webp
+      - gif
+
+  # Upload settings
+  uploads:
+    resumable_threshold: 6291456  # 6MB
+    chunk_size: 6291456
+
+# ═══════════════════════════════════════════════════════════════
+# EDGE FUNCTIONS SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+functions:
+  # Runtime settings
+  runtime:
+    version: "deno-1.40"
+    memory_limit: "512mb"
+    timeout: 60
+
+  # Local development
+  local:
+    port: 54321
+    env_file: ".env.local"
+    inspect: false
+
+  # Deployment
+  deploy:
+    verify_jwt: true
+    import_map: "./supabase/functions/import_map.json"
+
+# ═══════════════════════════════════════════════════════════════
+# REALTIME SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+realtime:
+  # Channel settings
+  channels:
+    max_per_client: 100
+    heartbeat_interval: 30
+
+  # Broadcast settings
+  broadcast:
+    self_receive: false
+    acknowledgment: false
+
+  # Presence settings
+  presence:
+    key: "user_id"
+    timeout: 30
+
+# ═══════════════════════════════════════════════════════════════
+# SECURITY SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+security:
+  # RLS settings
+  rls:
+    enforce: true
+    auto_generate: true
+    audit_on_deploy: true
+
+  # API settings
+  api:
+    rate_limit: 1000
+    max_rows: 1000
+    enable_pg_graphql: true
+
+  # Logging
+  logging:
+    level: "info"
+    services:
+      - api
+      - auth
+      - db
+      - storage
+      - realtime
+
+# ═══════════════════════════════════════════════════════════════
+# VECTOR/AI SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+vectors:
+  # pgvector settings
+  pgvector:
+    default_dimensions: 1536  # OpenAI ada-002
+    index_type: "hnsw"  # ivfflat or hnsw
+
+  # Index settings
+  indexes:
+    ivfflat:
+      lists: 100
+    hnsw:
+      m: 16
+      ef_construction: 64
+
+  # Embedding provider
+  embeddings:
+    provider: "openai"
+    model: "text-embedding-ada-002"
+
+# ═══════════════════════════════════════════════════════════════
+# CLI SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+cli:
+  # Output preferences
+  output:
+    format: "pretty"  # pretty, json, yaml
+    color: true
+    verbose: false
+
+  # Auto-actions
+  auto:
+    generate_types: true
+    lint_on_push: true
+    backup_before_reset: true
+
+# ═══════════════════════════════════════════════════════════════
+# FRAMEWORK INTEGRATIONS
+# ═══════════════════════════════════════════════════════════════
+
+integrations:
+  nextjs:
+    types_path: "src/types/supabase.ts"
+    client_path: "src/lib/supabase.ts"
+    middleware: true
+
+  nuxt:
+    types_path: "types/supabase.ts"
+    plugin: true
+
+  sveltekit:
+    types_path: "src/lib/types/supabase.ts"
+    hooks: true
+
+  remix:
+    types_path: "app/types/supabase.ts"
+    loader_helper: true

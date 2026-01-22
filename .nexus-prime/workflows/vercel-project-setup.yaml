@@ -1,0 +1,280 @@
+# Vercel Project Setup Workflow
+# NEXUS-PRIME Workflow Definition
+
+name: vercel-project-setup
+version: "1.0.0"
+description: "Initialize and configure a new Vercel project with best practices"
+category: setup
+trigger: manual
+
+metadata:
+  author: "NEXUS-PRIME"
+  created: "2025-01-15"
+  tags: ["vercel", "setup", "initialization", "project"]
+
+# Required agents for this workflow
+agents:
+  primary:
+    - DEPLOY-MASTER
+  support:
+    - ENV-CONFIG
+    - DOMAIN-HANDLER
+    - EDGE-OPS
+
+# Environment requirements
+requirements:
+  env_vars:
+    - VERCEL_TOKEN
+  tools:
+    - vercel
+    - git
+    - node
+
+# Input parameters
+parameters:
+  - name: project_name
+    type: string
+    required: true
+    description: "Name for the Vercel project"
+
+  - name: framework
+    type: choice
+    required: false
+    default: auto
+    options:
+      - auto
+      - nextjs
+      - react
+      - vue
+      - nuxt
+      - svelte
+      - astro
+      - remix
+      - gatsby
+      - angular
+      - other
+
+  - name: team
+    type: string
+    required: false
+    description: "Vercel team ID (optional)"
+
+  - name: custom_domain
+    type: string
+    required: false
+    description: "Custom domain to configure (optional)"
+
+# Workflow stages
+stages:
+  - name: initialization
+    description: "Initialize Vercel project"
+    steps:
+      - id: check-vercel-cli
+        action: bash
+        command: |
+          if ! command -v vercel &> /dev/null; then
+            echo "Installing Vercel CLI..."
+            npm install -g vercel
+          fi
+          vercel --version
+
+      - id: login-check
+        action: bash
+        command: vercel whoami || vercel login
+
+      - id: link-project
+        action: bash
+        command: |
+          if [ -n "$TEAM" ]; then
+            vercel link --yes --scope "$TEAM"
+          else
+            vercel link --yes
+          fi
+        env:
+          TEAM: "{{ parameters.team }}"
+
+  - name: configuration
+    description: "Configure project settings"
+    depends_on: initialization
+    steps:
+      - id: create-vercel-json
+        action: bash
+        command: |
+          if [ ! -f "vercel.json" ]; then
+            cat > vercel.json << 'EOF'
+          {
+            "$schema": "https://openapi.vercel.sh/vercel.json",
+            "framework": "{{ parameters.framework }}",
+            "buildCommand": null,
+            "installCommand": null,
+            "outputDirectory": null,
+            "headers": [
+              {
+                "source": "/(.*)",
+                "headers": [
+                  { "key": "X-Content-Type-Options", "value": "nosniff" },
+                  { "key": "X-Frame-Options", "value": "DENY" },
+                  { "key": "X-XSS-Protection", "value": "1; mode=block" },
+                  { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+                ]
+              }
+            ],
+            "regions": ["iad1"]
+          }
+          EOF
+            echo "Created vercel.json"
+          else
+            echo "vercel.json already exists"
+          fi
+
+      - id: setup-env-template
+        action: bash
+        command: |
+          if [ ! -f ".env.example" ]; then
+            cat > .env.example << 'EOF'
+          # Application
+          NEXT_PUBLIC_APP_URL=
+
+          # Database (if using)
+          DATABASE_URL=
+
+          # Authentication (if using)
+          AUTH_SECRET=
+
+          # External APIs
+          # API_KEY=
+          EOF
+            echo "Created .env.example"
+          fi
+
+      - id: setup-gitignore
+        action: bash
+        command: |
+          if [ -f ".gitignore" ]; then
+            if ! grep -q ".vercel" .gitignore; then
+              echo "" >> .gitignore
+              echo "# Vercel" >> .gitignore
+              echo ".vercel" >> .gitignore
+            fi
+          fi
+
+  - name: environment-setup
+    description: "Set up environment variables"
+    depends_on: configuration
+    steps:
+      - id: pull-env
+        action: bash
+        command: vercel env pull .env.local 2>/dev/null || echo "No existing env vars"
+
+      - id: env-instructions
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Environment Variable Setup"
+          echo "======================================"
+          echo ""
+          echo "Add environment variables using:"
+          echo "  vercel env add VARIABLE_NAME"
+          echo ""
+          echo "Or use the NEXUS command:"
+          echo "  ~/.nexus-prime/commands/vercel-env.sh add KEY value"
+          echo ""
+          echo "Required for different environments:"
+          echo "  - production"
+          echo "  - preview"
+          echo "  - development"
+          echo "======================================"
+
+  - name: domain-setup
+    description: "Configure custom domain (if provided)"
+    depends_on: environment-setup
+    condition: "{{ parameters.custom_domain }}"
+    steps:
+      - id: add-domain
+        action: bash
+        command: |
+          if [ -n "$DOMAIN" ]; then
+            vercel domains add "$DOMAIN"
+          fi
+        env:
+          DOMAIN: "{{ parameters.custom_domain }}"
+
+      - id: domain-instructions
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Domain Configuration"
+          echo "======================================"
+          echo ""
+          echo "If using a custom domain, add these DNS records:"
+          echo ""
+          echo "For apex domain (example.com):"
+          echo "  A     @    76.76.21.21"
+          echo ""
+          echo "For subdomain (www.example.com):"
+          echo "  CNAME www  cname.vercel-dns.com"
+          echo "======================================"
+
+  - name: first-deployment
+    description: "Initial deployment"
+    depends_on: domain-setup
+    steps:
+      - id: deploy-preview
+        action: bash
+        command: vercel deploy --yes
+        timeout: 600
+        capture_output: PREVIEW_URL
+
+      - id: verify-deployment
+        action: bash
+        command: |
+          if [ -n "$PREVIEW_URL" ]; then
+            echo "Preview URL: $PREVIEW_URL"
+            curl -s -o /dev/null -w "Status: %{http_code}\n" "$PREVIEW_URL"
+          fi
+
+  - name: finalization
+    description: "Complete setup"
+    depends_on: first-deployment
+    steps:
+      - id: summary
+        action: bash
+        command: |
+          echo "======================================"
+          echo "Vercel Project Setup Complete!"
+          echo "======================================"
+          echo ""
+          echo "Project: {{ parameters.project_name }}"
+          echo "Framework: {{ parameters.framework }}"
+          echo "Preview: ${PREVIEW_URL}"
+          echo ""
+          echo "Next steps:"
+          echo "  1. Add environment variables"
+          echo "  2. Configure custom domain (if needed)"
+          echo "  3. Deploy to production: vercel --prod"
+          echo "  4. Set up GitHub integration for auto-deploys"
+          echo ""
+          echo "Useful commands:"
+          echo "  vercel env add     - Add environment variable"
+          echo "  vercel domains     - Manage domains"
+          echo "  vercel logs        - View deployment logs"
+          echo "  vercel --prod      - Deploy to production"
+          echo "======================================"
+
+# Post-setup recommendations
+recommendations:
+  - name: "GitHub Integration"
+    description: "Connect to GitHub for automatic deployments"
+    command: "Visit https://vercel.com/integrations/github"
+
+  - name: "Analytics"
+    description: "Enable Vercel Analytics for Web Vitals"
+    command: "npm install @vercel/analytics && add to app"
+
+  - name: "Speed Insights"
+    description: "Enable real user monitoring"
+    command: "npm install @vercel/speed-insights && add to app"
+
+  - name: "Edge Config"
+    description: "Set up feature flags"
+    command: "Create Edge Config in Vercel dashboard"
