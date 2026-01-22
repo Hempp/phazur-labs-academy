@@ -449,7 +449,7 @@ export default function AdminContentPage() {
 
                     {courseSections.length === 0 ? (
                       <div className="text-center py-12 text-gray-500">
-                        <p>No sections yet. Click "Add Section" to create your first section.</p>
+                        <p>No sections yet. Click &quot;Add Section&quot; to create your first section.</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -661,7 +661,7 @@ export default function AdminContentPage() {
 
                       {mockQuizzes.filter(q => q.course_id === selectedCourse).length === 0 && (
                         <div className="text-center py-12 text-gray-500">
-                          <p>No quizzes yet. Click "Create Quiz" to add one.</p>
+                          <p>No quizzes yet. Click &quot;Create Quiz&quot; to add one.</p>
                         </div>
                       )}
                     </div>
@@ -700,7 +700,7 @@ export default function AdminContentPage() {
 
                       {mockAssignments.filter(a => a.course_id === selectedCourse).length === 0 && (
                         <div className="text-center py-12 text-gray-500">
-                          <p>No assignments yet. Click "Create Assignment" to add one.</p>
+                          <p>No assignments yet. Click &quot;Create Assignment&quot; to add one.</p>
                         </div>
                       )}
                     </div>

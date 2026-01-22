@@ -383,7 +383,7 @@ export default function HomePage() {
                     </p>
                   </div>
                 </div>
-                <p className="text-muted-foreground mb-4">"{testimonial.quote}"</p>
+                <p className="text-muted-foreground mb-4">&quot;{testimonial.quote}&quot;</p>
                 <p className="text-sm text-primary font-medium">{testimonial.course}</p>
               </div>
             ))}

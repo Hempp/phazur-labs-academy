@@ -30,8 +30,8 @@ export default function CheckoutCancelPage() {
               Your cart items are still saved
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Don't worry - your course selections are still in your cart.
-              You can complete your purchase whenever you're ready.
+              Don&apos;t worry - your course selections are still in your cart.
+              You can complete your purchase whenever you&apos;re ready.
             </p>
 
             {/* Reasons Section */}
@@ -85,7 +85,7 @@ export default function CheckoutCancelPage() {
             </h3>
             <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
               If you experienced any issues during checkout or have questions about our courses,
-              we're here to help.
+              we&apos;re here to help.
             </p>
             <a
               href="mailto:support@phazurlabs.com"

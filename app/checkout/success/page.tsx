@@ -60,7 +60,7 @@ function SuccessContent() {
               Payment Successful!
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Thank you for your purchase. You're all set to start learning!
+              Thank you for your purchase. You&apos;re all set to start learning!
             </p>
           </div>
 
@@ -68,7 +68,7 @@ function SuccessContent() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
             <h2 className="text-lg font-semibold mb-6 flex items-center justify-center gap-2">
               <Mail className="h-5 w-5 text-primary" />
-              What's Next?
+              What&apos;s Next?
             </h2>
 
             <div className="space-y-4 text-left">
@@ -79,7 +79,7 @@ function SuccessContent() {
                 <div>
                   <h3 className="font-medium">Check Your Email</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    We've sent a confirmation email with your receipt and course access details.
+                    We&apos;ve sent a confirmation email with your receipt and course access details.
                   </p>
                 </div>
               </div>

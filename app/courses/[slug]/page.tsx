@@ -568,7 +568,7 @@ export default function CourseDetailPage() {
         <div className="max-w-4xl">
           {/* About Section */}
           <section id="about" className="scroll-mt-32">
-            <h2 className="text-xl font-bold text-foreground mb-6">What you'll learn</h2>
+            <h2 className="text-xl font-bold text-foreground mb-6">What you&apos;ll learn</h2>
             <div className="grid sm:grid-cols-2 gap-3 p-5 border rounded-lg">
               {course.whatYouWillLearn.map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
@@ -579,7 +579,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Skills */}
-            <h3 className="text-lg font-bold text-foreground mt-10 mb-4">Skills you'll gain</h3>
+            <h3 className="text-lg font-bold text-foreground mt-10 mb-4">Skills you&apos;ll gain</h3>
             <div className="flex flex-wrap gap-2">
               {course.skills.map((skill) => (
                 <span

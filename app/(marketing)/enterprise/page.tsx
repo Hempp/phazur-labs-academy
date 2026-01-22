@@ -237,7 +237,7 @@ export default function EnterprisePage() {
               Everything Your Team Needs to Succeed
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive tools to manage, track, and certify your workforce's skills at scale.
+              Comprehensive tools to manage, track, and certify your workforce&apos;s skills at scale.
             </p>
           </div>
 

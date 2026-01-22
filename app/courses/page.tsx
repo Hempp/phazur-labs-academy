@@ -383,7 +383,7 @@ function CoursesContent() {
             <p className="mt-3 text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{filteredCourses.length}</span> results
               {searchQuery && (
-                <span> for "{searchQuery}"</span>
+                <span> for &quot;{searchQuery}&quot;</span>
               )}
             </p>
           </div>
