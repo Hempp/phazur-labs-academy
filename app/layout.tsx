@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
+import { CartProvider } from '@/components/cart'
 import '@/styles/globals.css'
 
 const inter = Inter({
@@ -104,7 +105,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
         <Toaster
           position="top-right"
           toastOptions={{

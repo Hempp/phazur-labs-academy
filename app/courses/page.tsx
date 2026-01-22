@@ -1,741 +1,631 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Header, Footer } from '@/components/layout'
 import {
   Search,
-  Filter,
-  Grid,
-  List,
   Star,
   Clock,
   Users,
   BookOpen,
-  Play,
   ChevronDown,
+  ChevronUp,
   X,
   SlidersHorizontal,
+  GraduationCap,
+  Loader2,
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge, LevelBadge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { AddToCartButton } from '@/components/cart'
 
-// Mock categories
-const categories = [
-  { id: 'all', name: 'All Categories', count: 156 },
-  { id: 'web-development', name: 'Web Development', count: 42 },
-  { id: 'mobile-development', name: 'Mobile Development', count: 28 },
-  { id: 'data-science', name: 'Data Science', count: 35 },
-  { id: 'machine-learning', name: 'Machine Learning', count: 24 },
-  { id: 'cloud-computing', name: 'Cloud Computing', count: 18 },
-  { id: 'devops', name: 'DevOps', count: 15 },
-  { id: 'cybersecurity', name: 'Cybersecurity', count: 12 },
-  { id: 'ui-ux-design', name: 'UI/UX Design', count: 22 },
+// Filter data
+const subjects = [
+  { id: 'development', name: 'Development', count: 850 },
+  { id: 'data-science', name: 'Data Science', count: 420 },
+  { id: 'ai-ml', name: 'AI & Machine Learning', count: 380 },
+  { id: 'cloud', name: 'Cloud Computing', count: 290 },
+  { id: 'mobile', name: 'Mobile Development', count: 210 },
+  { id: 'security', name: 'Cybersecurity', count: 175 },
+  { id: 'database', name: 'Database', count: 145 },
+  { id: 'design', name: 'UI/UX Design', count: 230 },
 ]
 
 const levels = [
-  { id: 'all', name: 'All Levels' },
-  { id: 'beginner', name: 'Beginner' },
-  { id: 'intermediate', name: 'Intermediate' },
-  { id: 'advanced', name: 'Advanced' },
+  { id: 'beginner', name: 'Beginner', count: 420 },
+  { id: 'intermediate', name: 'Intermediate', count: 580 },
+  { id: 'advanced', name: 'Advanced', count: 290 },
 ]
 
-const sortOptions = [
-  { id: 'popular', name: 'Most Popular' },
-  { id: 'rating', name: 'Highest Rated' },
-  { id: 'newest', name: 'Newest' },
-  { id: 'price-low', name: 'Price: Low to High' },
-  { id: 'price-high', name: 'Price: High to Low' },
+const durations = [
+  { id: 'short', name: 'Less than 1 Month', count: 320 },
+  { id: 'medium', name: '1-3 Months', count: 540 },
+  { id: 'long', name: '3-6 Months', count: 280 },
+  { id: 'extended', name: '6+ Months', count: 150 },
+]
+
+const languages = [
+  { id: 'english', name: 'English', count: 980 },
+  { id: 'spanish', name: 'Spanish', count: 120 },
+  { id: 'portuguese', name: 'Portuguese', count: 85 },
+  { id: 'french', name: 'French', count: 65 },
 ]
 
 // Mock courses data
 const mockCourses = [
   {
     id: '1',
-    slug: 'advanced-react-patterns',
-    title: 'Advanced React Patterns',
-    description: 'Master advanced React patterns including compound components, render props, and custom hooks.',
-    instructor: {
-      name: 'Sarah Johnson',
-      avatar: '/images/instructors/sarah.jpg',
-    },
-    thumbnail: '/images/courses/react-patterns.jpg',
+    slug: 'full-stack-web-development',
+    title: 'Full-Stack Web Development Mastery',
+    partner: 'Phazur Labs',
     rating: 4.9,
-    reviewCount: 2847,
-    students: 15420,
-    duration: 1440, // minutes
-    lessons: 32,
-    level: 'advanced' as const,
-    price: 89.99,
-    originalPrice: 149.99,
-    category: 'web-development',
-    tags: ['React', 'JavaScript', 'Frontend'],
-    isBestseller: true,
-    isNew: false,
-    updatedAt: '2024-01-15',
+    reviewCount: 12500,
+    level: 'Beginner',
+    duration: '3-6 Months',
+    skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'GraphQL'],
+    badge: 'Professional Certificate',
+    hasTrial: true,
+    category: 'development',
   },
   {
     id: '2',
-    slug: 'typescript-masterclass',
-    title: 'TypeScript Masterclass: Zero to Hero',
-    description: 'Complete TypeScript course from basics to advanced concepts. Build type-safe applications.',
-    instructor: {
-      name: 'Michael Chen',
-      avatar: '/images/instructors/michael.jpg',
-    },
-    thumbnail: '/images/courses/typescript.jpg',
+    slug: 'ai-machine-learning',
+    title: 'AI & Machine Learning Engineering',
+    partner: 'Phazur Labs',
     rating: 4.8,
-    reviewCount: 3521,
-    students: 22150,
-    duration: 2160,
-    lessons: 48,
-    level: 'intermediate' as const,
-    price: 79.99,
-    originalPrice: 129.99,
-    category: 'web-development',
-    tags: ['TypeScript', 'JavaScript', 'Programming'],
-    isBestseller: true,
-    isNew: false,
-    updatedAt: '2024-02-01',
+    reviewCount: 8900,
+    level: 'Intermediate',
+    duration: '4-6 Months',
+    skills: ['Python', 'TensorFlow', 'PyTorch', 'Deep Learning', 'NLP'],
+    badge: 'Specialization',
+    hasTrial: true,
+    category: 'ai-ml',
   },
   {
     id: '3',
-    slug: 'nodejs-backend-development',
-    title: 'Node.js Backend Development',
-    description: 'Build scalable backend applications with Node.js, Express, and MongoDB.',
-    instructor: {
-      name: 'Emma Wilson',
-      avatar: '/images/instructors/emma.jpg',
-    },
-    thumbnail: '/images/courses/nodejs.jpg',
-    rating: 4.7,
-    reviewCount: 1892,
-    students: 12340,
-    duration: 2520,
-    lessons: 56,
-    level: 'intermediate' as const,
-    price: 94.99,
-    originalPrice: 159.99,
-    category: 'web-development',
-    tags: ['Node.js', 'Backend', 'MongoDB'],
-    isBestseller: false,
-    isNew: false,
-    updatedAt: '2024-01-20',
+    slug: 'cloud-architecture-devops',
+    title: 'Cloud Architecture & DevOps',
+    partner: 'Phazur Labs',
+    rating: 4.9,
+    reviewCount: 6700,
+    level: 'Intermediate',
+    duration: '3-4 Months',
+    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD'],
+    badge: 'Professional Certificate',
+    hasTrial: false,
+    category: 'cloud',
   },
   {
     id: '4',
-    slug: 'nextjs-14-complete-guide',
-    title: 'Next.js 14: The Complete Guide',
-    description: 'Learn Next.js 14 with App Router, Server Components, and full-stack development.',
-    instructor: {
-      name: 'David Park',
-      avatar: '/images/instructors/david.jpg',
-    },
-    thumbnail: '/images/courses/nextjs.jpg',
-    rating: 4.9,
-    reviewCount: 1245,
-    students: 8540,
-    duration: 1080,
-    lessons: 38,
-    level: 'intermediate' as const,
-    price: 89.99,
-    originalPrice: null,
-    category: 'web-development',
-    tags: ['Next.js', 'React', 'Full-Stack'],
-    isBestseller: false,
-    isNew: true,
-    updatedAt: '2024-02-10',
+    slug: 'data-science-analytics',
+    title: 'Data Science & Analytics Pro',
+    partner: 'Phazur Labs',
+    rating: 4.8,
+    reviewCount: 9200,
+    level: 'Beginner',
+    duration: '4-5 Months',
+    skills: ['Python', 'SQL', 'Pandas', 'Machine Learning', 'Visualization'],
+    badge: 'Professional Certificate',
+    hasTrial: true,
+    category: 'data-science',
   },
   {
     id: '5',
-    slug: 'python-data-science',
-    title: 'Python for Data Science',
-    description: 'Master Python for data analysis, visualization, and machine learning fundamentals.',
-    instructor: {
-      name: 'Lisa Anderson',
-      avatar: '/images/instructors/lisa.jpg',
-    },
-    thumbnail: '/images/courses/python-ds.jpg',
-    rating: 4.8,
-    reviewCount: 4210,
-    students: 28750,
-    duration: 2880,
-    lessons: 64,
-    level: 'beginner' as const,
-    price: 99.99,
-    originalPrice: 179.99,
-    category: 'data-science',
-    tags: ['Python', 'Data Science', 'Pandas'],
-    isBestseller: true,
-    isNew: false,
-    updatedAt: '2024-01-25',
+    slug: 'react-native-mobile',
+    title: 'React Native Mobile Development',
+    partner: 'Phazur Labs',
+    rating: 4.7,
+    reviewCount: 5400,
+    level: 'Intermediate',
+    duration: '2-3 Months',
+    skills: ['React Native', 'TypeScript', 'Expo', 'Mobile UI'],
+    badge: 'Course',
+    hasTrial: true,
+    category: 'mobile',
   },
   {
     id: '6',
-    slug: 'aws-solutions-architect',
-    title: 'AWS Solutions Architect Associate',
-    description: 'Prepare for AWS certification with hands-on labs and real-world scenarios.',
-    instructor: {
-      name: 'James Martinez',
-      avatar: '/images/instructors/james.jpg',
-    },
-    thumbnail: '/images/courses/aws.jpg',
-    rating: 4.7,
-    reviewCount: 2156,
-    students: 14280,
-    duration: 2400,
-    lessons: 52,
-    level: 'intermediate' as const,
-    price: 119.99,
-    originalPrice: 199.99,
-    category: 'cloud-computing',
-    tags: ['AWS', 'Cloud', 'DevOps'],
-    isBestseller: false,
-    isNew: false,
-    updatedAt: '2024-01-18',
+    slug: 'cybersecurity-fundamentals',
+    title: 'Cybersecurity Fundamentals',
+    partner: 'Phazur Labs',
+    rating: 4.8,
+    reviewCount: 4200,
+    level: 'Beginner',
+    duration: '2-3 Months',
+    skills: ['Network Security', 'Ethical Hacking', 'SIEM', 'Compliance'],
+    badge: 'Professional Certificate',
+    hasTrial: false,
+    category: 'security',
   },
   {
     id: '7',
-    slug: 'react-native-mobile-apps',
-    title: 'React Native: Build Mobile Apps',
-    description: 'Create cross-platform mobile applications using React Native and Expo.',
-    instructor: {
-      name: 'Anna Roberts',
-      avatar: '/images/instructors/anna.jpg',
-    },
-    thumbnail: '/images/courses/react-native.jpg',
-    rating: 4.6,
-    reviewCount: 1678,
-    students: 9870,
-    duration: 1800,
-    lessons: 42,
-    level: 'intermediate' as const,
-    price: 84.99,
-    originalPrice: 139.99,
-    category: 'mobile-development',
-    tags: ['React Native', 'Mobile', 'JavaScript'],
-    isBestseller: false,
-    isNew: false,
-    updatedAt: '2024-02-05',
+    slug: 'advanced-react-patterns',
+    title: 'Advanced React Patterns',
+    partner: 'Phazur Labs',
+    rating: 4.9,
+    reviewCount: 3800,
+    level: 'Advanced',
+    duration: '1-2 Months',
+    skills: ['React', 'TypeScript', 'State Management', 'Performance'],
+    badge: 'Course',
+    hasTrial: true,
+    category: 'development',
   },
   {
     id: '8',
-    slug: 'machine-learning-tensorflow',
-    title: 'Machine Learning with TensorFlow',
-    description: 'Deep dive into machine learning and neural networks using TensorFlow and Keras.',
-    instructor: {
-      name: 'Robert Kim',
-      avatar: '/images/instructors/robert.jpg',
-    },
-    thumbnail: '/images/courses/ml-tensorflow.jpg',
+    slug: 'postgresql-mastery',
+    title: 'PostgreSQL Database Mastery',
+    partner: 'Phazur Labs',
+    rating: 4.7,
+    reviewCount: 2900,
+    level: 'Intermediate',
+    duration: '2-3 Months',
+    skills: ['PostgreSQL', 'SQL', 'Database Design', 'Performance Tuning'],
+    badge: 'Course',
+    hasTrial: true,
+    category: 'database',
+  },
+  {
+    id: '9',
+    slug: 'ui-ux-design-bootcamp',
+    title: 'UI/UX Design Bootcamp',
+    partner: 'Phazur Labs',
     rating: 4.8,
-    reviewCount: 1923,
-    students: 11240,
-    duration: 3240,
-    lessons: 72,
-    level: 'advanced' as const,
-    price: 149.99,
-    originalPrice: 249.99,
-    category: 'machine-learning',
-    tags: ['TensorFlow', 'ML', 'Deep Learning'],
-    isBestseller: false,
-    isNew: false,
-    updatedAt: '2024-01-30',
+    reviewCount: 6100,
+    level: 'Beginner',
+    duration: '3-4 Months',
+    skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+    badge: 'Professional Certificate',
+    hasTrial: true,
+    category: 'design',
   },
 ]
 
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  return `${hours}h total`
-}
-
-function CourseCard({
-  course,
-  viewMode,
+// Filter Accordion Component
+function FilterSection({
+  title,
+  options,
+  selected,
+  onToggle,
+  defaultOpen = false,
 }: {
-  course: typeof mockCourses[0]
-  viewMode: 'grid' | 'list'
+  title: string
+  options: { id: string; name: string; count: number }[]
+  selected: string[]
+  onToggle: (id: string) => void
+  defaultOpen?: boolean
 }) {
-  if (viewMode === 'list') {
-    return (
-      <Card className="group hover:shadow-lg transition-all duration-300">
-        <div className="flex flex-col sm:flex-row gap-4 p-4">
-          <div className="relative w-full sm:w-64 aspect-video sm:aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-              <BookOpen className="h-12 w-12 text-primary/50" />
-            </div>
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="p-3 rounded-full bg-white/90">
-                <Play className="h-6 w-6 text-primary fill-primary" />
-              </div>
-            </div>
-            {course.isBestseller && (
-              <Badge className="absolute top-2 left-2 bg-amber-500 hover:bg-amber-600">
-                Bestseller
-              </Badge>
-            )}
-            {course.isNew && (
-              <Badge className="absolute top-2 left-2 bg-emerald-500 hover:bg-emerald-600">
-                New
-              </Badge>
-            )}
-          </div>
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors line-clamp-2">
-                  {course.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {course.description}
-                </p>
-              </div>
-              <LevelBadge level={course.level} className="flex-shrink-0" />
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              By {course.instructor.name}
-            </p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-sm">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                <span className="font-medium">{course.rating}</span>
-                <span className="text-muted-foreground">({course.reviewCount.toLocaleString()})</span>
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                {course.students.toLocaleString()} students
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                {formatDuration(course.duration)}
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <BookOpen className="h-4 w-4" />
-                {course.lessons} lessons
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              {course.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            <div className="flex items-center justify-between mt-auto pt-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">${course.price}</span>
-                {course.originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
-                    ${course.originalPrice}
-                  </span>
-                )}
-              </div>
-              <Link
-                href={`/courses/${course.slug}`}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                View Course
-              </Link>
-            </div>
-          </div>
-        </div>
-      </Card>
-    )
-  }
+  const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col">
-      <div className="relative aspect-video bg-muted">
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-          <BookOpen className="h-12 w-12 text-primary/50" />
-        </div>
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="p-3 rounded-full bg-white/90">
-            <Play className="h-6 w-6 text-primary fill-primary" />
-          </div>
-        </div>
-        {course.isBestseller && (
-          <Badge className="absolute top-2 left-2 bg-amber-500 hover:bg-amber-600">
-            Bestseller
-          </Badge>
+    <div className="border-b border-border py-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full text-left"
+      >
+        <span className="font-medium text-foreground">{title}</span>
+        {isOpen ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
-        {course.isNew && (
-          <Badge className="absolute top-2 left-2 bg-emerald-500 hover:bg-emerald-600">
-            New
-          </Badge>
-        )}
-        <LevelBadge level={course.level} className="absolute top-2 right-2" />
-      </div>
-      <CardContent className="p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold group-hover:text-primary transition-colors line-clamp-2">
-          {course.title}
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1">{course.instructor.name}</p>
-        <div className="flex items-center gap-2 mt-2 text-sm">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-            <span className="font-medium">{course.rating}</span>
-          </div>
-          <span className="text-muted-foreground">
-            ({course.reviewCount.toLocaleString()})
-          </span>
+      </button>
+      {isOpen && (
+        <div className="mt-3 space-y-2">
+          {options.map((option) => (
+            <label
+              key={option.id}
+              className="flex items-center gap-3 cursor-pointer group"
+            >
+              <input
+                type="checkbox"
+                checked={selected.includes(option.id)}
+                onChange={() => onToggle(option.id)}
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <span className="flex-1 text-sm text-foreground group-hover:text-primary transition-colors">
+                {option.name}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {option.count}
+              </span>
+            </label>
+          ))}
         </div>
-        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-          <span>{formatDuration(course.duration)}</span>
-          <span>{course.lessons} lessons</span>
-        </div>
-        <div className="flex items-baseline gap-2 mt-auto pt-4">
-          <span className="text-xl font-bold">${course.price}</span>
-          {course.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">
-              ${course.originalPrice}
-            </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }
 
-export default function CourseCatalogPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedLevel, setSelectedLevel] = useState('all')
-  const [selectedSort, setSelectedSort] = useState('popular')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [showFilters, setShowFilters] = useState(false)
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
+// Course Card Component (Coursera-style)
+function CourseCard({ course }: { course: typeof mockCourses[0] }) {
+  return (
+    <Link
+      href={`/courses/${course.slug}`}
+      className="group flex flex-col bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+    >
+      {/* Image */}
+      <div className="relative aspect-video bg-muted overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
+        {/* Partner Logo Overlay */}
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-2 px-2 py-1 bg-white/90 backdrop-blur-sm rounded">
+          <div className="w-5 h-5 bg-primary rounded flex items-center justify-center">
+            <GraduationCap className="w-3 h-3 text-white" />
+          </div>
+          <span className="text-xs font-medium text-foreground">{course.partner}</span>
+        </div>
+        {/* Placeholder for course image */}
+        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-300" />
+      </div>
 
+      {/* Content */}
+      <div className="flex-1 p-4 space-y-3">
+        {/* Badges */}
+        <div className="flex flex-wrap gap-2">
+          {course.hasTrial && (
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-success/10 text-success rounded">
+              Free Trial
+            </span>
+          )}
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded">
+            {course.badge}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          {course.title}
+        </h3>
+
+        {/* Skills */}
+        <p className="text-sm text-muted-foreground line-clamp-1">
+          Skills: {course.skills.slice(0, 3).join(', ')}
+          {course.skills.length > 3 && `, +${course.skills.length - 3} more`}
+        </p>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5">
+          <Star className="w-4 h-4 fill-warning text-warning" />
+          <span className="text-sm font-medium">{course.rating}</span>
+          <span className="text-sm text-muted-foreground">
+            ({course.reviewCount.toLocaleString()} reviews)
+          </span>
+        </div>
+
+        {/* Meta */}
+        <p className="text-xs text-muted-foreground">
+          {course.level} · Course · {course.duration}
+        </p>
+      </div>
+    </Link>
+  )
+}
+
+// Main content component that uses useSearchParams
+function CoursesContent() {
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([])
+  const [selectedDurations, setSelectedDurations] = useState<string[]>([])
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+
+  // Filter courses
   const filteredCourses = useMemo(() => {
-    let filtered = [...mockCourses]
+    return mockCourses.filter((course) => {
+      // Search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        if (
+          !course.title.toLowerCase().includes(query) &&
+          !course.skills.some((s) => s.toLowerCase().includes(query))
+        ) {
+          return false
+        }
+      }
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (course) =>
-          course.title.toLowerCase().includes(query) ||
-          course.description.toLowerCase().includes(query) ||
-          course.tags.some((tag) => tag.toLowerCase().includes(query))
-      )
+      // Subject filter
+      if (selectedSubjects.length > 0 && !selectedSubjects.includes(course.category)) {
+        return false
+      }
+
+      // Level filter
+      if (selectedLevels.length > 0 && !selectedLevels.includes(course.level.toLowerCase())) {
+        return false
+      }
+
+      return true
+    })
+  }, [searchQuery, selectedSubjects, selectedLevels])
+
+  const toggleFilter = (list: string[], setList: (l: string[]) => void, id: string) => {
+    if (list.includes(id)) {
+      setList(list.filter((item) => item !== id))
+    } else {
+      setList([...list, id])
     }
+  }
 
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter((course) => course.category === selectedCategory)
-    }
+  const clearAllFilters = () => {
+    setSelectedSubjects([])
+    setSelectedLevels([])
+    setSelectedDurations([])
+    setSelectedLanguages([])
+    setSearchQuery('')
+  }
 
-    // Level filter
-    if (selectedLevel !== 'all') {
-      filtered = filtered.filter((course) => course.level === selectedLevel)
-    }
-
-    // Price filter
-    filtered = filtered.filter(
-      (course) => course.price >= priceRange[0] && course.price <= priceRange[1]
-    )
-
-    // Sort
-    switch (selectedSort) {
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        break
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price)
-        break
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price)
-        break
-      default: // popular
-        filtered.sort((a, b) => b.students - a.students)
-    }
-
-    return filtered
-  }, [searchQuery, selectedCategory, selectedLevel, selectedSort, priceRange])
-
-  const activeFiltersCount = [
-    selectedCategory !== 'all',
-    selectedLevel !== 'all',
-    priceRange[0] > 0 || priceRange[1] < 200,
-  ].filter(Boolean).length
+  const activeFilterCount =
+    selectedSubjects.length + selectedLevels.length + selectedDurations.length + selectedLanguages.length
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-center">
-            Explore Our Courses
-          </h1>
-          <p className="text-muted-foreground text-center mt-2 max-w-2xl mx-auto">
-            Discover {mockCourses.length}+ courses taught by industry experts. Start learning today.
-          </p>
+      <Header />
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mt-8">
-            <div className="relative">
+      {/* Search Header */}
+      <div className="border-b bg-surface-secondary">
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-2xl">
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="relative"
+            >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search for courses, topics, or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 pl-12 pr-4 rounded-xl border bg-background text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
+                placeholder="Search for courses, skills, or topics..."
+                className="w-full h-12 pl-12 pr-4 bg-background border border-border rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+            </form>
+            <p className="mt-3 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{filteredCourses.length}</span> results
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <span> for "{searchQuery}"</span>
               )}
-            </div>
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters - Desktop */}
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* Filter Sidebar - Desktop */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-24 space-y-6">
-              {/* Categories */}
-              <div>
-                <h3 className="font-semibold mb-3">Categories</h3>
-                <div className="space-y-1">
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={cn(
-                        'w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors',
-                        selectedCategory === category.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      )}
-                    >
-                      <span>{category.name}</span>
-                      <span className={cn(
-                        'text-xs',
-                        selectedCategory === category.id
-                          ? 'text-primary-foreground/70'
-                          : 'text-muted-foreground'
-                      )}>
-                        {category.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+            <div className="sticky top-24">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-foreground">Filters</h2>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
 
-              {/* Level */}
-              <div>
-                <h3 className="font-semibold mb-3">Level</h3>
-                <div className="space-y-1">
-                  {levels.map((level) => (
-                    <button
-                      key={level.id}
-                      onClick={() => setSelectedLevel(level.id)}
-                      className={cn(
-                        'w-full px-3 py-2 rounded-lg text-sm text-left transition-colors',
-                        selectedLevel === level.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      )}
-                    >
-                      {level.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <FilterSection
+                title="Subject"
+                options={subjects}
+                selected={selectedSubjects}
+                onToggle={(id) => toggleFilter(selectedSubjects, setSelectedSubjects, id)}
+                defaultOpen={true}
+              />
 
-              {/* Price Range */}
-              <div>
-                <h3 className="font-semibold mb-3">Price Range</h3>
-                <div className="px-3">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+              <FilterSection
+                title="Level"
+                options={levels}
+                selected={selectedLevels}
+                onToggle={(id) => toggleFilter(selectedLevels, setSelectedLevels, id)}
+                defaultOpen={true}
+              />
 
-              {/* Clear Filters */}
-              {activeFiltersCount > 0 && (
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all')
-                    setSelectedLevel('all')
-                    setPriceRange([0, 200])
-                  }}
-                  className="w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                >
-                  Clear all filters
-                </button>
-              )}
+              <FilterSection
+                title="Duration"
+                options={durations}
+                selected={selectedDurations}
+                onToggle={(id) => toggleFilter(selectedDurations, setSelectedDurations, id)}
+              />
+
+              <FilterSection
+                title="Language"
+                options={languages}
+                selected={selectedLanguages}
+                onToggle={(id) => toggleFilter(selectedLanguages, setSelectedLanguages, id)}
+              />
             </div>
           </aside>
 
-          {/* Main Content */}
+          {/* Course Grid */}
           <main className="flex-1">
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                {/* Mobile Filter Button */}
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium hover:bg-muted transition-colors"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="default" className="ml-1">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </button>
-
-                <span className="text-sm text-muted-foreground">
-                  {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Sort Dropdown */}
-                <div className="relative">
-                  <select
-                    value={selectedSort}
-                    onChange={(e) => setSelectedSort(e.target.value)}
-                    className="appearance-none px-4 py-2 pr-10 border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {sortOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
-
-                {/* View Toggle */}
-                <div className="hidden sm:flex items-center border rounded-lg p-1">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={cn(
-                      'p-2 rounded-md transition-colors',
-                      viewMode === 'grid' ? 'bg-muted' : 'hover:bg-muted/50'
-                    )}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={cn(
-                      'p-2 rounded-md transition-colors',
-                      viewMode === 'list' ? 'bg-muted' : 'hover:bg-muted/50'
-                    )}
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-6">
+              <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium hover:bg-muted transition-colors"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="px-1.5 py-0.5 bg-primary text-primary-foreground text-xs rounded-full">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
 
-            {/* Mobile Filters Panel */}
-            {showFilters && (
-              <div className="lg:hidden mb-6 p-4 border rounded-lg bg-card">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Filters</h3>
-                  <button
-                    onClick={() => setShowFilters(false)}
-                    className="p-1 hover:bg-muted rounded"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Category</label>
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg text-sm bg-background"
+            {/* Active Filters Pills */}
+            {activeFilterCount > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {selectedSubjects.map((id) => {
+                  const subject = subjects.find((s) => s.id === id)
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => toggleFilter(selectedSubjects, setSelectedSubjects, id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary/20 transition-colors"
                     >
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Level</label>
-                    <select
-                      value={selectedLevel}
-                      onChange={(e) => setSelectedLevel(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg text-sm bg-background"
+                      {subject?.name}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )
+                })}
+                {selectedLevels.map((id) => {
+                  const level = levels.find((l) => l.id === id)
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => toggleFilter(selectedLevels, setSelectedLevels, id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary/20 transition-colors"
                     >
-                      {levels.map((level) => (
-                        <option key={level.id} value={level.id}>
-                          {level.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                      {level?.name}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )
+                })}
               </div>
             )}
 
-            {/* Course Grid/List */}
+            {/* Course Grid */}
             {filteredCourses.length > 0 ? (
-              <div
-                className={cn(
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6'
-                    : 'space-y-4'
-                )}
-              >
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredCourses.map((course) => (
-                  <Link key={course.id} href={`/courses/${course.slug}`}>
-                    <CourseCard course={course} viewMode={viewMode} />
-                  </Link>
+                  <CourseCard key={course.id} course={course} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-16">
-                <BookOpen className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No courses found</h3>
+                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No courses found</h3>
                 <p className="text-muted-foreground mb-4">
                   Try adjusting your filters or search query
                 </p>
                 <button
-                  onClick={() => {
-                    setSearchQuery('')
-                    setSelectedCategory('all')
-                    setSelectedLevel('all')
-                    setPriceRange([0, 200])
-                  }}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                  onClick={clearAllFilters}
+                  className="text-primary hover:underline"
                 >
                   Clear all filters
+                </button>
+              </div>
+            )}
+
+            {/* Load More */}
+            {filteredCourses.length > 0 && (
+              <div className="mt-12 text-center">
+                <button className="inline-flex items-center justify-center h-11 px-8 border border-primary text-primary rounded-md font-medium hover:bg-primary/5 transition-colors">
+                  Show more courses
                 </button>
               </div>
             )}
           </main>
         </div>
       </div>
+
+      {/* Mobile Filter Sheet */}
+      {isMobileFilterOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsMobileFilterOpen(false)}
+          />
+          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-background shadow-xl animate-in slide-in-from-right">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="font-semibold text-foreground">Filters</h2>
+              <button
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="p-2 hover:bg-muted rounded-md transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto h-[calc(100%-8rem)]">
+              <FilterSection
+                title="Subject"
+                options={subjects}
+                selected={selectedSubjects}
+                onToggle={(id) => toggleFilter(selectedSubjects, setSelectedSubjects, id)}
+                defaultOpen={true}
+              />
+
+              <FilterSection
+                title="Level"
+                options={levels}
+                selected={selectedLevels}
+                onToggle={(id) => toggleFilter(selectedLevels, setSelectedLevels, id)}
+                defaultOpen={true}
+              />
+
+              <FilterSection
+                title="Duration"
+                options={durations}
+                selected={selectedDurations}
+                onToggle={(id) => toggleFilter(selectedDurations, setSelectedDurations, id)}
+              />
+
+              <FilterSection
+                title="Language"
+                options={languages}
+                selected={selectedLanguages}
+                onToggle={(id) => toggleFilter(selectedLanguages, setSelectedLanguages, id)}
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+              <div className="flex gap-3">
+                <button
+                  onClick={clearAllFilters}
+                  className="flex-1 h-11 border rounded-md font-medium hover:bg-muted transition-colors"
+                >
+                  Clear all
+                </button>
+                <button
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="flex-1 h-11 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Show results
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
+  )
+}
+
+// Loading fallback for Suspense
+function CoursesLoading() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="border-b bg-surface-secondary">
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-2xl">
+            <div className="h-12 bg-muted rounded-lg animate-pulse" />
+            <div className="mt-3 h-4 w-32 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      </div>
+      <Footer />
+    </div>
+  )
+}
+
+// Default export wraps content in Suspense
+export default function CoursesPage() {
+  return (
+    <Suspense fallback={<CoursesLoading />}>
+      <CoursesContent />
+    </Suspense>
   )
 }

@@ -4,48 +4,101 @@
 
 @layer base {
   :root {
+    /* Coursera-inspired palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 12%;              /* #1F1F1F */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --popover-foreground: 0 0% 12%;
+
+    /* Primary: Coursera Blue #0056D2 */
+    --primary: 213 100% 41%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 213 100% 35%;       /* #004BB5 */
+    --primary-light: 213 72% 95%;        /* #E8F0FE */
+
+    /* Secondary/Muted */
+    --secondary: 210 20% 98%;            /* #F8F9FA */
+    --secondary-foreground: 0 0% 12%;
+    --muted: 210 20% 98%;
+    --muted-foreground: 0 0% 39%;        /* #636363 */
+    --muted-light: 0 0% 55%;             /* #8C8C8C */
+
+    /* Accent */
+    --accent: 210 20% 96%;               /* #F0F2F5 */
+    --accent-foreground: 0 0% 12%;
+
+    /* Semantic Colors */
+    --success: 162 90% 26%;              /* #067D62 - completion green */
+    --success-foreground: 0 0% 100%;
+    --warning: 26 82% 53%;               /* #E87722 - badges orange */
+    --warning-foreground: 0 0% 100%;
+    --info: 213 100% 41%;                /* same as primary */
+    --info-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 0 0% 90%;                  /* #E5E5E5 */
+    --border-light: 0 0% 96%;            /* #F5F5F5 */
+    --input: 0 0% 90%;
+    --ring: 213 100% 41%;
+
+    /* Surfaces */
+    --surface: 0 0% 100%;
+    --surface-secondary: 210 20% 98%;    /* #F8F9FA */
+    --surface-tertiary: 210 20% 95%;     /* #F0F2F5 */
+
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    /* Dark mode - professional dark theme */
+    --background: 220 20% 7%;            /* #0F1419 */
+    --foreground: 0 0% 95%;              /* #F2F2F2 */
+    --card: 220 20% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Primary: Lighter blue for dark mode */
+    --primary: 213 100% 60%;             /* Brighter blue */
+    --primary-foreground: 220 20% 7%;
+    --primary-hover: 213 100% 50%;
+    --primary-light: 213 60% 20%;
+
+    /* Secondary/Muted */
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 0 0% 65%;
+    --muted-light: 0 0% 50%;
+
+    /* Accent */
+    --accent: 220 20% 18%;
+    --accent-foreground: 0 0% 95%;
+
+    /* Semantic Colors */
+    --success: 162 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 26 80% 55%;
+    --warning-foreground: 0 0% 100%;
+    --info: 213 100% 60%;
+    --info-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 220 20% 18%;
+    --border-light: 220 20% 15%;
+    --input: 220 20% 18%;
+    --ring: 213 100% 60%;
+
+    /* Surfaces */
+    --surface: 220 20% 10%;
+    --surface-secondary: 220 20% 12%;
+    --surface-tertiary: 220 20% 15%;
   }
 }
 

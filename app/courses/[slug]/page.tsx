@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { Header, Footer } from '@/components/layout'
 import {
   Star,
   Clock,
@@ -20,255 +21,218 @@ import {
   FileText,
   Code,
   Download,
-  Infinity,
-  Monitor,
-  MessageSquare,
-  ShieldCheck,
+  Calendar,
+  BarChart,
+  Briefcase,
+  GraduationCap,
+  ChevronRight,
+  Info,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge, LevelBadge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { UserAvatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { AddToCartButton } from '@/components/cart'
 
-// Mock course data - would come from API
+// Mock course data
 const mockCourseData = {
   id: '1',
-  slug: 'advanced-react-patterns',
-  title: 'Advanced React Patterns',
-  subtitle: 'Master modern React development with advanced patterns and best practices',
+  slug: 'full-stack-web-development',
+  title: 'Full-Stack Web Development Professional Certificate',
+  subtitle: 'Launch your career as a full-stack developer. Master React, Node.js, TypeScript, and PostgreSQL to build production-ready applications.',
+  partner: 'Phazur Labs',
+  partnerLogo: null,
   description: `
-    Take your React skills to the next level with this comprehensive course on advanced patterns and techniques used by industry experts.
+    Become a job-ready full-stack developer in this comprehensive program. You'll learn to build complete web applications from the ground up, using modern technologies and best practices employed by top tech companies.
 
-    You'll learn how to build reusable, maintainable, and scalable React applications using patterns like Compound Components, Render Props, Custom Hooks, and more.
+    This program is designed for beginners and those looking to transition into software development. No prior programming experience is required - we'll start from the fundamentals and build up to advanced concepts.
 
-    By the end of this course, you'll have the confidence to tackle complex React challenges and architect large-scale applications.
+    By completing this certificate, you'll have a portfolio of real-world projects demonstrating your skills to potential employers.
   `,
   instructor: {
     id: 'inst-1',
     name: 'Sarah Johnson',
-    avatar: '/images/instructors/sarah.jpg',
-    title: 'Senior Software Engineer at Meta',
-    bio: 'Sarah has been building React applications for over 8 years and has contributed to several popular open-source libraries. She specializes in performance optimization and architectural patterns.',
-    courses: 12,
-    students: 125000,
+    avatar: null,
+    title: 'Principal Software Engineer',
+    company: 'Phazur Labs',
+    bio: 'Sarah has been building web applications for over 12 years and has led engineering teams at multiple startups. She specializes in React architecture and has contributed to several popular open-source libraries.',
+    courses: 8,
+    students: 185000,
     rating: 4.9,
   },
-  thumbnail: '/images/courses/react-patterns.jpg',
-  previewVideo: '/videos/react-patterns-preview.mp4',
   rating: 4.9,
-  reviewCount: 2847,
-  students: 15420,
-  duration: 1440,
-  lessons: 32,
-  level: 'advanced' as const,
-  price: 89.99,
-  originalPrice: 149.99,
-  category: 'Web Development',
-  subcategory: 'React',
+  reviewCount: 12500,
+  enrolledCount: 158420,
+  duration: '6 months',
+  hoursPerWeek: '10 hours/week',
+  level: 'Beginner',
   language: 'English',
   lastUpdated: '2024-01-15',
-  isBestseller: true,
-  tags: ['React', 'JavaScript', 'Frontend', 'Hooks', 'TypeScript'],
-  requirements: [
-    'Solid understanding of JavaScript (ES6+)',
-    'Basic React knowledge (components, props, state)',
-    'Familiarity with React hooks (useState, useEffect)',
-    'Node.js installed on your machine',
+  price: 49,
+  originalPrice: null,
+  category: 'Development',
+  subcategory: 'Web Development',
+  badge: 'Professional Certificate',
+  skills: [
+    'React',
+    'Node.js',
+    'TypeScript',
+    'PostgreSQL',
+    'GraphQL',
+    'Docker',
+    'AWS',
+    'Git',
+  ],
+  outcomes: [
+    { metric: '87%', label: 'of learners started a new career after completing' },
+    { metric: '45%', label: 'got a pay increase or promotion' },
+    { metric: '$85,000', label: 'median salary for entry-level developers' },
   ],
   whatYouWillLearn: [
-    'Master Compound Components pattern for flexible APIs',
-    'Implement Render Props for maximum reusability',
-    'Create custom hooks for shared logic',
-    'Build performant applications with React.memo and useMemo',
-    'Understand and implement the Provider pattern',
-    'Handle complex state with useReducer',
-    'Build accessible components following ARIA best practices',
-    'Write tests for React components and hooks',
-  ],
-  targetAudience: [
-    'React developers looking to level up their skills',
-    'Frontend engineers preparing for senior roles',
-    'Developers who want to write cleaner, more maintainable code',
-    'Anyone building complex React applications',
+    'Build responsive web applications using React and TypeScript',
+    'Design and implement RESTful APIs with Node.js and Express',
+    'Work with relational databases using PostgreSQL and Prisma',
+    'Deploy applications using Docker and cloud platforms',
+    'Implement authentication and authorization patterns',
+    'Write tests and maintain code quality standards',
+    'Collaborate using Git and modern development workflows',
+    'Build a portfolio of production-ready projects',
   ],
   modules: [
     {
       id: 'm1',
-      title: 'Introduction to Advanced Patterns',
-      duration: 45,
-      lessons: [
-        { id: 'l1', title: 'Course Overview', type: 'video' as const, duration: 8, isFree: true },
-        { id: 'l2', title: 'Setting Up the Development Environment', type: 'video' as const, duration: 12, isFree: true },
-        { id: 'l3', title: 'Understanding Pattern Categories', type: 'video' as const, duration: 15, isFree: false },
-        { id: 'l4', title: 'When to Use Which Pattern', type: 'video' as const, duration: 10, isFree: false },
-      ],
+      title: 'Foundations of Web Development',
+      subtitle: 'Course 1',
+      duration: '4 weeks',
+      lessons: 24,
+      description: 'Learn HTML, CSS, and JavaScript fundamentals',
     },
     {
       id: 'm2',
-      title: 'Compound Components Pattern',
-      duration: 120,
-      lessons: [
-        { id: 'l5', title: 'What are Compound Components?', type: 'video' as const, duration: 18, isFree: false },
-        { id: 'l6', title: 'Building a Tabs Component', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l7', title: 'Using Context for Implicit State', type: 'video' as const, duration: 22, isFree: false },
-        { id: 'l8', title: 'Flexible Compound Components', type: 'video' as const, duration: 20, isFree: false },
-        { id: 'l9', title: 'Real-world Examples', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l10', title: 'Exercise: Build a Menu Component', type: 'exercise' as const, duration: 10, isFree: false },
-      ],
+      title: 'React Development',
+      subtitle: 'Course 2',
+      duration: '5 weeks',
+      lessons: 32,
+      description: 'Build interactive user interfaces with React',
     },
     {
       id: 'm3',
-      title: 'Custom Hooks Deep Dive',
-      duration: 150,
-      lessons: [
-        { id: 'l11', title: 'Custom Hooks Fundamentals', type: 'video' as const, duration: 20, isFree: false },
-        { id: 'l12', title: 'Building useToggle and useBoolean', type: 'video' as const, duration: 18, isFree: false },
-        { id: 'l13', title: 'Data Fetching with Custom Hooks', type: 'video' as const, duration: 28, isFree: false },
-        { id: 'l14', title: 'useLocalStorage Hook', type: 'video' as const, duration: 22, isFree: false },
-        { id: 'l15', title: 'usePrevious and useDebounce', type: 'video' as const, duration: 20, isFree: false },
-        { id: 'l16', title: 'Composing Hooks Together', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l17', title: 'Testing Custom Hooks', type: 'video' as const, duration: 17, isFree: false },
-      ],
+      title: 'TypeScript Fundamentals',
+      subtitle: 'Course 3',
+      duration: '3 weeks',
+      lessons: 18,
+      description: 'Add type safety to your JavaScript applications',
     },
     {
       id: 'm4',
-      title: 'Render Props & HOCs',
-      duration: 90,
-      lessons: [
-        { id: 'l18', title: 'Understanding Render Props', type: 'video' as const, duration: 18, isFree: false },
-        { id: 'l19', title: 'Building Reusable Render Props', type: 'video' as const, duration: 22, isFree: false },
-        { id: 'l20', title: 'Higher-Order Components Explained', type: 'video' as const, duration: 20, isFree: false },
-        { id: 'l21', title: 'HOCs vs Hooks: When to Use What', type: 'video' as const, duration: 15, isFree: false },
-        { id: 'l22', title: 'Quiz: Patterns Review', type: 'quiz' as const, duration: 15, isFree: false },
-      ],
+      title: 'Backend Development with Node.js',
+      subtitle: 'Course 4',
+      duration: '5 weeks',
+      lessons: 28,
+      description: 'Build scalable server-side applications',
     },
     {
       id: 'm5',
-      title: 'Performance Optimization',
-      duration: 135,
-      lessons: [
-        { id: 'l23', title: 'React Rendering Behavior', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l24', title: 'React.memo Deep Dive', type: 'video' as const, duration: 22, isFree: false },
-        { id: 'l25', title: 'useMemo and useCallback', type: 'video' as const, duration: 28, isFree: false },
-        { id: 'l26', title: 'Virtualization Techniques', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l27', title: 'React DevTools Profiler', type: 'video' as const, duration: 20, isFree: false },
-        { id: 'l28', title: 'Performance Project', type: 'project' as const, duration: 15, isFree: false },
-      ],
+      title: 'Database Design & PostgreSQL',
+      subtitle: 'Course 5',
+      duration: '4 weeks',
+      lessons: 22,
+      description: 'Design and query relational databases',
     },
     {
       id: 'm6',
-      title: 'State Management Patterns',
-      duration: 120,
-      lessons: [
-        { id: 'l29', title: 'useReducer for Complex State', type: 'video' as const, duration: 25, isFree: false },
-        { id: 'l30', title: 'Context + useReducer Architecture', type: 'video' as const, duration: 30, isFree: false },
-        { id: 'l31', title: 'State Machines in React', type: 'video' as const, duration: 28, isFree: false },
-        { id: 'l32', title: 'Final Project: Building a Complex App', type: 'project' as const, duration: 37, isFree: false },
-      ],
+      title: 'Full-Stack Capstone Project',
+      subtitle: 'Course 6',
+      duration: '6 weeks',
+      lessons: 15,
+      description: 'Build a complete application from scratch',
     },
+  ],
+  requirements: [
+    'No programming experience required',
+    'Basic computer literacy',
+    'Access to a computer with internet connection',
+    'Commitment of 10+ hours per week',
+  ],
+  targetAudience: [
+    'Beginners with no coding experience',
+    'Career changers looking to enter tech',
+    'Self-taught developers wanting structured learning',
+    'Students preparing for software development roles',
   ],
 }
 
 const mockReviews = [
   {
     id: 'r1',
-    user: { name: 'Alex Thompson', avatar: null },
+    user: { name: 'Alex Thompson', avatar: null, country: 'United States' },
     rating: 5,
     date: '2024-01-10',
-    content: 'This course completely changed how I approach React development. Sarah explains complex patterns in a way that actually makes sense. The compound components section alone was worth the price.',
-    helpful: 245,
+    content: 'This certificate program completely changed my career trajectory. I went from working in retail to landing a junior developer position within 3 months of completing the program. The projects are practical and the instructors are incredibly supportive.',
+    helpful: 892,
   },
   {
     id: 'r2',
-    user: { name: 'Maria Garcia', avatar: null },
+    user: { name: 'Maria Garcia', avatar: null, country: 'Spain' },
     rating: 5,
     date: '2024-01-05',
-    content: 'I\'ve been a React developer for 3 years and still learned so much. The custom hooks section is incredibly practical - I\'m already using several patterns from the course in my day job.',
-    helpful: 189,
+    content: 'Excellent curriculum that covers everything you need to know. The pace is perfect for beginners, and the advanced modules are challenging enough for those with some experience. Highly recommend!',
+    helpful: 654,
   },
   {
     id: 'r3',
-    user: { name: 'James Wilson', avatar: null },
+    user: { name: 'James Wilson', avatar: null, country: 'United Kingdom' },
     rating: 4,
     date: '2024-01-02',
-    content: 'Great course overall. The content is excellent and well-explained. Would have loved to see more about testing patterns, but the fundamentals covered are solid.',
-    helpful: 134,
+    content: 'Great content and well-structured courses. The capstone project was particularly valuable for building my portfolio. Only wish there was more content on DevOps practices.',
+    helpful: 423,
   },
 ]
 
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  if (hours === 0) return `${mins}m`
-  if (mins === 0) return `${hours}h`
-  return `${hours}h ${mins}m`
-}
+// Sticky navigation sections
+const navSections = [
+  { id: 'about', label: 'About' },
+  { id: 'outcomes', label: 'Outcomes' },
+  { id: 'courses', label: 'Courses' },
+  { id: 'instructors', label: 'Instructors' },
+  { id: 'reviews', label: 'Reviews' },
+]
 
-function ModuleAccordion({
-  module,
-  index,
-  isExpanded,
-  onToggle,
-}: {
-  module: typeof mockCourseData.modules[0]
-  index: number
-  isExpanded: boolean
-  onToggle: () => void
-}) {
-  const lessonTypeIcons = {
-    video: PlayCircle,
-    exercise: Code,
-    quiz: FileText,
-    project: Award,
-  }
+function CourseModuleCard({ module, index }: { module: typeof mockCourseData.modules[0]; index: number }) {
+  const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <div className="border rounded-lg overflow-hidden">
       <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors text-left"
       >
-        <div className="flex items-center gap-3">
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            {index + 1}
-          </span>
-          <div className="text-left">
-            <h3 className="font-medium">{module.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {module.lessons.length} lessons · {formatDuration(module.duration)}
-            </p>
-          </div>
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
+          {index + 1}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-muted-foreground font-medium">{module.subtitle}</p>
+          <h3 className="font-semibold text-foreground mt-0.5">{module.title}</h3>
+          <p className="text-sm text-muted-foreground mt-1">{module.description}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {module.duration} · {module.lessons} lessons
+          </p>
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+          <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
         ) : (
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+          <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
         )}
       </button>
       {isExpanded && (
-        <div className="border-t bg-muted/30">
-          {module.lessons.map((lesson) => {
-            const Icon = lessonTypeIcons[lesson.type]
-            return (
-              <div
-                key={lesson.id}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
-              >
-                <Icon className="h-4 w-4 text-muted-foreground" />
-                <span className="flex-1 text-sm">{lesson.title}</span>
-                {lesson.isFree && (
-                  <Badge variant="secondary" className="text-xs">
-                    Preview
-                  </Badge>
-                )}
-                <span className="text-sm text-muted-foreground">
-                  {formatDuration(lesson.duration)}
-                </span>
-              </div>
-            )
-          })}
+        <div className="border-t bg-muted/30 px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Course content includes video lectures, hands-on exercises, quizzes, and a course project.
+          </p>
+          <Link
+            href={`/courses/${mockCourseData.slug}/modules/${module.id}`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary mt-3 hover:underline"
+          >
+            View course details
+            <ChevronRight className="w-4 h-4" />
+          </Link>
         </div>
       )}
     </div>
@@ -277,47 +241,37 @@ function ModuleAccordion({
 
 function ReviewCard({ review }: { review: typeof mockReviews[0] }) {
   return (
-    <div className="border-b last:border-0 py-6">
-      <div className="flex items-start gap-4">
-        <UserAvatar
-          user={{ name: review.user.name, avatar_url: review.user.avatar }}
-          size="md"
-        />
+    <div className="py-6 border-b last:border-0">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold flex-shrink-0">
+          {review.user.name.charAt(0)}
+        </div>
         <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">{review.user.name}</h4>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex items-center">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        'h-4 w-4',
-                        i < review.rating
-                          ? 'text-amber-500 fill-amber-500'
-                          : 'text-muted-foreground'
-                      )}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(review.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-              </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-foreground">{review.user.name}</span>
+            <span className="text-xs text-muted-foreground">· {review.user.country}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={cn(
+                    'w-3.5 h-3.5',
+                    i < review.rating ? 'text-warning fill-warning' : 'text-muted-foreground'
+                  )}
+                />
+              ))}
             </div>
+            <span className="text-xs text-muted-foreground">
+              {new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </span>
           </div>
-          <p className="text-sm mt-3">{review.content}</p>
-          <div className="flex items-center gap-4 mt-3">
-            <button className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-              <CheckCircle2 className="h-4 w-4" />
-              Helpful ({review.helpful})
-            </button>
-          </div>
+          <p className="text-sm text-foreground mt-3 leading-relaxed">{review.content}</p>
+          <button className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Helpful ({review.helpful})
+          </button>
         </div>
       </div>
     </div>
@@ -326,420 +280,484 @@ function ReviewCard({ review }: { review: typeof mockReviews[0] }) {
 
 export default function CourseDetailPage() {
   const params = useParams()
-  const [expandedModules, setExpandedModules] = useState<string[]>(['m1'])
+  const [activeSection, setActiveSection] = useState('about')
+  const [showStickyNav, setShowStickyNav] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   const course = mockCourseData
 
-  const toggleModule = (moduleId: string) => {
-    setExpandedModules((prev) =>
-      prev.includes(moduleId)
-        ? prev.filter((id) => id !== moduleId)
-        : [...prev, moduleId]
-    )
-  }
+  // Handle scroll for sticky nav
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const heroBottom = heroRef.current.getBoundingClientRect().bottom
+        setShowStickyNav(heroBottom < 0)
+      }
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-  const expandAll = () => {
-    setExpandedModules(course.modules.map((m) => m.id))
+  // Scroll to section
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const offset = showStickyNav ? 120 : 80
+      const top = element.getBoundingClientRect().top + window.scrollY - offset
+      window.scrollTo({ top, behavior: 'smooth' })
+      setActiveSection(sectionId)
+    }
   }
-
-  const collapseAll = () => {
-    setExpandedModules([])
-  }
-
-  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
-  const discount = course.originalPrice
-    ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
-    : 0
 
   const ratingDistribution = [
-    { stars: 5, percentage: 78 },
-    { stars: 4, percentage: 15 },
-    { stars: 3, percentage: 5 },
+    { stars: 5, percentage: 82 },
+    { stars: 4, percentage: 12 },
+    { stars: 3, percentage: 4 },
     { stars: 2, percentage: 1 },
     { stars: 1, percentage: 1 },
   ]
 
+  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons, 0)
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Course Info */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-2 text-sm mb-4">
-                <Link href="/courses" className="hover:underline">
-                  Courses
-                </Link>
-                <span>/</span>
-                <Link href={`/courses?category=${course.category.toLowerCase().replace(' ', '-')}`} className="hover:underline">
-                  {course.category}
-                </Link>
-                <span>/</span>
-                <span className="text-muted-foreground">{course.subcategory}</span>
-              </div>
+      <Header />
 
-              <h1 className="text-3xl md:text-4xl font-bold">{course.title}</h1>
-              <p className="text-lg text-slate-300 mt-3">{course.subtitle}</p>
-
-              <div className="flex flex-wrap items-center gap-4 mt-6">
-                {course.isBestseller && (
-                  <Badge className="bg-amber-500 hover:bg-amber-600">Bestseller</Badge>
-                )}
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-amber-400">{course.rating}</span>
-                  <div className="flex items-center">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          'h-4 w-4',
-                          i < Math.floor(course.rating)
-                            ? 'text-amber-400 fill-amber-400'
-                            : 'text-slate-500'
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-slate-400">
-                    ({course.reviewCount.toLocaleString()} reviews)
-                  </span>
-                </div>
-                <span className="text-slate-400">
-                  {course.students.toLocaleString()} students
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4 mt-4 text-sm text-slate-300">
-                <span>Created by <Link href={`/instructors/${course.instructor.id}`} className="text-primary hover:underline">{course.instructor.name}</Link></span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-slate-400">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  Last updated {new Date(course.lastUpdated).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Globe className="h-4 w-4" />
-                  {course.language}
-                </div>
-              </div>
-            </div>
-
-            {/* Purchase Card - Shows on mobile */}
-            <div className="lg:hidden">
-              <Card className="bg-white text-foreground">
-                <CardContent className="p-6">
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-3xl font-bold">${course.price}</span>
-                    {course.originalPrice && (
-                      <>
-                        <span className="text-lg text-muted-foreground line-through">
-                          ${course.originalPrice}
-                        </span>
-                        <Badge variant="destructive">{discount}% off</Badge>
-                      </>
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    <button className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                      Add to Cart
-                    </button>
-                    <button className="w-full py-3 border rounded-lg font-medium hover:bg-muted transition-colors">
-                      Buy Now
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Sticky Navigation */}
+      <div
+        className={cn(
+          'fixed top-0 left-0 right-0 z-40 bg-background border-b transition-transform duration-300',
+          showStickyNav ? 'translate-y-0' : '-translate-y-full'
+        )}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center h-14 gap-8">
+            <h2 className="font-semibold text-foreground truncate max-w-xs">
+              {course.title}
+            </h2>
+            <nav className="hidden md:flex items-center gap-1">
+              {navSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={cn(
+                    'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                    activeSection === section.id
+                      ? 'text-primary bg-primary/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  )}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </nav>
+            <div className="ml-auto">
+              <button className="h-9 px-4 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
+                Enroll for Free
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* What You'll Learn */}
-            <Card>
-              <CardHeader>
-                <CardTitle>What you&apos;ll learn</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {course.whatYouWillLearn.map((item, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      {/* Hero Section */}
+      <div ref={heroRef} className="bg-surface-secondary border-b">
+        <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm mb-6">
+            <Link href="/courses" className="text-primary hover:underline">
+              Browse
+            </Link>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <Link href={`/courses?category=${course.category.toLowerCase()}`} className="text-primary hover:underline">
+              {course.category}
+            </Link>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{course.subcategory}</span>
+          </nav>
 
-            {/* Course Content */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Course Content</h2>
-                <div className="flex items-center gap-4 text-sm">
+          <div className="grid lg:grid-cols-5 gap-8">
+            {/* Left Column - Course Info */}
+            <div className="lg:col-span-3">
+              {/* Partner */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
+                  <GraduationCap className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-semibold text-foreground">{course.partner}</span>
+              </div>
+
+              {/* Title */}
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {course.title}
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-lg text-muted-foreground mt-3">
+                {course.subtitle}
+              </p>
+
+              {/* Badge */}
+              <div className="flex items-center gap-3 mt-4">
+                <span className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                  {course.badge}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {course.modules.length} course series
+                </span>
+              </div>
+
+              {/* Rating & Stats */}
+              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-warning fill-warning" />
+                  <span className="font-semibold">{course.rating}</span>
                   <span className="text-muted-foreground">
-                    {course.modules.length} sections · {totalLessons} lectures · {formatDuration(course.duration)} total
+                    ({course.reviewCount.toLocaleString()} reviews)
                   </span>
-                  <button
-                    onClick={expandedModules.length === course.modules.length ? collapseAll : expandAll}
-                    className="text-primary hover:underline"
+                </div>
+                <span className="text-muted-foreground">
+                  {course.enrolledCount.toLocaleString()} already enrolled
+                </span>
+              </div>
+
+              {/* Instructor */}
+              <div className="flex items-center gap-3 mt-6 pt-6 border-t">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                  {course.instructor.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Taught by</p>
+                  <Link
+                    href={`/instructors/${course.instructor.id}`}
+                    className="font-medium text-foreground hover:text-primary transition-colors"
                   >
-                    {expandedModules.length === course.modules.length ? 'Collapse all' : 'Expand all'}
-                  </button>
+                    {course.instructor.name}
+                  </Link>
                 </div>
               </div>
-              <div className="space-y-2">
-                {course.modules.map((module, index) => (
-                  <ModuleAccordion
-                    key={module.id}
-                    module={module}
-                    index={index}
-                    isExpanded={expandedModules.includes(module.id)}
-                    onToggle={() => toggleModule(module.id)}
-                  />
+            </div>
+
+            {/* Right Column - CTA Card */}
+            <div className="lg:col-span-2">
+              <div className="bg-background border rounded-lg shadow-sm overflow-hidden">
+                {/* Preview Video Placeholder */}
+                <div className="relative aspect-video bg-muted">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <button className="p-4 rounded-full bg-white/90 shadow-lg hover:scale-110 transition-transform">
+                      <Play className="w-8 h-8 text-primary fill-primary" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  {/* Key Info */}
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-start gap-3">
+                      <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">Flexible deadlines</p>
+                        <p className="text-muted-foreground">Reset deadlines in accordance to your schedule.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Award className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">Shareable Certificate</p>
+                        <p className="text-muted-foreground">Earn a Certificate upon completion</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">100% online</p>
+                        <p className="text-muted-foreground">Start instantly and learn at your own schedule.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <BarChart className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">{course.level} Level</p>
+                        <p className="text-muted-foreground">{course.requirements[0]}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">{course.duration} to complete</p>
+                        <p className="text-muted-foreground">{course.hoursPerWeek} suggested</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="mt-6 space-y-3">
+                    <AddToCartButton
+                      course={{
+                        id: course.id,
+                        title: course.title,
+                        slug: course.slug,
+                        instructor: course.instructor.name,
+                        price: course.price,
+                        originalPrice: course.originalPrice ?? undefined,
+                        image: '/images/courses/default-course.jpg',
+                        category: course.category,
+                      }}
+                      variant="primary"
+                      showIcon={true}
+                      className="w-full h-11"
+                    />
+                    <button className="w-full h-11 border rounded-md font-medium hover:bg-muted transition-colors">
+                      Try for Free
+                    </button>
+                  </div>
+
+                  {/* Financial Aid */}
+                  <p className="text-center text-sm text-muted-foreground mt-4">
+                    <Link href="/financial-aid" className="text-primary hover:underline">
+                      Financial aid available
+                    </Link>
+                  </p>
+
+                  {/* Share & Wishlist */}
+                  <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t">
+                    <button
+                      onClick={() => setIsWishlisted(!isWishlisted)}
+                      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Heart className={cn('w-4 h-4', isWishlisted && 'fill-red-500 text-red-500')} />
+                      Save
+                    </button>
+                    <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section Navigation (Non-sticky) */}
+      <div className="border-b bg-background">
+        <div className="container mx-auto px-4">
+          <nav className="flex items-center gap-1 overflow-x-auto py-1">
+            {navSections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                className={cn(
+                  'px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
+                  activeSection === section.id
+                    ? 'text-primary border-primary'
+                    : 'text-muted-foreground border-transparent hover:text-foreground hover:border-muted-foreground'
+                )}
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-10">
+        <div className="max-w-4xl">
+          {/* About Section */}
+          <section id="about" className="scroll-mt-32">
+            <h2 className="text-xl font-bold text-foreground mb-6">What you'll learn</h2>
+            <div className="grid sm:grid-cols-2 gap-3 p-5 border rounded-lg">
+              {course.whatYouWillLearn.map((item, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Skills */}
+            <h3 className="text-lg font-bold text-foreground mt-10 mb-4">Skills you'll gain</h3>
+            <div className="flex flex-wrap gap-2">
+              {course.skills.map((skill) => (
+                <span
+                  key={skill}
+                  className="px-3 py-1.5 bg-surface-secondary text-sm text-foreground rounded-full"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+
+            {/* Description */}
+            <div className="mt-10 prose prose-sm max-w-none">
+              {course.description.split('\n\n').map((paragraph, index) => (
+                <p key={index} className="text-foreground leading-relaxed">
+                  {paragraph.trim()}
+                </p>
+              ))}
+            </div>
+          </section>
+
+          {/* Outcomes Section */}
+          <section id="outcomes" className="mt-16 scroll-mt-32">
+            <h2 className="text-xl font-bold text-foreground mb-6">Career outcomes</h2>
+            <div className="grid sm:grid-cols-3 gap-6 p-6 bg-surface-secondary rounded-lg">
+              {course.outcomes.map((outcome, index) => (
+                <div key={index} className="text-center">
+                  <p className="text-3xl font-bold text-primary">{outcome.metric}</p>
+                  <p className="text-sm text-muted-foreground mt-2">{outcome.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Target Audience */}
+            <h3 className="text-lg font-bold text-foreground mt-10 mb-4">Who this program is for</h3>
+            <ul className="space-y-2">
+              {course.targetAudience.map((item, index) => (
+                <li key={index} className="flex items-start gap-3 text-foreground">
+                  <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Courses Section */}
+          <section id="courses" className="mt-16 scroll-mt-32">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Program curriculum</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {course.modules.length} courses · {totalLessons} total lessons
+                </p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {course.modules.map((module, index) => (
+                <CourseModuleCard key={module.id} module={module} index={index} />
+              ))}
+            </div>
+          </section>
+
+          {/* Instructors Section */}
+          <section id="instructors" className="mt-16 scroll-mt-32">
+            <h2 className="text-xl font-bold text-foreground mb-6">Meet your instructors</h2>
+            <div className="border rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-semibold flex-shrink-0">
+                  {course.instructor.name.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <Link
+                    href={`/instructors/${course.instructor.id}`}
+                    className="text-lg font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {course.instructor.name}
+                  </Link>
+                  <p className="text-muted-foreground">
+                    {course.instructor.title} at {course.instructor.company}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-warning fill-warning" />
+                      {course.instructor.rating} Instructor Rating
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      {course.instructor.students.toLocaleString()} Students
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="w-4 h-4" />
+                      {course.instructor.courses} Courses
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-foreground mt-4 leading-relaxed">
+                    {course.instructor.bio}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Reviews Section */}
+          <section id="reviews" className="mt-16 scroll-mt-32">
+            <h2 className="text-xl font-bold text-foreground mb-6">Learner reviews</h2>
+
+            {/* Rating Summary */}
+            <div className="grid sm:grid-cols-3 gap-8 p-6 border rounded-lg mb-8">
+              <div className="text-center">
+                <p className="text-5xl font-bold text-foreground">{course.rating}</p>
+                <div className="flex justify-center mt-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        'w-5 h-5',
+                        i < Math.floor(course.rating) ? 'text-warning fill-warning' : 'text-muted-foreground'
+                      )}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {course.reviewCount.toLocaleString()} reviews
+                </p>
+              </div>
+              <div className="sm:col-span-2">
+                {ratingDistribution.map((item) => (
+                  <div key={item.stars} className="flex items-center gap-3 mb-2">
+                    <span className="text-sm text-muted-foreground w-16">
+                      {item.stars} stars
+                    </span>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-warning rounded-full"
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-muted-foreground w-12 text-right">
+                      {item.percentage}%
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Requirements */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Requirements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {course.requirements.map((req, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <span className="text-primary mt-1">•</span>
-                      {req}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  {course.description.split('\n\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph.trim()}</p>
-                  ))}
+            {/* Reviews List */}
+            <div className="border rounded-lg divide-y">
+              {mockReviews.map((review) => (
+                <div key={review.id} className="px-6">
+                  <ReviewCard review={review} />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Target Audience */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Who this course is for</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {course.targetAudience.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <span className="text-primary mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Instructor */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Instructor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  <UserAvatar
-                    user={{ name: course.instructor.name, avatar_url: course.instructor.avatar }}
-                    size="xl"
-                  />
-                  <div>
-                    <Link
-                      href={`/instructors/${course.instructor.id}`}
-                      className="text-lg font-semibold text-primary hover:underline"
-                    >
-                      {course.instructor.name}
-                    </Link>
-                    <p className="text-muted-foreground">{course.instructor.title}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                        {course.instructor.rating} rating
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageSquare className="h-4 w-4" />
-                        {course.instructor.courses} courses
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {course.instructor.students.toLocaleString()} students
-                      </div>
-                    </div>
-                    <p className="text-sm mt-3">{course.instructor.bio}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Reviews */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Feedback</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-8 mb-8">
-                  <div className="text-center md:border-r">
-                    <div className="text-5xl font-bold text-amber-500">{course.rating}</div>
-                    <div className="flex justify-center mt-2">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            'h-5 w-5',
-                            i < Math.floor(course.rating)
-                              ? 'text-amber-500 fill-amber-500'
-                              : 'text-muted-foreground'
-                          )}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">Course Rating</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    {ratingDistribution.map((item) => (
-                      <div key={item.stars} className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1 w-20">
-                          {Array.from({ length: item.stars }).map((_, i) => (
-                            <Star key={i} className="h-3 w-3 text-amber-500 fill-amber-500" />
-                          ))}
-                        </div>
-                        <Progress value={item.percentage} className="h-2 flex-1" />
-                        <span className="text-sm text-muted-foreground w-12">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-0">
-                  {mockReviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
-                  ))}
-                </div>
-
-                <button className="w-full mt-6 py-3 border rounded-lg font-medium hover:bg-muted transition-colors">
-                  Show all reviews
-                </button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar - Purchase Card */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <Card>
-                <div className="relative aspect-video bg-muted rounded-t-lg overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                    <BookOpen className="h-16 w-16 text-primary/50" />
-                  </div>
-                  <button className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors group">
-                    <div className="p-4 rounded-full bg-white/90 group-hover:scale-110 transition-transform">
-                      <Play className="h-8 w-8 text-primary fill-primary" />
-                    </div>
-                  </button>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-3xl font-bold">${course.price}</span>
-                    {course.originalPrice && (
-                      <>
-                        <span className="text-lg text-muted-foreground line-through">
-                          ${course.originalPrice}
-                        </span>
-                        <Badge variant="destructive">{discount}% off</Badge>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <button className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                      Add to Cart
-                    </button>
-                    <button className="w-full py-3 border rounded-lg font-medium hover:bg-muted transition-colors">
-                      Buy Now
-                    </button>
-                  </div>
-
-                  <p className="text-center text-sm text-muted-foreground mt-4">
-                    30-Day Money-Back Guarantee
-                  </p>
-
-                  <div className="border-t mt-6 pt-6">
-                    <h4 className="font-medium mb-3">This course includes:</h4>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        {formatDuration(course.duration)} on-demand video
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Code className="h-4 w-4 text-muted-foreground" />
-                        Coding exercises
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Download className="h-4 w-4 text-muted-foreground" />
-                        Downloadable resources
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Infinity className="h-4 w-4 text-muted-foreground" />
-                        Full lifetime access
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Monitor className="h-4 w-4 text-muted-foreground" />
-                        Access on mobile and TV
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-muted-foreground" />
-                        Certificate of completion
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-4 mt-6 pt-6 border-t">
-                    <button
-                      onClick={() => setIsWishlisted(!isWishlisted)}
-                      className="flex items-center gap-1 text-sm hover:text-primary transition-colors"
-                    >
-                      <Heart
-                        className={cn(
-                          'h-4 w-4',
-                          isWishlisted && 'fill-red-500 text-red-500'
-                        )}
-                      />
-                      Wishlist
-                    </button>
-                    <button className="flex items-center gap-1 text-sm hover:text-primary transition-colors">
-                      <Share2 className="h-4 w-4" />
-                      Share
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+              ))}
             </div>
-          </div>
+
+            <button className="w-full mt-4 h-11 border rounded-md font-medium hover:bg-muted transition-colors">
+              View all reviews
+            </button>
+          </section>
+
+          {/* Requirements */}
+          <section className="mt-16">
+            <h2 className="text-xl font-bold text-foreground mb-6">Requirements</h2>
+            <ul className="space-y-2">
+              {course.requirements.map((req, index) => (
+                <li key={index} className="flex items-start gap-3 text-foreground">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }

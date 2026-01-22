@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   BookOpen,
   Clock,
   Trophy,
-  TrendingUp,
   Play,
   CheckCircle2,
   Flame,
@@ -18,17 +16,18 @@ import {
   BarChart3,
   Video,
   FileText,
+  ChevronRight,
+  Award,
+  TrendingUp,
+  GraduationCap,
+  Users,
+  Zap,
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/use-auth'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Progress, ProgressRing } from '@/components/ui/progress'
-import { Badge, LevelBadge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import {
   courses,
-  enrollments,
-  liveTrainings,
-  certificates,
   getEnrollmentsByStudentId,
   getStudentAnalytics,
   getUpcomingLiveTrainings,
@@ -38,56 +37,8 @@ import {
 // For demo purposes, we use a mock student ID
 const CURRENT_STUDENT_ID = 'student-1'
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  trend,
-  trendLabel,
-  className,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  value: string | number
-  trend?: number
-  trendLabel?: string
-  className?: string
-}) {
-  return (
-    <Card className={cn('relative overflow-hidden', className)}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
-            {trend !== undefined && (
-              <div className="flex items-center gap-1 mt-2">
-                <TrendingUp className={cn(
-                  'h-4 w-4',
-                  trend >= 0 ? 'text-emerald-500' : 'text-red-500'
-                )} />
-                <span className={cn(
-                  'text-sm font-medium',
-                  trend >= 0 ? 'text-emerald-500' : 'text-red-500'
-                )}>
-                  {trend >= 0 ? '+' : ''}{trend}%
-                </span>
-                {trendLabel && (
-                  <span className="text-xs text-muted-foreground">{trendLabel}</span>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="p-3 rounded-xl bg-primary/10">
-            <Icon className="h-6 w-6 text-primary" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function ContinueLearningCard({
+// Continue Learning Hero Card
+function ContinueLearningHero({
   course,
 }: {
   course: {
@@ -95,185 +46,462 @@ function ContinueLearningCard({
     title: string
     instructor: string
     progress: number
-    lastLesson: string
+    currentLesson: string
+    currentModule: string
     totalLessons: number
     completedLessons: number
-    level: 'beginner' | 'intermediate' | 'advanced'
+    partner: string
   }
 }) {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300">
-      <div className="flex gap-4 p-4">
-        <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-            <BookOpen className="h-8 w-8 text-primary/50" />
-          </div>
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="p-2 rounded-full bg-white/90">
-              <Play className="h-5 w-5 text-primary fill-primary" />
-            </div>
-          </div>
+    <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl border overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+          <Zap className="w-4 h-4 text-primary" />
+          <span>Continue where you left off</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                {course.title}
-              </h3>
-              <p className="text-sm text-muted-foreground">{course.instructor}</p>
+
+        <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+          {/* Course Preview */}
+          <div className="relative w-full lg:w-80 aspect-video lg:aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
+              <BookOpen className="h-16 w-16 text-primary/60" />
             </div>
-            <LevelBadge level={course.level} />
-          </div>
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-sm mb-1.5">
-              <span className="text-muted-foreground">
-                {course.completedLessons}/{course.totalLessons} lessons
-              </span>
-              <span className="font-medium">{course.progress}%</span>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <button className="p-4 rounded-full bg-white shadow-lg hover:scale-105 transition-transform">
+                <Play className="h-8 w-8 text-primary fill-primary" />
+              </button>
             </div>
-            <Progress value={course.progress} size="sm" />
+            {/* Progress Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${course.progress}%` }}
+              />
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 line-clamp-1">
-            Continue: {course.lastLesson}
-          </p>
+
+          {/* Course Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
+                <GraduationCap className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">{course.partner}</span>
+            </div>
+
+            <h2 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
+              {course.title}
+            </h2>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              {course.instructor}
+            </p>
+
+            {/* Current Lesson Info */}
+            <div className="bg-background rounded-lg p-3 mb-4">
+              <p className="text-xs text-muted-foreground mb-1">Up Next</p>
+              <p className="text-sm font-medium text-foreground">{course.currentLesson}</p>
+              <p className="text-xs text-muted-foreground mt-1">{course.currentModule}</p>
+            </div>
+
+            {/* Progress */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex justify-between text-sm mb-1.5">
+                  <span className="text-muted-foreground">Your Progress</span>
+                  <span className="font-medium">{course.progress}%</span>
+                </div>
+                <Progress value={course.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {course.completedLessons} of {course.totalLessons} lessons completed
+                </p>
+              </div>
+
+              <Link
+                href={`/courses/${course.id}/learn`}
+                className="inline-flex items-center gap-2 h-11 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+              >
+                Continue
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-    </Card>
+    </div>
   )
 }
 
-function RecommendedCard({
+// Course Progress Card
+function CourseProgressCard({
   course,
 }: {
   course: {
     id: string
     title: string
     instructor: string
-    rating: number
-    students: number
-    duration: string
-    level: 'beginner' | 'intermediate' | 'advanced'
-    price: number
+    progress: number
+    totalLessons: number
+    completedLessons: number
+    partner: string
   }
 }) {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-      <div className="relative aspect-video bg-muted">
+    <Link
+      href={`/courses/${course.id}/learn`}
+      className="flex gap-4 p-4 rounded-lg border bg-background hover:bg-muted/50 transition-colors group"
+    >
+      {/* Thumbnail */}
+      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-          <BookOpen className="h-12 w-12 text-primary/50" />
+          <BookOpen className="h-8 w-8 text-primary/50" />
         </div>
-        <div className="absolute top-2 right-2">
-          <LevelBadge level={course.level} />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+          <Play className="h-5 w-5 text-white fill-white" />
         </div>
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground mb-0.5">{course.partner}</p>
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
           {course.title}
         </h3>
+        <p className="text-sm text-muted-foreground">{course.instructor}</p>
+
+        <div className="mt-2">
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span className="text-muted-foreground">
+              {course.completedLessons}/{course.totalLessons} lessons
+            </span>
+            <span className="font-medium">{course.progress}%</span>
+          </div>
+          <Progress value={course.progress} className="h-1.5" />
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// Weekly Goal Card
+function WeeklyGoalCard({
+  currentMinutes,
+  goalMinutes,
+  daysActive,
+  streak,
+}: {
+  currentMinutes: number
+  goalMinutes: number
+  daysActive: number
+  streak: number
+}) {
+  const progress = Math.min((currentMinutes / goalMinutes) * 100, 100)
+  const currentHours = Math.floor(currentMinutes / 60)
+  const goalHours = Math.floor(goalMinutes / 60)
+
+  return (
+    <div className="rounded-xl border bg-background p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-foreground">Weekly goal</h3>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+          <Flame className="w-4 h-4 text-amber-500" />
+          <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+            {streak} day streak
+          </span>
+        </div>
+      </div>
+
+      {/* Progress Ring */}
+      <div className="flex items-center gap-6">
+        <div className="relative w-24 h-24 flex-shrink-0">
+          <svg className="w-24 h-24 transform -rotate-90">
+            <circle
+              cx="48"
+              cy="48"
+              r="42"
+              className="stroke-muted"
+              strokeWidth="8"
+              fill="none"
+            />
+            <circle
+              cx="48"
+              cy="48"
+              r="42"
+              className="stroke-primary"
+              strokeWidth="8"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={`${progress * 2.64} 264`}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-bold">{currentHours}h</span>
+            <span className="text-xs text-muted-foreground">of {goalHours}h</span>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <p className="text-sm text-muted-foreground mb-3">
+            {progress >= 100
+              ? "You've reached your weekly goal!"
+              : `${goalMinutes - currentMinutes} min to reach your goal`}
+          </p>
+          <div className="flex items-center gap-4">
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+              <div
+                key={i}
+                className={cn(
+                  'w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium',
+                  i < daysActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                )}
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <Link
+        href="/dashboard/student/goals"
+        className="block mt-4 text-sm text-primary hover:underline"
+      >
+        Edit weekly goal
+      </Link>
+    </div>
+  )
+}
+
+// Upcoming Deadline Card
+function UpcomingDeadlineCard({
+  items,
+}: {
+  items: Array<{
+    id: string
+    title: string
+    course: string
+    dueDate: Date
+    type: 'assignment' | 'quiz' | 'project'
+  }>
+}) {
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'quiz':
+        return Target
+      case 'project':
+        return FileText
+      default:
+        return FileText
+    }
+  }
+
+  const formatDueDate = (date: Date) => {
+    const now = new Date()
+    const diff = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    if (diff <= 0) return 'Due today'
+    if (diff === 1) return 'Due tomorrow'
+    if (diff <= 7) return `Due in ${diff} days`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  const getDueDateColor = (date: Date) => {
+    const now = new Date()
+    const diff = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    if (diff <= 1) return 'text-destructive'
+    if (diff <= 3) return 'text-amber-600 dark:text-amber-500'
+    return 'text-muted-foreground'
+  }
+
+  return (
+    <div className="rounded-xl border bg-background">
+      <div className="p-4 border-b">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-foreground">Upcoming deadlines</h3>
+          <Link
+            href="/dashboard/student/calendar"
+            className="text-sm text-primary hover:underline"
+          >
+            View all
+          </Link>
+        </div>
+      </div>
+
+      {items.length > 0 ? (
+        <div className="divide-y">
+          {items.map((item) => {
+            const Icon = getTypeIcon(item.type)
+            return (
+              <div key={item.id} className="flex items-start gap-3 p-4">
+                <div className="p-2 rounded-lg bg-muted">
+                  <Icon className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-medium text-foreground line-clamp-1">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.course}</p>
+                </div>
+                <span className={cn('text-xs font-medium', getDueDateColor(item.dueDate))}>
+                  {formatDueDate(item.dueDate)}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="p-8 text-center">
+          <Calendar className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No upcoming deadlines</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Achievement Card
+function AchievementCard({
+  certificates,
+  completedCourses,
+}: {
+  certificates: number
+  completedCourses: number
+}) {
+  return (
+    <div className="rounded-xl border bg-background p-5">
+      <h3 className="font-semibold text-foreground mb-4">Achievements</h3>
+
+      <div className="space-y-4">
+        <Link
+          href="/dashboard/student/certificates"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+        >
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Award className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">Certificates</p>
+            <p className="text-xs text-muted-foreground">Earned credentials</p>
+          </div>
+          <span className="text-lg font-bold text-primary">{certificates}</span>
+        </Link>
+
+        <Link
+          href="/dashboard/student/courses?filter=completed"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+        >
+          <div className="p-2 rounded-lg bg-success/10">
+            <CheckCircle2 className="w-5 h-5 text-success" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">Completed</p>
+            <p className="text-xs text-muted-foreground">Finished courses</p>
+          </div>
+          <span className="text-lg font-bold text-success">{completedCourses}</span>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// Live Session Banner
+function LiveSessionBanner({
+  session,
+}: {
+  session: {
+    id: string
+    title: string
+    startTime: Date
+    course: string
+    meetingUrl: string
+  }
+}) {
+  const isLive = new Date() >= session.startTime
+
+  return (
+    <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-xl p-4 text-white">
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-white/20 rounded-lg">
+          <Video className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            {isLive && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded text-xs font-medium">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                LIVE NOW
+              </span>
+            )}
+          </div>
+          <h3 className="font-semibold">{session.title}</h3>
+          <p className="text-sm text-white/80">{session.course}</p>
+        </div>
+        <a
+          href={session.meetingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 bg-white text-red-600 rounded-lg font-medium hover:bg-white/90 transition-colors"
+        >
+          {isLive ? 'Join Now' : 'Set Reminder'}
+        </a>
+      </div>
+    </div>
+  )
+}
+
+// Recommended Course Card
+function RecommendedCourseCard({
+  course,
+}: {
+  course: {
+    id: string
+    slug: string
+    title: string
+    instructor: string
+    partner: string
+    rating: number
+    students: number
+    level: string
+  }
+}) {
+  return (
+    <Link
+      href={`/courses/${course.slug}`}
+      className="block rounded-xl border bg-background overflow-hidden hover:shadow-md transition-shadow group"
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video bg-muted">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+          <BookOpen className="h-12 w-12 text-primary/40" />
+        </div>
+        <div className="absolute top-2 left-2">
+          <span className="px-2 py-1 bg-background/90 text-xs font-medium rounded">
+            {course.level}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4">
+        <p className="text-xs text-muted-foreground mb-1">{course.partner}</p>
+        <h4 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          {course.title}
+        </h4>
         <p className="text-sm text-muted-foreground mt-1">{course.instructor}</p>
-        <div className="flex items-center gap-3 mt-3 text-sm">
+
+        <div className="flex items-center gap-2 mt-3 text-sm">
           <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+            <Star className="w-4 h-4 text-warning fill-warning" />
             <span className="font-medium">{course.rating}</span>
           </div>
+          <span className="text-muted-foreground">•</span>
           <span className="text-muted-foreground">
             {course.students.toLocaleString()} students
           </span>
         </div>
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-lg font-bold">${course.price}</span>
-          <Link
-            href={`/courses/${course.id}`}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            View Course
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function UpcomingItem({
-  item,
-}: {
-  item: {
-    id: string
-    title: string
-    date: Date
-    course: string
-    type: 'live' | 'quiz' | 'assignment'
-  }
-}) {
-  const formatDate = (date: Date) => {
-    const diff = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    if (diff === 0) return 'Today'
-    if (diff === 1) return 'Tomorrow'
-    return `In ${diff} days`
-  }
-
-  const typeStyles = {
-    live: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    quiz: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    assignment: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  }
-
-  const typeLabels = {
-    live: 'Live',
-    quiz: 'Quiz',
-    assignment: 'Assignment',
-  }
-
-  const typeIcons = {
-    live: Video,
-    quiz: Target,
-    assignment: FileText,
-  }
-
-  const Icon = typeIcons[item.type]
-
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-      <div className={cn('p-2 rounded-lg', typeStyles[item.type])}>
-        <Icon className="h-4 w-4" />
       </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium line-clamp-1">{item.title}</h4>
-        <p className="text-xs text-muted-foreground mt-0.5">{item.course}</p>
-      </div>
-      <div className="flex flex-col items-end gap-1">
-        <Badge variant="outline" className={cn('text-[10px]', typeStyles[item.type])}>
-          {typeLabels[item.type]}
-        </Badge>
-        <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
-      </div>
-    </div>
-  )
-}
-
-function WeeklyActivityChart({ data }: { data: { day: string; hours: number }[] }) {
-  const maxHours = Math.max(...data.map(d => d.hours))
-
-  return (
-    <div className="flex items-end justify-between gap-2 h-32">
-      {data.map((day) => (
-        <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
-          <div className="w-full flex flex-col items-center">
-            <span className="text-xs text-muted-foreground mb-1">{day.hours}h</span>
-            <div
-              className="w-full max-w-[40px] bg-primary/20 rounded-t-sm relative overflow-hidden"
-              style={{ height: `${(day.hours / maxHours) * 80}px` }}
-            >
-              <div
-                className="absolute bottom-0 left-0 right-0 bg-primary rounded-t-sm transition-all duration-500"
-                style={{ height: '100%' }}
-              />
-            </div>
-          </div>
-          <span className="text-xs font-medium">{day.day}</span>
-        </div>
-      ))}
-    </div>
+    </Link>
   )
 }
 
@@ -296,332 +524,227 @@ export default function StudentDashboardPage() {
   const studentCertificates = useMemo(() => getCertificatesByStudentId(CURRENT_STUDENT_ID), [])
   const upcomingLiveTrainings = useMemo(() => getUpcomingLiveTrainings(), [])
 
-  // Calculate stats from shared data
-  const stats = useMemo(() => {
-    const activeEnrollments = studentEnrollments.filter(e => e.status === 'active')
-    const completedEnrollments = studentEnrollments.filter(e => e.status === 'completed')
-
-    return {
-      coursesInProgress: activeEnrollments.length,
-      coursesCompleted: completedEnrollments.length,
-      totalHoursLearned: studentAnalytics.total_hours_learned,
-      currentStreak: studentAnalytics.current_streak,
-      longestStreak: studentAnalytics.longest_streak,
-      certificatesEarned: studentCertificates.length,
-      overallProgress: Math.round(
-        studentEnrollments.reduce((sum, e) => sum + e.progress_percentage, 0) /
-        (studentEnrollments.length || 1)
-      ),
-    }
-  }, [studentEnrollments, studentAnalytics, studentCertificates])
-
-  // Continue learning courses from shared data
-  const continueLearning = useMemo(() => {
-    return studentEnrollments
+  // Most recent course for hero
+  const heroCoursre = useMemo(() => {
+    const active = studentEnrollments
       .filter(e => e.status === 'active')
       .sort((a, b) => {
         const aDate = new Date(a.last_accessed_at || a.enrolled_at).getTime()
         const bDate = new Date(b.last_accessed_at || b.enrolled_at).getTime()
         return bDate - aDate
-      })
+      })[0]
+
+    if (!active) return null
+
+    return {
+      id: active.course.id,
+      title: active.course.title,
+      instructor: active.course.instructor.full_name,
+      progress: active.progress_percentage,
+      currentLesson: `Lesson ${active.completed_lessons.length + 1}`,
+      currentModule: `Module ${Math.floor(active.completed_lessons.length / 5) + 1}`,
+      totalLessons: active.course.total_lessons,
+      completedLessons: active.completed_lessons.length,
+      partner: 'Phazur Labs',
+    }
+  }, [studentEnrollments])
+
+  // Other active courses (excluding hero)
+  const otherCourses = useMemo(() => {
+    return studentEnrollments
+      .filter(e => e.status === 'active' && e.course.id !== heroCoursre?.id)
       .slice(0, 3)
-      .map(enrollment => ({
-        id: enrollment.course.id,
-        title: enrollment.course.title,
-        instructor: enrollment.course.instructor.full_name,
-        progress: enrollment.progress_percentage,
-        lastLesson: `Lesson ${enrollment.completed_lessons.length + 1}`,
-        totalLessons: enrollment.course.total_lessons,
-        completedLessons: enrollment.completed_lessons.length,
-        level: enrollment.course.level,
+      .map(e => ({
+        id: e.course.id,
+        title: e.course.title,
+        instructor: e.course.instructor.full_name,
+        progress: e.progress_percentage,
+        totalLessons: e.course.total_lessons,
+        completedLessons: e.completed_lessons.length,
+        partner: 'Phazur Labs',
       }))
+  }, [studentEnrollments, heroCoursre])
+
+  // Completed courses count
+  const completedCount = useMemo(() => {
+    return studentEnrollments.filter(e => e.status === 'completed').length
   }, [studentEnrollments])
 
-  // Recommended courses (courses not enrolled in)
-  const recommendedCourses = useMemo(() => {
-    const enrolledCourseIds = studentEnrollments.map(e => e.course_id)
-    return courses
-      .filter(c => c.status === 'published' && !enrolledCourseIds.includes(c.id))
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 4)
-      .map(course => ({
-        id: course.id,
-        title: course.title,
-        instructor: course.instructor.full_name,
-        rating: course.rating,
-        students: course.enrolled_students,
-        duration: `${Math.round(course.total_duration_minutes / 60)} hours`,
-        level: course.level,
-        price: course.discount_price || course.price,
-      }))
-  }, [studentEnrollments])
+  // Weekly stats
+  const weeklyStats = useMemo(() => ({
+    currentMinutes: studentAnalytics.learning_by_day.reduce((sum, d) => sum + d.hours * 60, 0),
+    goalMinutes: 5 * 60, // 5 hours goal
+    daysActive: studentAnalytics.learning_by_day.filter(d => d.hours > 0).length,
+    streak: studentAnalytics.current_streak,
+  }), [studentAnalytics])
 
-  // Upcoming events (live trainings + mock quizzes/assignments)
-  const upcomingEvents = useMemo(() => {
-    const events: Array<{
+  // Upcoming deadlines (mock)
+  const upcomingDeadlines = useMemo(() => {
+    const deadlines: Array<{
       id: string
       title: string
-      date: Date
       course: string
-      type: 'live' | 'quiz' | 'assignment'
+      dueDate: Date
+      type: 'assignment' | 'quiz' | 'project'
     }> = []
 
-    // Add live trainings
-    upcomingLiveTrainings.slice(0, 2).forEach(training => {
-      events.push({
-        id: training.id,
-        title: training.title,
-        date: new Date(training.scheduled_start),
-        course: training.course?.title || 'General',
-        type: 'live',
-      })
-    })
-
-    // Add mock quiz and assignment
     if (studentEnrollments.length > 0) {
-      events.push({
+      deadlines.push({
         id: 'quiz-1',
-        title: `Quiz: ${studentEnrollments[0].course.title.split(' ').slice(0, 3).join(' ')}`,
-        date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+        title: 'Module 3 Quiz',
         course: studentEnrollments[0].course.title,
+        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
         type: 'quiz',
       })
 
       if (studentEnrollments.length > 1) {
-        events.push({
-          id: 'assignment-1',
-          title: 'Assignment Due: Project Submission',
-          date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        deadlines.push({
+          id: 'project-1',
+          title: 'Final Project Submission',
           course: studentEnrollments[1].course.title,
-          type: 'assignment',
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          type: 'project',
         })
       }
     }
 
-    return events.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 3)
-  }, [upcomingLiveTrainings, studentEnrollments])
+    return deadlines
+  }, [studentEnrollments])
 
-  // Weekly activity from analytics
-  const weeklyActivity = useMemo(() => {
-    return studentAnalytics.learning_by_day
-  }, [studentAnalytics])
+  // Next live session
+  const nextLiveSession = useMemo(() => {
+    if (upcomingLiveTrainings.length === 0) return null
+    const training = upcomingLiveTrainings[0]
+    return {
+      id: training.id,
+      title: training.title,
+      startTime: new Date(training.scheduled_start),
+      course: training.course?.title || 'General',
+      meetingUrl: training.meeting_url,
+    }
+  }, [upcomingLiveTrainings])
+
+  // Recommended courses
+  const recommendedCourses = useMemo(() => {
+    const enrolledIds = studentEnrollments.map(e => e.course_id)
+    return courses
+      .filter(c => c.status === 'published' && !enrolledIds.includes(c.id))
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 4)
+      .map(c => ({
+        id: c.id,
+        slug: c.slug,
+        title: c.title,
+        instructor: c.instructor.full_name,
+        partner: 'Phazur Labs',
+        rating: c.rating,
+        students: c.enrolled_students,
+        level: c.level.charAt(0).toUpperCase() + c.level.slice(1),
+      }))
+  }, [studentEnrollments])
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">
-            {greeting}, {firstName}!
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Ready to continue your learning journey?
+      {/* Welcome Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">
+          {greeting}, {firstName}
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Ready to continue your learning journey?
+        </p>
+      </div>
+
+      {/* Live Session Banner */}
+      {nextLiveSession && (
+        <LiveSessionBanner session={nextLiveSession} />
+      )}
+
+      {/* Continue Learning Hero */}
+      {heroCoursre ? (
+        <ContinueLearningHero course={heroCoursre} />
+      ) : (
+        <div className="rounded-xl border bg-muted/30 p-8 text-center">
+          <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-semibold text-lg mb-2">Start your learning journey</h3>
+          <p className="text-muted-foreground mb-4">
+            Browse our catalog to find courses that match your goals
           </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
-            <Flame className="h-5 w-5 text-amber-500" />
-            <span className="font-semibold text-amber-700 dark:text-amber-400">
-              {stats.currentStreak} day streak!
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={BookOpen}
-          label="Courses in Progress"
-          value={stats.coursesInProgress}
-          trend={12}
-          trendLabel="vs last month"
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Courses Completed"
-          value={stats.coursesCompleted}
-          trend={8}
-          trendLabel="vs last month"
-        />
-        <StatCard
-          icon={Clock}
-          label="Hours Learned"
-          value={stats.totalHoursLearned}
-          trend={15}
-          trendLabel="vs last month"
-        />
-        <StatCard
-          icon={Trophy}
-          label="Certificates Earned"
-          value={stats.certificatesEarned}
-        />
-      </div>
-
-      {/* Upcoming Live Training Banner */}
-      {upcomingLiveTrainings.length > 0 && (
-        <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Video className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Upcoming Live Session</h3>
-                <p className="text-white/80">{upcomingLiveTrainings[0].title}</p>
-                <p className="text-sm text-white/60">
-                  {new Date(upcomingLiveTrainings[0].scheduled_start).toLocaleString('en-US', {
-                    weekday: 'long',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
-            </div>
-            <a
-              href={upcomingLiveTrainings[0].meeting_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-            >
-              <span>Set Reminder</span>
-              <Calendar className="h-4 w-4" />
-            </a>
-          </div>
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
+          >
+            Browse Courses
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Continue Learning - Takes 2 columns */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Continue Learning</h2>
-            <Link
-              href="/dashboard/student/courses"
-              className="text-sm text-primary hover:underline flex items-center gap-1"
-            >
-              View all <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid gap-4">
-            {continueLearning.length > 0 ? (
-              continueLearning.map((course) => (
-                <Link key={course.id} href={`/courses/${course.id}/learn`}>
-                  <ContinueLearningCard course={course} />
-                </Link>
-              ))
-            ) : (
-              <Card className="p-8 text-center">
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">No courses in progress</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start your learning journey by enrolling in a course
-                </p>
+      {/* Main Grid */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - My Courses */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Other In-Progress Courses */}
+          {otherCourses.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">My Courses</h2>
                 <Link
-                  href="/courses"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                  href="/dashboard/student/courses"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
                 >
-                  Browse Courses
-                  <ArrowRight className="h-4 w-4" />
+                  View all
+                  <ChevronRight className="w-4 h-4" />
                 </Link>
-              </Card>
-            )}
-          </div>
+              </div>
+              <div className="space-y-3">
+                {otherCourses.map(course => (
+                  <CourseProgressCard key={course.id} course={course} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Deadlines */}
+          <UpcomingDeadlineCard items={upcomingDeadlines} />
         </div>
 
-        {/* Right Sidebar */}
+        {/* Right Column - Sidebar Widgets */}
         <div className="space-y-6">
-          {/* Overall Progress */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Overall Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              <ProgressRing
-                value={stats.overallProgress}
-                size={140}
-                strokeWidth={12}
-                className="text-primary"
-              />
-              <p className="text-sm text-muted-foreground mt-4 text-center">
-                You&apos;re making great progress! Keep up the momentum.
-              </p>
-              <div className="grid grid-cols-2 gap-4 w-full mt-4">
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-2xl font-bold text-primary">
-                    {stats.longestStreak}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Longest Streak</div>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-2xl font-bold text-primary">
-                    {Math.round(stats.totalHoursLearned / 7)}h
-                  </div>
-                  <div className="text-xs text-muted-foreground">Weekly Average</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Weekly Goal */}
+          <WeeklyGoalCard {...weeklyStats} />
 
-          {/* Weekly Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Weekly Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WeeklyActivityChart data={weeklyActivity} />
-              <p className="text-sm text-muted-foreground mt-4 text-center">
-                Total: {weeklyActivity.reduce((sum, d) => sum + d.hours, 0).toFixed(1)} hours this week
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Upcoming
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((item) => (
-                  <UpcomingItem key={item.id} item={item} />
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No upcoming events
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Achievements */}
+          <AchievementCard
+            certificates={studentCertificates.length}
+            completedCourses={completedCount}
+          />
         </div>
       </div>
 
       {/* Recommended Courses */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Recommended for You</h2>
-          <Link
-            href="/courses"
-            className="text-sm text-primary hover:underline flex items-center gap-1"
-          >
-            Browse all <ArrowRight className="h-4 w-4" />
-          </Link>
+      {recommendedCourses.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Recommended for you</h2>
+              <p className="text-sm text-muted-foreground">Based on your interests and learning history</p>
+            </div>
+            <Link
+              href="/courses"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              Browse all
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recommendedCourses.map(course => (
+              <RecommendedCourseCard key={course.id} course={course} />
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {recommendedCourses.map((course) => (
-            <RecommendedCard key={course.id} course={course} />
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
