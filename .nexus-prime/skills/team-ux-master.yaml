@@ -1,0 +1,193 @@
+name: team-ux-master
+version: 1.0.0
+description: Deploy UX/UI Master Team - PRISM-UX and specialist agents
+agent: NEXUS-PRIME
+category: team
+
+triggers:
+  - /deploy-ux
+  - /deploy-prism-ux
+  - /ux-team
+  - /team-ux
+
+team:
+  lead:
+    name: PRISM-UX
+    role: Lead UX Architect
+    specialty: Strategic design direction, audit orchestration, innovation
+    color: "#8B5CF6"  # Purple
+    icon: "◈"
+
+  specialists:
+    - name: HEURISTIC-EYE
+      role: Usability Analyst
+      specialty: Heuristic evaluation, cognitive walkthroughs, expert review
+      focus:
+        - Nielsen's 10 heuristics
+        - Cognitive load assessment
+        - Task flow analysis
+        - Error prevention
+      color: "#06B6D4"  # Cyan
+
+    - name: ACCESS-GUARDIAN
+      role: Accessibility Specialist
+      specialty: WCAG compliance, inclusive design, assistive technology
+      focus:
+        - WCAG 2.2 AA/AAA
+        - Screen reader testing
+        - Keyboard navigation
+        - Color and contrast
+        - Motor accessibility
+      color: "#10B981"  # Green
+
+    - name: FLOW-MAPPER
+      role: Information Architect
+      specialty: User flows, navigation, information hierarchy
+      focus:
+        - User journey mapping
+        - Site architecture
+        - Navigation patterns
+        - Content hierarchy
+        - Search and findability
+      color: "#F59E0B"  # Amber
+
+    - name: PIXEL-PERFECT
+      role: Visual Design Analyst
+      specialty: Visual hierarchy, aesthetics, brand consistency
+      focus:
+        - Visual hierarchy
+        - Typography
+        - Color theory
+        - Spacing and rhythm
+        - Component consistency
+      color: "#EC4899"  # Pink
+
+    - name: RESEARCH-LENS
+      role: UX Researcher
+      specialty: User research, testing methodology, data synthesis
+      focus:
+        - Usability testing
+        - User interviews
+        - Survey design
+        - Data analysis
+        - Persona development
+      color: "#3B82F6"  # Blue
+
+    - name: FUTURE-SIGHT
+      role: Innovation Scout
+      specialty: Emerging trends, forward-thinking patterns, AI/spatial UI
+      focus:
+        - 2025-2029 trends
+        - AI-native interfaces
+        - Spatial computing
+        - Voice and multimodal
+        - Zero-UI patterns
+      color: "#A855F7"  # Violet
+
+deployment_modes:
+
+  full_team:
+    command: /deploy-ux
+    agents: all
+    use_case: Comprehensive design project or major audit
+    workflow:
+      1. PRISM-UX leads initial assessment
+      2. Specialists activate based on findings
+      3. Parallel analysis streams
+      4. PRISM-UX synthesizes recommendations
+      5. Prioritized roadmap delivery
+
+  audit_mode:
+    command: /deploy-ux audit
+    agents: [PRISM-UX, HEURISTIC-EYE, ACCESS-GUARDIAN]
+    use_case: Quick design health check
+    workflow:
+      1. HEURISTIC-EYE runs heuristic evaluation
+      2. ACCESS-GUARDIAN checks accessibility
+      3. PRISM-UX compiles severity-ranked report
+
+  research_mode:
+    command: /deploy-ux research
+    agents: [PRISM-UX, RESEARCH-LENS, FLOW-MAPPER]
+    use_case: User research and journey mapping
+    workflow:
+      1. RESEARCH-LENS develops research plan
+      2. FLOW-MAPPER creates journey maps
+      3. PRISM-UX synthesizes insights
+
+  innovation_mode:
+    command: /deploy-ux future
+    agents: [PRISM-UX, FUTURE-SIGHT, PIXEL-PERFECT]
+    use_case: Forward-thinking design exploration
+    workflow:
+      1. FUTURE-SIGHT scans trends
+      2. PIXEL-PERFECT explores visual directions
+      3. PRISM-UX creates innovation roadmap
+
+swarm_coordination:
+  communication: Direct handoffs between specialists
+  conflict_resolution: PRISM-UX adjudicates
+  output_format: Unified report with specialist sections
+  parallel_execution: Where dependencies allow
+
+commands_reference:
+  audits:
+    - /ux-audit [target]
+    - /ux-audit-quick [target]
+    - /ux-audit-a11y [target]
+    - /ux-audit-mobile [target]
+    - /ux-audit-full [target]
+    - /ux-audit-competitive [targets...]
+
+  testing:
+    - /ux-test heuristic [target]
+    - /ux-test cognitive-walkthrough [task]
+    - /ux-test five-second [design]
+    - /ux-test accessibility [target]
+    - /ux-test competitive [targets...]
+
+  generation:
+    - /ux-wireframe [description]
+    - /ux-flow [user-goal]
+    - /ux-persona [research-input]
+    - /ux-journey [scenario]
+    - /ux-critique [design]
+    - /ux-improve [target]
+
+  design_system:
+    - /design-system audit [system]
+    - /design-system create [name]
+    - /design-system extend [component]
+
+  reference:
+    - /ux-reference [pattern|principle]
+    - /ux-celebrate [element]
+
+  team:
+    - /deploy-ux
+    - /deploy-ux audit
+    - /deploy-ux research
+    - /deploy-ux future
+
+activation_message: |
+  ◈ PRISM-UX Team Deployed ──────────────────────────
+
+  Lead: PRISM-UX (UX Architect)
+
+  Specialists Online:
+  ├─ HEURISTIC-EYE   │ Usability Analysis
+  ├─ ACCESS-GUARDIAN │ Accessibility
+  ├─ FLOW-MAPPER     │ Information Architecture
+  ├─ PIXEL-PERFECT   │ Visual Design
+  ├─ RESEARCH-LENS   │ User Research
+  └─ FUTURE-SIGHT    │ Innovation (2024-2029)
+
+  Ready for: Audits • Testing • Generation • Research
+
+  Quick Commands:
+  /ux-audit [url]     - Full design audit
+  /ux-test heuristic  - Heuristic evaluation
+  /ux-critique        - Constructive feedback
+  /ux-reference       - Pattern lookup
+
+  ────────────────────────────────────────────────────

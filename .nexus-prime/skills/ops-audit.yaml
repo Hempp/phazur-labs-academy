@@ -1,0 +1,234 @@
+name: ops-audit
+version: 1.0.0
+description: Comprehensive infrastructure audit and assessment
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-audit
+  - /ops-audit-security
+  - /ops-audit-cost
+  - /ops-audit-reliability
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: Infrastructure, cloud account, or service to audit
+  - name: focus
+    type: enum
+    values: [all, security, cost, reliability, compliance]
+    default: all
+  - name: depth
+    type: enum
+    values: [quick, standard, deep]
+    default: standard
+
+audit_dimensions:
+
+  security:
+    network:
+      - public_exposure_check
+      - security_group_review
+      - nacl_review
+      - vpc_flow_logs_enabled
+      - private_link_usage
+
+    identity:
+      - iam_policy_least_privilege
+      - mfa_enforcement
+      - service_account_keys
+      - cross_account_access
+      - identity_federation
+
+    data:
+      - encryption_at_rest
+      - encryption_in_transit
+      - key_rotation
+      - backup_encryption
+      - data_classification
+
+    secrets:
+      - no_plaintext_secrets
+      - secrets_manager_usage
+      - rotation_policies
+      - access_logging
+
+    compliance:
+      - cis_benchmark
+      - soc2_controls
+      - pci_dss
+      - hipaa
+      - gdpr
+
+    tools:
+      - prowler
+      - scoutsuite
+      - checkov
+      - tfsec
+      - trivy
+
+  cost:
+    compute:
+      - rightsizing_opportunities
+      - idle_instances
+      - spot_instance_candidates
+      - reserved_instance_coverage
+      - savings_plan_utilization
+
+    storage:
+      - unattached_volumes
+      - snapshot_lifecycle
+      - s3_storage_class
+      - glacier_candidates
+      - data_transfer_costs
+
+    database:
+      - oversized_instances
+      - idle_databases
+      - reserved_capacity
+      - storage_optimization
+      - backup_retention
+
+    network:
+      - nat_gateway_costs
+      - data_transfer_optimization
+      - unused_elastic_ips
+      - vpc_endpoint_savings
+
+    tools:
+      - aws_cost_explorer
+      - cloud_custodian
+      - infracost
+      - kubecost
+      - finops_tools
+
+  reliability:
+    availability:
+      - multi_az_deployment
+      - auto_scaling_config
+      - health_check_coverage
+      - load_balancer_config
+      - failover_configuration
+
+    recovery:
+      - backup_verification
+      - rpo_rto_compliance
+      - disaster_recovery_plan
+      - cross_region_replication
+      - restore_testing
+
+    capacity:
+      - headroom_analysis
+      - scaling_policies
+      - quota_utilization
+      - rate_limiting
+      - circuit_breakers
+
+    resilience:
+      - chaos_engineering_coverage
+      - dependency_mapping
+      - graceful_degradation
+      - bulkhead_patterns
+      - retry_policies
+
+    tools:
+      - chaos_monkey
+      - litmus
+      - gremlin
+      - aws_fis
+      - custom_tests
+
+  automation:
+    infrastructure:
+      - iac_coverage
+      - drift_detection
+      - gitops_adoption
+      - manual_changes
+      - documentation
+
+    operations:
+      - runbook_coverage
+      - alert_automation
+      - incident_response
+      - patching_automation
+      - backup_automation
+
+    deployment:
+      - ci_cd_coverage
+      - deployment_frequency
+      - rollback_capability
+      - feature_flags
+      - canary_deployments
+
+severity_levels:
+  critical:
+    definition: Immediate security risk, data exposure, service down
+    action: Fix within hours
+    color: "#DC2626"
+
+  high:
+    definition: Significant risk, compliance violation, reliability gap
+    action: Fix within 24 hours
+    color: "#EA580C"
+
+  medium:
+    definition: Best practice violation, cost waste, minor risk
+    action: Fix within sprint
+    color: "#CA8A04"
+
+  low:
+    definition: Optimization opportunity, minor improvement
+    action: Add to backlog
+    color: "#2563EB"
+
+  info:
+    definition: Observation, suggestion, documentation
+    action: Consider for improvement
+    color: "#6B7280"
+
+workflows:
+
+  quick_audit:
+    command: /ops-audit-quick
+    duration: "15 minutes"
+    steps:
+      - scan: Run automated security scanners
+      - cost: Quick cost anomaly detection
+      - reliability: Basic health checks
+      - report: Summary findings
+
+  standard_audit:
+    command: /ops-audit
+    duration: "2-4 hours"
+    steps:
+      - inventory: Resource discovery
+      - security: Full security scan
+      - cost: Cost optimization analysis
+      - reliability: Reliability assessment
+      - automation: Automation gap analysis
+      - report: Comprehensive report
+
+  deep_audit:
+    command: /ops-audit-deep
+    duration: "1-2 days"
+    steps:
+      - architecture: Architecture review
+      - security: Manual security review
+      - cost: Detailed cost modeling
+      - reliability: Chaos testing
+      - compliance: Compliance assessment
+      - interviews: Team interviews
+      - roadmap: Improvement roadmap
+
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - security_findings
+    - cost_optimization
+    - reliability_assessment
+    - automation_gaps
+    - compliance_status
+    - recommendations
+    - health_scores

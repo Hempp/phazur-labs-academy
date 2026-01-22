@@ -1,0 +1,266 @@
+name: forge-security
+version: 1.0.0
+description: Security analysis, vulnerability detection, and hardening
+agent: FORGE-X
+category: engineering
+
+triggers:
+  - /forge-security
+  - /forge-secrets-scan
+  - /forge-deps-audit
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: Codebase or file to analyze
+  - name: depth
+    type: enum
+    values: [quick, standard, deep]
+    default: standard
+
+security_principles:
+  - name: Never trust input
+    description: Validate all input at system boundaries
+    implementation:
+      - Whitelist validation
+      - Type coercion
+      - Length limits
+      - Format validation
+
+  - name: Least privilege
+    description: Grant minimum permissions required
+    implementation:
+      - Role-based access control
+      - Scoped tokens
+      - Time-limited permissions
+
+  - name: Defense in depth
+    description: Multiple layers of security
+    implementation:
+      - Input validation AND output encoding
+      - Authentication AND authorization
+      - Encryption at rest AND in transit
+
+  - name: Fail secure
+    description: Default to denied on errors
+    implementation:
+      - Catch-all denies access
+      - Error pages don't leak info
+      - Timeouts deny, not allow
+
+  - name: Secrets management
+    description: Never store secrets in code
+    implementation:
+      - Environment variables
+      - Secret managers (Vault, AWS Secrets)
+      - Rotate credentials regularly
+
+owasp_top_10:
+
+  injection:
+    description: Untrusted data sent to interpreter
+    prevention:
+      - Parameterized queries
+      - Input validation
+      - Output encoding
+    tools: [semgrep, snyk, sonarqube]
+
+  broken_authentication:
+    description: Flaws in authentication/session management
+    prevention:
+      - Multi-factor authentication
+      - Secure session handling
+      - Password policies
+    tools: [burp, zap]
+
+  sensitive_data_exposure:
+    description: Inadequate protection of sensitive data
+    prevention:
+      - Encryption at rest
+      - Encryption in transit
+      - Minimal data collection
+    tools: [trufflehog, gitleaks]
+
+  xxe:
+    description: XML External Entity processing vulnerabilities
+    prevention:
+      - Disable DTDs
+      - Use JSON when possible
+      - Validate XML input
+    tools: [semgrep, snyk]
+
+  broken_access_control:
+    description: Improper enforcement of access restrictions
+    prevention:
+      - Deny by default
+      - Validate on every request
+      - Rate limiting
+    tools: [burp, zap, custom tests]
+
+  security_misconfiguration:
+    description: Insecure default configs, open cloud storage
+    prevention:
+      - Hardened configurations
+      - Remove unused features
+      - Regular audits
+    tools: [prowler, scout, checkov]
+
+  xss:
+    description: Cross-site scripting vulnerabilities
+    prevention:
+      - Output encoding
+      - Content Security Policy
+      - Sanitization libraries
+    tools: [semgrep, eslint-plugin-security]
+
+  insecure_deserialization:
+    description: Untrusted data deserialization
+    prevention:
+      - Validate serialized data
+      - Use safe serialization formats
+      - Implement integrity checks
+    tools: [semgrep, snyk]
+
+  vulnerable_components:
+    description: Using components with known vulnerabilities
+    prevention:
+      - Regular dependency updates
+      - Automated scanning
+      - Software composition analysis
+    tools: [snyk, dependabot, npm audit]
+
+  insufficient_logging:
+    description: Inadequate logging and monitoring
+    prevention:
+      - Log security events
+      - Alerting on anomalies
+      - Audit trail
+    tools: [datadog, splunk, elk]
+
+security_checklist:
+  input_validation:
+    - All user inputs validated
+    - Whitelist over blacklist
+    - Type checking enforced
+    - Length limits applied
+
+  authentication:
+    - Secure password storage (bcrypt, argon2)
+    - Session management secure
+    - MFA available
+    - Account lockout implemented
+
+  authorization:
+    - RBAC implemented
+    - Resource-level permissions
+    - Deny by default
+    - Regular permission audits
+
+  data_protection:
+    - Encryption at rest
+    - TLS for transit
+    - Minimal data collection
+    - Data retention policies
+
+  api_security:
+    - Rate limiting
+    - Input validation
+    - Authentication required
+    - CORS configured properly
+
+  infrastructure:
+    - Firewalls configured
+    - Secrets in vault
+    - Regular patching
+    - Principle of least privilege
+
+tools:
+  sast:
+    description: Static Application Security Testing
+    tools:
+      - semgrep: Multi-language semantic analysis
+      - sonarqube: Comprehensive code quality
+      - codeql: GitHub's semantic analysis
+      - snyk_code: Developer-first SAST
+
+  dast:
+    description: Dynamic Application Security Testing
+    tools:
+      - zap: OWASP ZAP scanner
+      - burp: Burp Suite professional
+      - nuclei: Template-based scanner
+
+  sca:
+    description: Software Composition Analysis
+    tools:
+      - snyk: Dependency vulnerability scanning
+      - dependabot: GitHub's dependency updates
+      - npm_audit: Node.js dependency audit
+      - safety: Python dependency check
+
+  secrets:
+    description: Secret Detection
+    tools:
+      - gitleaks: Git history scanning
+      - trufflehog: Deep credential search
+      - detect_secrets: Pre-commit hook
+
+workflows:
+
+  pre_commit:
+    description: Security checks before commit
+    steps:
+      - secrets_scan: Check for leaked secrets
+      - lint_security: Security linting rules
+      - type_check: Type safety verification
+
+  ci_pipeline:
+    description: Security in CI/CD
+    steps:
+      - sast_scan: Static analysis
+      - sca_scan: Dependency vulnerabilities
+      - container_scan: Image vulnerabilities
+      - secrets_scan: Credential detection
+
+  security_review:
+    description: Manual security review process
+    steps:
+      - threat_model: Identify attack surface
+      - code_review: Manual security review
+      - penetration_test: Active testing
+      - remediation: Fix findings
+      - verification: Confirm fixes
+
+severity_levels:
+  critical:
+    description: Immediate exploitation risk
+    examples:
+      - Remote code execution
+      - SQL injection with admin access
+      - Authentication bypass
+    action: Fix immediately, consider rollback
+
+  high:
+    description: High risk, exploitable
+    examples:
+      - Stored XSS
+      - IDOR to sensitive data
+      - Weak encryption
+    action: Fix within 24 hours
+
+  medium:
+    description: Moderate risk, limited impact
+    examples:
+      - Reflected XSS
+      - Information disclosure
+      - Missing security headers
+    action: Fix within sprint
+
+  low:
+    description: Minor risk, defense in depth
+    examples:
+      - Verbose errors
+      - Missing rate limiting
+      - Outdated libraries
+    action: Schedule for remediation

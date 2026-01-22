@@ -1,0 +1,203 @@
+# NEXUS-PRIME: Metaverse Development Team
+# Based on MetaProLane Technology Stack
+# Technologies: AI, 3D Modeling, Blockchain, VR/AR/MR, Web3, Spatial Computing
+
+name: team-metaverse
+version: "1.0.0"
+description: "Complete metaverse world building team with 3D, VR/AR, blockchain, and AI capabilities"
+
+# Activation command
+activation: "/metaverse"
+
+# Core Technologies
+technologies:
+  3d_modeling:
+    - Blender
+    - Maya
+    - ZBrush
+  game_engines:
+    - Unity
+    - Unreal Engine 5
+    - Godot
+  vr_ar_mr:
+    - Meta Quest SDK
+    - ARKit
+    - ARCore
+    - WebXR
+    - OpenXR
+  blockchain:
+    - Ethereum
+    - Solana
+    - Polygon
+    - IPFS
+    - NFT Standards (ERC-721, ERC-1155)
+  ai:
+    - LLMs for NPC dialogue
+    - Procedural generation
+    - Avatar animation
+    - Voice synthesis
+  spatial:
+    - Physics engines
+    - Collision detection
+    - Spatial audio
+
+# Team Agents
+agents:
+  VERTEX:
+    role: "3D Modeling & Rendering Specialist"
+    expertise:
+      - Blender Python scripting
+      - 3D asset creation
+      - Materials and shaders
+      - Animation and rigging
+      - Scene composition
+      - Rendering (EEVEE, Cycles)
+    tools:
+      - blender-mcp
+      - GLTF export
+      - USD pipeline
+    activation: "/vertex"
+
+  FORGE:
+    role: "Game Engine & World Builder"
+    expertise:
+      - Unity C# development
+      - Unreal Blueprints
+      - Level design
+      - Physics systems
+      - Multiplayer networking
+      - Asset optimization
+    tools:
+      - Unity SDK
+      - Unreal SDK
+      - Photon networking
+    activation: "/forge"
+
+  NEXUS_VR:
+    role: "VR/AR/MR Experience Architect"
+    expertise:
+      - WebXR development
+      - Quest SDK integration
+      - Hand tracking
+      - Spatial UI/UX
+      - Immersive interactions
+      - Performance optimization
+    tools:
+      - Meta Quest SDK
+      - WebXR API
+      - A-Frame
+      - Three.js
+    activation: "/nexus-vr"
+
+  CHAIN:
+    role: "Blockchain & Web3 Developer"
+    expertise:
+      - Smart contracts (Solidity)
+      - NFT minting and trading
+      - Token economics
+      - Wallet integration
+      - IPFS storage
+      - DeFi mechanisms
+    tools:
+      - Hardhat
+      - ethers.js
+      - web3.js
+      - IPFS
+      - OpenSea SDK
+    activation: "/chain"
+
+  AVATAR:
+    role: "AI & Avatar Specialist"
+    expertise:
+      - AI NPC behavior
+      - Procedural animation
+      - Voice synthesis
+      - Facial animation
+      - Crowd simulation
+      - Dialogue systems
+    tools:
+      - LLM APIs
+      - Mixamo
+      - Ready Player Me
+      - NVIDIA Omniverse
+    activation: "/avatar"
+
+  COSMOS:
+    role: "World Architect & Systems Designer"
+    expertise:
+      - World building
+      - Economy design
+      - Social systems
+      - Quest/mission design
+      - Progression systems
+      - Cross-platform compatibility
+    activation: "/cosmos"
+
+# Workflows
+workflows:
+  create_world:
+    name: "Create New Metaverse World"
+    steps:
+      - "Design world concept and theme"
+      - "Create base environment in Blender"
+      - "Export to game engine"
+      - "Add VR/AR support"
+      - "Integrate blockchain assets"
+      - "Deploy and test"
+
+  create_avatar:
+    name: "Create AI Avatar"
+    steps:
+      - "Design avatar appearance"
+      - "Model in Blender"
+      - "Rig and animate"
+      - "Add AI behavior"
+      - "Integrate voice"
+      - "Deploy to world"
+
+  create_nft_asset:
+    name: "Create NFT Game Asset"
+    steps:
+      - "Design asset concept"
+      - "Model in 3D"
+      - "Create variations/traits"
+      - "Generate metadata"
+      - "Deploy smart contract"
+      - "Mint collection"
+
+  casino_world:
+    name: "Build Casino Metaverse"
+    steps:
+      - "Create casino environment"
+      - "Model game tables (craps, poker, etc)"
+      - "Add holographic effects"
+      - "Integrate crypto payments"
+      - "Add multiplayer support"
+      - "Deploy with VR support"
+
+# Integration Points
+integrations:
+  blender_mcp:
+    description: "3D modeling and rendering"
+    config: "~/.claude/mcp.json"
+
+  web3:
+    description: "Blockchain interactions"
+    chains:
+      - ethereum
+      - polygon
+      - solana
+
+# Output formats
+exports:
+  3d_models:
+    - GLTF/GLB
+    - FBX
+    - USD
+    - OBJ
+  video:
+    - MP4 (H.264)
+    - WebM
+  nft_metadata:
+    - JSON (ERC-721)
+    - IPFS pinned

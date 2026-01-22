@@ -1,0 +1,174 @@
+name: forge-audit
+version: 1.0.0
+description: Comprehensive code audit and quality analysis
+agent: FORGE-X
+category: engineering
+
+triggers:
+  - /forge-audit
+  - /forge-audit-quick
+  - /forge-audit-security
+  - /forge-audit-performance
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: Codebase, file, or folder to audit
+  - name: depth
+    type: enum
+    values: [quick, standard, deep]
+    default: standard
+  - name: focus
+    type: enum
+    values: [all, quality, security, performance, architecture]
+    default: all
+
+audit_dimensions:
+
+  code_quality:
+    metrics:
+      - cyclomatic_complexity:
+          target: "<10 per function"
+          tool: "eslint/sonarqube"
+      - code_duplication:
+          target: "<3%"
+          tool: "cpd/sonarqube"
+      - test_coverage:
+          target: ">80%"
+          tool: "jest/pytest/go test"
+      - technical_debt:
+          target: "<5% ratio"
+          tool: "sonarqube"
+      - documentation:
+          target: ">90% public APIs"
+          tool: "tsdoc/jsdoc"
+
+    checks:
+      - naming_conventions
+      - code_organization
+      - error_handling
+      - logging_practices
+      - comment_quality
+
+  security:
+    owasp_top_10:
+      - injection
+      - broken_authentication
+      - sensitive_data_exposure
+      - xxe
+      - broken_access_control
+      - security_misconfiguration
+      - xss
+      - insecure_deserialization
+      - vulnerable_components
+      - insufficient_logging
+
+    additional:
+      - secrets_in_code
+      - dependency_vulnerabilities
+      - input_validation
+      - output_encoding
+      - auth_authorization
+
+  performance:
+    metrics:
+      - response_time_p95
+      - memory_usage
+      - cpu_utilization
+      - database_query_efficiency
+      - bundle_size
+
+    checks:
+      - n_plus_one_queries
+      - memory_leaks
+      - unnecessary_rerenders
+      - blocking_operations
+      - caching_opportunities
+
+  architecture:
+    patterns:
+      - solid_principles
+      - clean_architecture
+      - dependency_injection
+      - separation_of_concerns
+
+    analysis:
+      - dependency_graph
+      - circular_dependencies
+      - layer_violations
+      - coupling_metrics
+      - cohesion_metrics
+
+workflows:
+
+  quick_audit:
+    command: /forge-audit-quick
+    duration: "5 minutes"
+    steps:
+      - linting: Run standard linters
+      - type_check: Run type checker if applicable
+      - complexity: Quick complexity scan
+      - security: SAST quick scan
+      - report: Generate summary
+
+  standard_audit:
+    command: /forge-audit
+    duration: "30 minutes"
+    steps:
+      - setup: Initialize analysis tools
+      - quality: Full quality metrics
+      - security: Complete security scan
+      - performance: Performance analysis
+      - architecture: Architecture review
+      - report: Comprehensive report
+
+  deep_audit:
+    command: /forge-audit-deep
+    duration: "2+ hours"
+    steps:
+      - historical: Analyze git history
+      - quality: Deep quality analysis
+      - security: Manual security review
+      - performance: Load testing
+      - architecture: Full architecture assessment
+      - interviews: Code author interviews
+      - report: Executive report with roadmap
+
+severity_levels:
+  critical:
+    definition: Security vulnerability, data loss risk, system crash
+    action: Fix immediately, block deployment
+    color: "#DC2626"
+
+  high:
+    definition: Major bug, significant performance issue
+    action: Fix within 24 hours
+    color: "#EA580C"
+
+  medium:
+    definition: Code smell, minor bug, maintainability issue
+    action: Fix within sprint
+    color: "#CA8A04"
+
+  low:
+    definition: Style issue, minor optimization
+    action: Add to backlog
+    color: "#2563EB"
+
+  info:
+    definition: Suggestion, best practice recommendation
+    action: Consider for improvement
+    color: "#6B7280"
+
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - critical_issues
+    - quality_metrics
+    - security_findings
+    - performance_analysis
+    - architecture_assessment
+    - recommendations
+    - technical_debt_register

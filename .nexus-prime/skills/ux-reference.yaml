@@ -1,0 +1,226 @@
+name: ux-reference
+version: 1.0.0
+description: UX pattern library, research references, and best practice lookups
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /ux-reference
+  - /ux-pattern
+  - /ux-research
+  - /design-pattern
+
+parameters:
+  - name: query
+    type: string
+    required: true
+    description: Pattern, principle, or research topic to look up
+  - name: category
+    type: enum
+    values: [pattern, principle, research, component, flow, metric]
+    required: false
+    default: pattern
+
+knowledge_base:
+
+  patterns:
+    navigation:
+      - name: Tab Bar
+        use_when: 3-5 primary destinations, mobile
+        avoid_when: More than 5 items, secondary actions
+        examples: [iOS, Android, Spotify]
+
+      - name: Hamburger Menu
+        use_when: Secondary navigation, limited space
+        avoid_when: Critical navigation, discovery important
+        research: "Hamburger menus decrease discoverability by 21% (NN/g)"
+
+      - name: Bottom Sheet
+        use_when: Contextual actions, mobile, non-blocking
+        avoid_when: Critical decisions, complex content
+        examples: [Google Maps, Apple Maps]
+
+      - name: Command Palette
+        use_when: Power users, many actions, keyboard-first
+        avoid_when: Novice users primary, simple apps
+        examples: [VS Code, Linear, Figma, Notion]
+
+    forms:
+      - name: Single Column Layout
+        use_when: Always for forms (research-backed)
+        research: "Single column forms complete 15% faster (Baymard)"
+
+      - name: Inline Validation
+        use_when: Complex fields, real-time feedback helps
+        avoid_when: Simple forms, server validation required
+        research: "Inline validation reduces errors by 22%"
+
+      - name: Floating Labels
+        use_when: Space constrained, aesthetic priority
+        avoid_when: Accessibility critical, complex forms
+        caution: "Can cause accessibility issues if poorly implemented"
+
+    feedback:
+      - name: Toast Notification
+        use_when: Non-critical confirmations, temporary info
+        avoid_when: Errors requiring action, critical info
+        duration: 3-5 seconds
+
+      - name: Inline Error
+        use_when: Form validation, contextual errors
+        best_practice: "Place below field, use red + icon, explain fix"
+
+      - name: Empty State
+        use_when: No data to display
+        components: [illustration, explanation, CTA]
+        examples: [Notion, Slack, Dropbox]
+
+    onboarding:
+      - name: Progressive Onboarding
+        use_when: Complex products, feature-rich apps
+        pattern: Introduce features as user reaches them
+        research: "Reduces cognitive load, improves retention"
+
+      - name: Checklist Onboarding
+        use_when: Multiple setup steps, clear progress helps
+        examples: [Notion, Slack, Asana]
+        research: "Completion gamification increases activation 40%"
+
+      - name: Tooltip Tour
+        use_when: Showing existing UI, quick orientation
+        avoid_when: Too many steps, covers important content
+        best_practice: "Max 5 steps, allow skip, remember completion"
+
+  principles:
+    cognitive:
+      - name: Miller's Law
+        statement: "Average person can hold 7±2 items in working memory"
+        application: Chunk information, limit choices, use progressive disclosure
+
+      - name: Hick's Law
+        statement: "Decision time increases with number and complexity of choices"
+        formula: "RT = a + b × log₂(n)"
+        application: Reduce options, use smart defaults, progressive disclosure
+
+      - name: Fitts's Law
+        statement: "Time to target depends on distance and size"
+        formula: "T = a + b × log₂(1 + D/W)"
+        application: Make important targets large and close
+
+      - name: Jakob's Law
+        statement: "Users spend most time on other sites"
+        application: Follow conventions, don't reinvent standard patterns
+
+      - name: Tesler's Law
+        statement: "Every system has inherent complexity that cannot be removed"
+        application: Ensure burden is on system, not user
+
+    gestalt:
+      - name: Proximity
+        statement: "Objects near each other are perceived as grouped"
+        application: Group related elements, separate unrelated
+
+      - name: Similarity
+        statement: "Similar objects are perceived as grouped"
+        application: Use consistent styling for related items
+
+      - name: Continuity
+        statement: "Eye follows smooth paths"
+        application: Align elements, create visual flow
+
+      - name: Closure
+        statement: "Mind completes incomplete shapes"
+        application: Use implied boundaries, reduce visual noise
+
+      - name: Figure-Ground
+        statement: "Elements perceived as either figure or background"
+        application: Clear hierarchy, proper contrast
+
+    behavioral:
+      - name: Peak-End Rule
+        statement: "Experiences judged by peak and end moments"
+        application: Design memorable peaks, strong endings
+
+      - name: Serial Position Effect
+        statement: "First and last items remembered best"
+        application: Put important info at start and end
+
+      - name: Von Restorff Effect
+        statement: "Distinctive items are remembered"
+        application: Make CTAs visually different
+
+      - name: Zeigarnik Effect
+        statement: "Incomplete tasks remembered better"
+        application: Progress indicators, checklists motivate completion
+
+  research_sources:
+    academic:
+      - name: Nielsen Norman Group
+        url: https://nngroup.com
+        focus: Usability research, heuristics, best practices
+
+      - name: Baymard Institute
+        url: https://baymard.com
+        focus: E-commerce UX, checkout optimization
+
+      - name: Google Research
+        url: https://research.google
+        focus: AI/ML interfaces, accessibility, mobile
+
+    industry:
+      - name: Laws of UX
+        url: https://lawsofux.com
+        author: Jon Yablonski
+        focus: Psychology principles for designers
+
+      - name: UI Patterns
+        url: https://ui-patterns.com
+        focus: Interaction design patterns
+
+      - name: Mobbin
+        url: https://mobbin.com
+        focus: Mobile app design patterns
+
+    books:
+      - title: "Don't Make Me Think"
+        author: Steve Krug
+        focus: Web usability fundamentals
+
+      - title: "The Design of Everyday Things"
+        author: Don Norman
+        focus: Human-centered design principles
+
+      - title: "Refactoring UI"
+        author: Adam Wathan & Steve Schoger
+        focus: Practical visual design tactics
+
+      - title: "Form Design Patterns"
+        author: Adam Silver
+        focus: Accessible, usable forms
+
+output_format: |
+  ## UX Reference: [Query]
+
+  ### Pattern/Principle
+  [Name and definition]
+
+  ### When to Use
+  [Appropriate contexts]
+
+  ### When to Avoid
+  [Inappropriate contexts]
+
+  ### Research/Evidence
+  [Supporting data]
+
+  ### Examples
+  [Real-world implementations]
+
+  ### Implementation Notes
+  [Practical guidance]
+
+  ### Related Patterns
+  [Connected concepts]
+
+  ### Sources
+  [Links to learn more]

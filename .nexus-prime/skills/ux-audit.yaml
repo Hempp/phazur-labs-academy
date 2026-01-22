@@ -1,0 +1,140 @@
+name: ux-audit
+version: 1.0.0
+description: Comprehensive UX audit with severity-ranked findings and actionable recommendations
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /ux-audit
+  - /audit-ux
+  - /design-audit
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: URL, screenshot path, or Figma link to audit
+  - name: type
+    type: enum
+    values: [quick, full, accessibility, mobile, forms, checkout, onboarding]
+    default: quick
+  - name: competitors
+    type: array
+    required: false
+    description: Optional competitor URLs for benchmarking
+
+workflow:
+  - step: analyze_target
+    action: |
+      Identify target type (URL, image, Figma) and extract visual/structural information.
+      For URLs: capture screenshot, analyze DOM structure, check meta tags.
+      For images: perform visual analysis of layout, hierarchy, components.
+      For Figma: extract frame structure, components, auto-layout usage.
+
+  - step: heuristic_evaluation
+    action: |
+      Evaluate against Nielsen's 10 Usability Heuristics:
+      1. Visibility of system status
+      2. Match between system and real world
+      3. User control and freedom
+      4. Consistency and standards
+      5. Error prevention
+      6. Recognition rather than recall
+      7. Flexibility and efficiency of use
+      8. Aesthetic and minimalist design
+      9. Help users recognize, diagnose, recover from errors
+      10. Help and documentation
+
+      Score each 0-4 (0=no issues, 4=usability catastrophe)
+
+  - step: cognitive_assessment
+    action: |
+      Analyze cognitive load factors:
+      - Miller's Law: Are choices chunked (7±2)?
+      - Hick's Law: Decision time proportional to choices?
+      - Cognitive tunneling: Are users guided appropriately?
+      - Working memory load: How much must users remember?
+      - Progressive disclosure: Is complexity managed?
+
+  - step: accessibility_check
+    action: |
+      WCAG 2.2 compliance scan:
+      - Color contrast ratios (APCA preferred)
+      - Text alternatives for images
+      - Keyboard navigation paths
+      - Focus indicator visibility
+      - Touch target sizes (44x44px min)
+      - Motion/animation preferences
+      - Form label associations
+      - Error identification clarity
+
+  - step: emotional_design_review
+    action: |
+      Don Norman's three levels:
+      - Visceral: First impression, visual appeal
+      - Behavioral: Usability, functionality, feel
+      - Reflective: Self-image, meaning, memory
+
+      Identify delight opportunities and friction points.
+
+  - step: future_readiness
+    action: |
+      Evaluate preparedness for emerging paradigms:
+      - AI integration points
+      - Voice/multimodal potential
+      - Spatial UI adaptation readiness
+      - Adaptive interface capability
+      - Sustainability considerations
+
+  - step: generate_report
+    action: |
+      Compile findings into structured report:
+
+      ## UX Audit Report: [Target]
+      **Date:** [Current Date]
+      **Auditor:** PRISM-UX
+      **Audit Type:** [Type]
+
+      ### Executive Summary
+      [2-3 sentence overview with overall score]
+
+      ### Severity Matrix
+      | Issue | Heuristic | Severity | Impact | Effort | Priority |
+
+      ### Critical Issues (Fix Immediately)
+      [Detailed findings with screenshots/annotations]
+
+      ### Major Issues (Fix Soon)
+      [Detailed findings]
+
+      ### Minor Issues (Backlog)
+      [Detailed findings]
+
+      ### What's Working Well
+      [Celebrate good design decisions]
+
+      ### Recommendations Roadmap
+      [Prioritized action items]
+
+      ### Competitive Benchmark
+      [If competitors provided]
+
+      ### Future Considerations
+      [2-5 year outlook]
+
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - severity_matrix
+    - detailed_findings
+    - wins
+    - recommendations
+    - benchmarks
+    - future_outlook
+
+references:
+  - Nielsen Norman Group heuristics
+  - WCAG 2.2 guidelines
+  - Laws of UX
+  - Baymard Institute research

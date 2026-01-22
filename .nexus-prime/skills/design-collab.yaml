@@ -1,0 +1,389 @@
+name: design-collab
+version: 1.0.0
+description: Cross-functional collaboration models and practices
+agent: VISION-PRIME
+category: design-leadership
+
+triggers:
+  - /collab-model
+  - /collab-audit
+  - /collab-rituals
+  - /collab-workshop
+
+parameters:
+  - name: partner
+    type: enum
+    values: [product, engineering, research, marketing, all]
+    required: true
+  - name: team
+    type: string
+    required: false
+
+partnership_models:
+
+  design_product:
+    name: Design + Product Partnership
+    philosophy: "Jointly accountable for user and business outcomes"
+
+    collaboration_phases:
+      discovery:
+        pm_leads: Problem definition, business context
+        design_supports: User research, market analysis
+        together: Problem framing workshop
+
+      define:
+        pm_leads: Requirements, prioritization
+        design_supports: Solution exploration, trade-offs
+        together: Solution alignment
+
+      deliver:
+        pm_leads: Launch planning, stakeholder comms
+        design_leads: Design execution, quality
+        together: Review and iteration
+
+    shared_responsibilities:
+      user_research:
+        pm: Stakeholder interviews, market research
+        design: Usability research, user interviews
+        together: Synthesis, insights sharing
+
+      roadmap:
+        pm: Leads prioritization
+        design: Contributes design perspective
+        together: User journey alignment
+
+      decisions:
+        pm: Business and priority decisions
+        design: Experience and quality decisions
+        together: Trade-off discussions
+
+    rituals:
+      daily:
+        - name: Standup
+          attendees: PM + Design + Eng
+          purpose: Sync on blockers
+
+      weekly:
+        - name: Trio sync
+          attendees: PM + Design + Eng Lead
+          purpose: Strategic alignment
+
+        - name: 1:1
+          attendees: PM + Design
+          purpose: Partnership health
+
+      per_project:
+        - name: Kickoff
+          purpose: Align on goals and approach
+        - name: Review
+          purpose: Decision points
+        - name: Retrospective
+          purpose: Process improvement
+
+    anti_patterns:
+      - "Design as order taker"
+      - "PM designing solutions"
+      - "Last-minute design involvement"
+      - "No shared metrics"
+      - "Siloed research"
+
+  design_engineering:
+    name: Design + Engineering Partnership
+    philosophy: "Shared ownership of the user experience"
+
+    collaboration_phases:
+      explore:
+        design_leads: Concept exploration
+        eng_supports: Feasibility input
+        together: Technical design pairing
+
+      build:
+        eng_leads: Implementation
+        design_supports: Clarification, QA
+        together: Continuous review
+
+      refine:
+        design_leads: Polish, edge cases
+        eng_supports: Implementation adjustments
+        together: Quality assurance
+
+    collaboration_principles:
+      - early_involvement: Involve eng in design exploration
+      - constraints_welcome: Technical limits inspire creativity
+      - shared_ownership: Both accountable for experience
+      - continuous_handoff: Not waterfall, iterative
+      - pair_sessions: Designer + engineer problem solve
+
+    handoff_best_practices:
+      before_handoff:
+        - Eng reviewed designs during creation
+        - Technical feasibility confirmed
+        - Edge cases documented
+        - Interactions specified
+
+      handoff_includes:
+        - Design specs in Figma
+        - Interaction documentation
+        - Asset exports
+        - Prototype for interactions
+        - Accessibility requirements
+
+      during_build:
+        - Designer available for questions
+        - Regular check-ins
+        - Live design review of implementation
+        - Flexibility for minor adjustments
+
+      after_ship:
+        - Design QA of live product
+        - Bug tracking for design issues
+        - Retrospective on process
+
+    anti_patterns:
+      - "Throw over the wall" handoffs
+      - Pixel-perfect spec documents
+      - Designer unavailable during build
+      - Engineer not consulted on feasibility
+      - Last-minute design changes
+
+  design_research:
+    name: Design + Research Partnership
+    philosophy: "Research-informed design decisions"
+
+    research_integration:
+      strategic:
+        frequency: Quarterly
+        types:
+          - Market trends
+          - User segments
+          - Journey maps
+          - Competitive analysis
+        design_involvement: Consumer of insights
+
+      tactical:
+        frequency: Per project/epic
+        types:
+          - Usability testing
+          - Concept testing
+          - Prototype testing
+          - A/B testing
+        design_involvement: Active participant
+
+      continuous:
+        frequency: Weekly/ongoing
+        types:
+          - Analytics review
+          - Support tickets
+          - Feedback channels
+          - Quick user interviews
+        design_involvement: Self-service
+
+    collaboration_model:
+      research_leads:
+        - Study design and methodology
+        - Participant recruitment
+        - Data analysis
+        - Insight synthesis
+
+      design_leads:
+        - Research questions (with PM)
+        - Prototype creation
+        - Observation sessions
+        - Design implications
+
+      together:
+        - Research planning
+        - Session observation
+        - Synthesis workshops
+        - Insight-to-action mapping
+
+    research_operations:
+      repository:
+        tool: Dovetail, Notion, or similar
+        purpose: Centralized insights
+        access: All team members
+
+      participant_pool:
+        management: ResearchOps or Research
+        access: Any team member can request
+
+      templates:
+        study_plan: Standardized format
+        report: Consistent structure
+        share_out: Presentation template
+
+  design_stakeholders:
+    name: Design + Stakeholder Management
+    philosophy: "Build advocates through transparency and impact"
+
+    stakeholder_categories:
+      executives:
+        interest: Strategy, ROI, brand
+        engagement: Inform
+        frequency: Monthly/quarterly
+        format: Executive summaries, dashboards
+
+      product_leaders:
+        interest: Roadmap, priorities, timelines
+        engagement: Partner
+        frequency: Weekly
+        format: Detailed reviews, working sessions
+
+      engineering_leaders:
+        interest: Feasibility, technical approach
+        engagement: Partner
+        frequency: Weekly
+        format: Technical discussions, reviews
+
+      marketing:
+        interest: Brand, messaging, campaigns
+        engagement: Consult
+        frequency: Per campaign
+        format: Brand reviews, asset reviews
+
+      sales:
+        interest: Demo, differentiation, training
+        engagement: Inform
+        frequency: Quarterly
+        format: Feature demos, sales enablement
+
+      support:
+        interest: Usability, documentation, training
+        engagement: Consult
+        frequency: Per release
+        format: Support training, documentation review
+
+    engagement_strategies:
+      inform:
+        - Regular updates (async)
+        - Dashboards and reports
+        - Newsletter or digest
+        - Key decision communication
+
+      consult:
+        - Input sessions
+        - Review meetings
+        - Feedback loops
+        - Advisory role
+
+      partner:
+        - Regular syncs
+        - Joint planning
+        - Shared goals
+        - Collaborative work
+
+    stakeholder_mapping:
+      template: |
+        | Stakeholder | Interest | Influence | Engagement | Frequency |
+        |-------------|----------|-----------|------------|-----------|
+        | [Name] | [What they care about] | [High/Med/Low] | [Inform/Consult/Partner] | [Frequency] |
+
+rituals_library:
+
+  design_critique:
+    purpose: Improve work through structured feedback
+    frequency: Weekly
+    duration: 60 minutes
+    format:
+      present: 5 minutes
+      questions: 5 minutes
+      feedback: 10 minutes
+    rules:
+      - Descriptive not prescriptive
+      - Ask questions before suggestions
+      - Focus on objectives, not preferences
+      - Build on others' feedback
+    facilitation:
+      - Rotate facilitator
+      - Time-box strictly
+      - Document feedback
+      - Follow up on actions
+
+  design_review:
+    purpose: Get stakeholder alignment on direction
+    frequency: Per milestone
+    duration: 30-60 minutes
+    format:
+      context: 5 minutes
+      options: 10-20 minutes
+      recommendation: 5 minutes
+      discussion: 10-20 minutes
+    preparation:
+      - Clear decision needed
+      - Options with trade-offs
+      - Recommendation stated
+      - Supporting evidence
+    outcome:
+      - Decision documented
+      - Next steps clear
+      - Owners assigned
+
+  show_and_tell:
+    purpose: Share shipped work, celebrate wins
+    frequency: Bi-weekly
+    duration: 30 minutes
+    format:
+      demo: 5-10 minutes
+      impact: 2-3 minutes
+      learnings: 2-3 minutes
+    audience: Design team + interested stakeholders
+    benefits:
+      - Visibility into design work
+      - Knowledge sharing
+      - Celebration of wins
+
+  design_all_hands:
+    purpose: Align team on strategy, share updates
+    frequency: Monthly
+    duration: 60 minutes
+    format:
+      leadership: 15 minutes
+      team_shares: 30 minutes
+      qa: 15 minutes
+    agenda:
+      - Company/design updates
+      - Strategy and vision
+      - Team highlights
+      - Open discussion
+
+  cross_functional_workshop:
+    purpose: Collaborative problem-solving
+    duration: 2-4 hours
+    participants: PM + Design + Eng + stakeholders
+    formats:
+      design_sprint: 5-day compressed innovation
+      kickoff: Project alignment
+      retrospective: Process improvement
+      roadmap: Quarterly planning
+
+workflows:
+
+  collab_audit:
+    command: /collab-audit
+    steps:
+      - survey: Partnership health survey
+      - interview: 1:1 interviews
+      - observe: Meeting observation
+      - analyze: Patterns and gaps
+      - recommend: Improvements
+      - plan: Implementation
+
+  ritual_design:
+    command: /collab-rituals
+    steps:
+      - assess: Current rituals
+      - gaps: Missing rituals
+      - design: Ritual format
+      - pilot: Test and iterate
+      - rollout: Team adoption
+      - measure: Effectiveness
+
+  workshop_facilitation:
+    command: /collab-workshop
+    steps:
+      - scope: Define objectives
+      - design: Create agenda
+      - prepare: Materials and space
+      - facilitate: Run workshop
+      - document: Capture outcomes
+      - follow_up: Track actions

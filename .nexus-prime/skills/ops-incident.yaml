@@ -1,0 +1,326 @@
+name: ops-incident
+version: 1.0.0
+description: Incident management, response, and postmortem workflows
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-incident
+  - /ops-postmortem
+  - /ops-runbook
+
+parameters:
+  - name: severity
+    type: enum
+    values: [sev1, sev2, sev3, sev4]
+    required: false
+  - name: incident_id
+    type: string
+    required: false
+
+severity_levels:
+
+  sev1:
+    name: Critical
+    definition: Complete outage, data loss, security breach
+    impact: All users affected
+    response_time: 5 minutes
+    notification: Page entire on-call rotation
+    communication: Every 15 minutes
+    examples:
+      - Production completely down
+      - Data corruption/loss
+      - Active security incident
+      - Payment processing failure
+
+  sev2:
+    name: High
+    definition: Major feature broken, significant degradation
+    impact: ">50% users affected"
+    response_time: 15 minutes
+    notification: Page primary on-call
+    communication: Every 30 minutes
+    examples:
+      - Core feature unavailable
+      - Significant latency increase
+      - Partial data issues
+      - Authentication problems
+
+  sev3:
+    name: Medium
+    definition: Minor feature broken, some degradation
+    impact: "<50% users affected"
+    response_time: 1 hour
+    notification: Slack alert
+    communication: Every 2 hours
+    examples:
+      - Non-critical feature down
+      - Elevated error rates
+      - Single region issue
+      - Minor data inconsistency
+
+  sev4:
+    name: Low
+    definition: Minimal impact, monitoring alert
+    impact: Few users, internal only
+    response_time: 4 hours
+    notification: Ticket creation
+    communication: Daily update
+    examples:
+      - Monitoring alert
+      - Non-production issue
+      - Documentation needed
+      - Minor bug reported
+
+incident_response:
+
+  phases:
+    detect:
+      description: Identify that an incident is occurring
+      sources:
+        - Automated monitoring alerts
+        - User reports
+        - Internal reports
+        - External monitoring
+      actions:
+        - Acknowledge alert
+        - Initial triage
+        - Declare incident if needed
+
+    triage:
+      description: Assess severity and impact
+      questions:
+        - Who is affected?
+        - How many users?
+        - Is there data loss?
+        - Is security compromised?
+        - What is the business impact?
+      actions:
+        - Assign severity
+        - Page appropriate responders
+        - Create incident channel
+        - Start timeline
+
+    mitigate:
+      description: Stop the bleeding, reduce impact
+      priority: Speed over elegance
+      techniques:
+        - Rollback deployment
+        - Scale up resources
+        - Enable maintenance mode
+        - Failover to backup
+        - Block bad traffic
+      goal: Restore service, not fix root cause
+
+    resolve:
+      description: Fix the underlying issue
+      approaches:
+        - Deploy fix
+        - Data repair
+        - Configuration change
+        - Infrastructure repair
+      verification:
+        - Confirm fix deployed
+        - Verify metrics normal
+        - Test affected functionality
+        - Monitor for recurrence
+
+    postmortem:
+      description: Learn from the incident
+      timing: Within 48 hours
+      format: Blameless
+      deliverables:
+        - Timeline
+        - Root cause
+        - Contributing factors
+        - Action items
+        - Lessons learned
+
+  roles:
+    incident_commander:
+      responsibilities:
+        - Overall coordination
+        - Decision making
+        - Resource allocation
+        - Escalation
+        - Communication approval
+
+    communications_lead:
+      responsibilities:
+        - Status page updates
+        - Customer communication
+        - Internal stakeholder updates
+        - Timeline documentation
+
+    technical_lead:
+      responsibilities:
+        - Technical investigation
+        - Mitigation execution
+        - Expert coordination
+        - Technical decisions
+
+    scribe:
+      responsibilities:
+        - Timeline documentation
+        - Action tracking
+        - Meeting notes
+        - Postmortem preparation
+
+postmortem:
+
+  principles:
+    - blameless: Focus on systems, not people
+    - thorough: Complete analysis
+    - actionable: Clear follow-up items
+    - shared: Published and discussed
+    - tracked: Actions completed
+
+  template: |
+    ## Incident Postmortem: [Title]
+    **Date:** [Date]
+    **Duration:** [Start] - [End] ([Total])
+    **Severity:** [SEV1/2/3/4]
+    **Author:** [Name]
+    **Reviewers:** [Names]
+
+    ### Executive Summary
+    [2-3 sentence summary of what happened and impact]
+
+    ### Impact
+    - **Users Affected:** [Number/percentage]
+    - **Duration:** [Time]
+    - **Revenue Impact:** [If applicable]
+    - **SLO Impact:** [Error budget consumed]
+
+    ### Timeline
+    | Time (UTC) | Event |
+    |------------|-------|
+    | HH:MM | [Event description] |
+
+    ### Root Cause
+    [Technical explanation of what caused the incident]
+
+    ### Contributing Factors
+    1. [Factor that made the incident possible or worse]
+    2. [Factor 2]
+
+    ### Detection
+    - **How detected:** [Alert/User report/etc]
+    - **Time to detect:** [Minutes]
+    - **Could we detect sooner:** [Yes/No, how]
+
+    ### Response
+    - **Time to respond:** [Minutes]
+    - **Time to mitigate:** [Minutes]
+    - **What helped:** [Tools, runbooks, etc]
+    - **What hindered:** [Gaps, confusion, etc]
+
+    ### Action Items
+    | Action | Owner | Priority | Due Date | Status |
+    |--------|-------|----------|----------|--------|
+    | [Action] | [Name] | P0/P1/P2 | [Date] | Open |
+
+    ### Lessons Learned
+    **What went well:**
+    - [Item]
+
+    **What could be improved:**
+    - [Item]
+
+    ### References
+    - [Link to incident channel]
+    - [Link to dashboards]
+    - [Link to relevant PRs]
+
+runbooks:
+
+  structure:
+    header:
+      - title
+      - description
+      - owner
+      - last_updated
+      - related_alerts
+
+    overview:
+      - service_description
+      - architecture_diagram
+      - dependencies
+      - slo_targets
+
+    troubleshooting:
+      - common_symptoms
+      - diagnostic_steps
+      - known_issues
+      - escalation_path
+
+    procedures:
+      - step_by_step_instructions
+      - commands_with_examples
+      - expected_outputs
+      - verification_steps
+
+    recovery:
+      - rollback_procedures
+      - failover_steps
+      - data_recovery
+      - post_recovery_verification
+
+  best_practices:
+    - keep_updated: Review quarterly
+    - test_regularly: Practice procedures
+    - link_to_alerts: Easy access during incidents
+    - include_commands: Copy-paste ready
+    - version_control: Track changes
+
+tools:
+  incident_management:
+    - pagerduty
+    - opsgenie
+    - incident_io
+    - firehydrant
+    - statuspage
+
+  communication:
+    - slack
+    - teams
+    - zoom
+    - statuspage
+
+  documentation:
+    - confluence
+    - notion
+    - github_wiki
+    - runbook_tools
+
+workflows:
+
+  start_incident:
+    command: /ops-incident
+    steps:
+      - severity: Determine severity level
+      - channel: Create incident channel
+      - page: Notify appropriate responders
+      - roles: Assign IC, comms, tech lead
+      - timeline: Start documentation
+      - status: Update status page
+
+  create_postmortem:
+    command: /ops-postmortem
+    steps:
+      - gather: Collect timeline, logs, metrics
+      - draft: Write initial postmortem
+      - review: Blameless review meeting
+      - actions: Define and assign action items
+      - publish: Share with organization
+      - track: Monitor action completion
+
+  generate_runbook:
+    command: /ops-runbook
+    steps:
+      - service: Identify service/system
+      - alerts: List related alerts
+      - procedures: Document troubleshooting
+      - recovery: Document recovery steps
+      - test: Validate procedures
+      - publish: Add to runbook repository

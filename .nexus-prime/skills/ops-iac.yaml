@@ -1,0 +1,345 @@
+name: ops-iac
+version: 1.0.0
+description: Infrastructure as Code patterns, standards, and best practices
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-terraform
+  - /ops-pulumi
+  - /ops-ansible
+  - /ops-iac-lint
+
+parameters:
+  - name: tool
+    type: enum
+    values: [terraform, pulumi, ansible, crossplane]
+    required: true
+  - name: action
+    type: enum
+    values: [init, plan, apply, destroy, lint, test]
+    default: plan
+
+terraform:
+
+  structure:
+    module_layout: |
+      modules/
+      ├── network/
+      │   ├── main.tf
+      │   ├── variables.tf
+      │   ├── outputs.tf
+      │   ├── versions.tf
+      │   ├── locals.tf
+      │   └── README.md
+      ├── compute/
+      ├── database/
+      ├── security/
+      └── observability/
+
+    environment_layout: |
+      environments/
+      ├── dev/
+      │   ├── main.tf
+      │   ├── terraform.tfvars
+      │   └── backend.tf
+      ├── staging/
+      └── prod/
+
+  state_management:
+    backends:
+      s3:
+        bucket: terraform-state-${account_id}
+        key: ${project}/${environment}/terraform.tfstate
+        region: us-east-1
+        encrypt: true
+        dynamodb_table: terraform-locks
+
+      terraform_cloud:
+        organization: my-org
+        workspaces:
+          prefix: my-project-
+
+    best_practices:
+      - remote_state_only
+      - state_locking
+      - encryption_at_rest
+      - versioning_enabled
+      - access_logging
+
+  coding_standards:
+    naming:
+      resources: lowercase_with_underscores
+      variables: lowercase_with_underscores
+      outputs: lowercase_with_underscores
+      modules: lowercase-with-dashes
+
+    formatting:
+      - terraform_fmt
+      - consistent_indentation
+      - attribute_ordering
+
+    validation:
+      - terraform_validate
+      - tflint
+      - tfsec
+      - checkov
+
+  patterns:
+    module_composition:
+      description: Build infrastructure from reusable modules
+      example:
+        root_module:
+          - network_module
+          - compute_module
+          - database_module
+
+    workspaces:
+      description: Environment isolation within same config
+      use_case: Simple environment differences
+      limitations:
+        - shared_state_file
+        - limited_isolation
+
+    directory_separation:
+      description: Separate directories per environment
+      use_case: Complex environment differences
+      benefits:
+        - full_isolation
+        - independent_state
+        - different_providers
+
+  security:
+    sensitive_values:
+      - mark_sensitive_variables
+      - no_secrets_in_state
+      - use_vault_provider
+      - use_aws_secrets_manager
+
+    provider_constraints:
+      - pin_provider_versions
+      - verify_provider_checksums
+      - use_private_registry
+
+    drift_detection:
+      - scheduled_plan_runs
+      - state_comparison
+      - alert_on_drift
+
+pulumi:
+
+  languages:
+    supported:
+      - typescript
+      - python
+      - go
+      - csharp
+      - java
+      - yaml
+
+    recommended: typescript
+    reason: Best IDE support, type safety
+
+  structure:
+    project_layout: |
+      my-project/
+      ├── Pulumi.yaml
+      ├── Pulumi.dev.yaml
+      ├── Pulumi.prod.yaml
+      ├── index.ts
+      ├── components/
+      │   ├── network.ts
+      │   ├── compute.ts
+      │   └── database.ts
+      └── config/
+
+  patterns:
+    component_resources:
+      description: Reusable infrastructure components
+      benefits:
+        - encapsulation
+        - reusability
+        - custom_resources
+
+    stack_references:
+      description: Cross-stack dependencies
+      use_case: Shared infrastructure
+      example:
+        network_stack: Exports VPC ID
+        compute_stack: References VPC ID
+
+    automation_api:
+      description: Programmatic infrastructure management
+      use_case:
+        - dynamic_infrastructure
+        - testing
+        - self_service_platforms
+
+  state_management:
+    backends:
+      - pulumi_cloud
+      - s3
+      - azure_blob
+      - gcs
+
+    secrets:
+      providers:
+        - pulumi_default
+        - aws_kms
+        - azure_keyvault
+        - gcp_kms
+        - hashicorp_vault
+
+ansible:
+
+  structure:
+    inventory_layout: |
+      inventory/
+      ├── production/
+      │   ├── hosts.yml
+      │   └── group_vars/
+      │       ├── all.yml
+      │       └── webservers.yml
+      └── staging/
+
+    playbook_layout: |
+      playbooks/
+      ├── site.yml
+      ├── webservers.yml
+      ├── databases.yml
+      └── roles/
+          ├── common/
+          ├── nginx/
+          └── postgresql/
+
+  role_structure: |
+    roles/my_role/
+    ├── defaults/main.yml
+    ├── files/
+    ├── handlers/main.yml
+    ├── meta/main.yml
+    ├── tasks/main.yml
+    ├── templates/
+    ├── tests/
+    └── vars/main.yml
+
+  best_practices:
+    idempotency:
+      - always_use_modules
+      - check_mode_support
+      - no_shell_when_module_exists
+
+    security:
+      - ansible_vault_for_secrets
+      - no_plaintext_passwords
+      - ssh_key_authentication
+
+    testing:
+      - molecule_for_roles
+      - ansible_lint
+      - yaml_lint
+
+    performance:
+      - fact_caching
+      - parallel_execution
+      - async_tasks
+
+crossplane:
+
+  concepts:
+    providers:
+      description: Cloud provider integrations
+      examples: [provider-aws, provider-gcp, provider-azure]
+
+    managed_resources:
+      description: Individual cloud resources
+      pattern: kubernetes_native
+
+    composite_resources:
+      description: Custom resource abstractions
+      components:
+        - xrd: CompositeResourceDefinition
+        - composition: Resource mapping
+
+  patterns:
+    platform_api:
+      description: Self-service infrastructure
+      benefits:
+        - kubernetes_native
+        - developer_self_service
+        - policy_enforcement
+
+testing:
+
+  terraform:
+    tools:
+      - terratest: Go-based integration tests
+      - kitchen_terraform: Ruby-based testing
+      - terraform_compliance: BDD-style compliance
+
+    patterns:
+      unit_tests:
+        - validate_syntax
+        - check_formatting
+        - lint_rules
+
+      integration_tests:
+        - deploy_to_test_env
+        - verify_resources
+        - destroy_resources
+
+  pulumi:
+    tools:
+      - pulumi_test: Built-in testing
+      - unit_tests: Mock resources
+      - property_tests: Policy validation
+
+  ansible:
+    tools:
+      - molecule: Role testing framework
+      - testinfra: Infrastructure testing
+      - ansible_lint: Style checking
+
+tools:
+
+  linting:
+    - tflint
+    - tfsec
+    - checkov
+    - terrascan
+    - ansible_lint
+
+  documentation:
+    - terraform_docs
+    - inframap
+    - rover
+
+  cost:
+    - infracost
+    - terraform_cost_estimation
+
+  drift:
+    - driftctl
+    - terraform_plan_scheduled
+
+workflows:
+
+  terraform_workflow:
+    command: /ops-terraform
+    steps:
+      - init: Initialize backend
+      - validate: Syntax validation
+      - lint: Run tflint, tfsec
+      - plan: Generate execution plan
+      - cost: Estimate cost impact
+      - apply: Apply changes (with approval)
+      - document: Update documentation
+
+  iac_audit:
+    command: /ops-iac-lint
+    steps:
+      - scan: Run all linters
+      - security: Check for vulnerabilities
+      - compliance: Policy validation
+      - cost: Cost estimation
+      - report: Generate findings

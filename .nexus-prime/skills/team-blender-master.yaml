@@ -1,0 +1,349 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Blender Master Team (SWARM CONFIGURATION)
+#  Full 3D Production Pipeline | Modeling to Final Render
+# ═══════════════════════════════════════════════════════════════════════════════
+
+skill:
+  id: "TEAM-BLENDER"
+  name: "Blender Master Team"
+  version: "1.0.0"
+  tier: "master-team"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Team Identity
+  # ─────────────────────────────────────────────────────────────────────────────
+  identity:
+    title: "Blender 3D Production Swarm"
+    tagline: "From Concept to Final Pixel"
+    description: |
+      A coordinated swarm of 7 guru-level specialists covering the complete
+      Blender 3D production pipeline. From modeling and rigging through
+      animation, simulation, and final rendering—every aspect of 3D creation.
+
+    combined_experience: "210+ years (30 years x 7 specialists)"
+
+    capabilities:
+      - "Complete 3D modeling (hard surface & organic)"
+      - "Character rigging and animation"
+      - "Physics simulation and VFX"
+      - "Procedural content with Geometry Nodes"
+      - "PBR materials and shader development"
+      - "Photorealistic rendering (Cycles/Eevee)"
+      - "VR/AR export and real-time optimization"
+      - "Python automation and scripting"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Agents
+  # ─────────────────────────────────────────────────────────────────────────────
+  agents:
+    lead:
+      id: "BLN-007"
+      codename: "RENDER-MASTER"
+      role: "Lead Visualizer & Pipeline Director"
+      responsibilities:
+        - final_output_quality
+        - pipeline_coordination
+        - render_optimization
+        - team_orchestration
+
+    specialists:
+      - id: "BLN-001"
+        codename: "MESH-MASTER"
+        role: "3D Modeling Expert"
+        focus: "Geometry, topology, procedural modeling"
+
+      - id: "BLN-002"
+        codename: "SHADER-WIZARD"
+        role: "Materials & Shaders Expert"
+        focus: "PBR materials, procedural textures, node graphs"
+
+      - id: "BLN-003"
+        codename: "ANIM-GURU"
+        role: "Animation Director"
+        focus: "Keyframe animation, motion graphics, timing"
+
+      - id: "BLN-004"
+        codename: "RIG-MASTER"
+        role: "Technical Animation Expert"
+        focus: "Rigging, constraints, deformation systems"
+
+      - id: "BLN-005"
+        codename: "SIM-GURU"
+        role: "Physics & VFX Expert"
+        focus: "Cloth, fluid, particles, destruction"
+
+      - id: "BLN-006"
+        codename: "NODE-ARCHITECT"
+        role: "Procedural Systems Expert"
+        focus: "Geometry nodes, procedural generation"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Coordination Protocol
+  # ─────────────────────────────────────────────────────────────────────────────
+  swarm_protocol:
+    communication:
+      style: "parallel_pipeline"
+      lead_coordinator: "RENDER-MASTER"
+      decision_authority: "context-dependent specialist"
+
+    workflow_phases:
+      concept:
+        lead: "RENDER-MASTER"
+        support: ["MESH-MASTER"]
+        outputs: ["project_setup", "reference_gathering", "pipeline_plan"]
+
+      modeling:
+        lead: "MESH-MASTER"
+        parallel:
+          - agent: "NODE-ARCHITECT"
+            task: "procedural_assets"
+        outputs: ["base_meshes", "high_poly", "optimized_geo"]
+
+      surfacing:
+        lead: "SHADER-WIZARD"
+        receives_from: ["MESH-MASTER"]
+        outputs: ["pbr_materials", "uvs", "textures"]
+
+      rigging:
+        lead: "RIG-MASTER"
+        receives_from: ["MESH-MASTER"]
+        outputs: ["character_rigs", "mechanical_rigs", "controls"]
+
+      animation:
+        lead: "ANIM-GURU"
+        receives_from: ["RIG-MASTER"]
+        outputs: ["keyframe_animation", "motion_graphics"]
+
+      simulation:
+        lead: "SIM-GURU"
+        parallel_with: ["ANIM-GURU"]
+        outputs: ["cloth_sim", "fluid_sim", "particle_fx"]
+
+      lighting_render:
+        lead: "RENDER-MASTER"
+        receives_from: "all"
+        outputs: ["final_renders", "animations", "vr_export"]
+
+    handoff_protocols:
+      MESH_to_SHADER:
+        trigger: "mesh_complete"
+        data: ["uvs", "vertex_colors", "topology_info"]
+
+      MESH_to_RIG:
+        trigger: "mesh_approved"
+        data: ["deformation_mesh", "topology_guide"]
+
+      RIG_to_ANIM:
+        trigger: "rig_complete"
+        data: ["control_rig", "documentation"]
+
+      ALL_to_RENDER:
+        trigger: "assets_ready"
+        data: ["scene_assembly", "render_requirements"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Project Types
+  # ─────────────────────────────────────────────────────────────────────────────
+  project_types:
+    architectural_visualization:
+      key_agents: ["RENDER-MASTER", "SHADER-WIZARD", "NODE-ARCHITECT"]
+      focus: "photorealism, materials, lighting"
+      outputs: ["still_renders", "animations", "vr_tours"]
+
+    character_production:
+      key_agents: ["MESH-MASTER", "RIG-MASTER", "ANIM-GURU"]
+      focus: "modeling, rigging, animation"
+      outputs: ["animated_characters", "game_assets"]
+
+    product_visualization:
+      key_agents: ["MESH-MASTER", "SHADER-WIZARD", "RENDER-MASTER"]
+      focus: "precision, materials, studio_lighting"
+      outputs: ["product_renders", "turntables", "exploded_views"]
+
+    motion_graphics:
+      key_agents: ["ANIM-GURU", "NODE-ARCHITECT", "SHADER-WIZARD"]
+      focus: "animation, procedural, stylized"
+      outputs: ["animations", "loops", "transitions"]
+
+    visual_effects:
+      key_agents: ["SIM-GURU", "NODE-ARCHITECT", "RENDER-MASTER"]
+      focus: "simulation, compositing, integration"
+      outputs: ["vfx_elements", "destruction", "environments"]
+
+    game_assets:
+      key_agents: ["MESH-MASTER", "SHADER-WIZARD", "RIG-MASTER"]
+      focus: "optimization, real-time, LODs"
+      outputs: ["game_ready_assets", "textures", "rigs"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Blender Integration
+  # ─────────────────────────────────────────────────────────────────────────────
+  blender_integration:
+    scripts_location: "~/.nexus-prime/blender/"
+
+    script_categories:
+      core:
+        - scene_setup.py
+        - batch_processor.py
+        - asset_manager.py
+
+      modeling:
+        - mesh_analyzer.py
+        - topology_checker.py
+        - geometry_node_library.py
+
+      materials:
+        - material_library.py
+        - pbr_generator.py
+        - texture_baker.py
+
+      animation:
+        - animation_tools.py
+        - rig_utilities.py
+        - motion_path_tools.py
+
+      rendering:
+        - render_presets.py
+        - camera_setup.py
+        - lighting_presets.py
+        - batch_render.py
+
+      export:
+        - gltf_exporter.py
+        - fbx_exporter.py
+        - vr_optimizer.py
+
+    material_libraries:
+      - architectural_materials
+      - organic_materials
+      - metal_materials
+      - fabric_materials
+      - glass_materials
+      - special_effects
+
+    presets:
+      render:
+        - preview_fast
+        - preview_quality
+        - production
+        - final_4k
+        - animation_optimized
+
+      lighting:
+        - studio_three_point
+        - hdri_outdoor
+        - hdri_indoor
+        - dramatic
+        - product_photography
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Export Configurations
+  # ─────────────────────────────────────────────────────────────────────────────
+  export_configs:
+    realtime:
+      format: "gltf"
+      settings:
+        draco_compression: true
+        texture_format: "webp"
+        max_texture_size: 2048
+
+    game:
+      format: "fbx"
+      settings:
+        embed_textures: false
+        apply_modifiers: true
+        triangulate: true
+
+    film:
+      format: "usd"
+      settings:
+        full_quality: true
+        animation_data: true
+
+    vr:
+      format: "glb"
+      settings:
+        optimize_meshes: true
+        bake_lighting: "optional"
+        texture_size: 1024
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Activation
+  # ─────────────────────────────────────────────────────────────────────────────
+  activation:
+    commands:
+      - "/deploy-blender"
+      - "/blender"
+      - "/blender-model"
+      - "/blender-material"
+      - "/blender-animate"
+      - "/blender-rig"
+      - "/blender-sim"
+      - "/blender-nodes"
+      - "/blender-render"
+
+    triggers:
+      - "blender"
+      - "3d modeling"
+      - "3d animation"
+      - "render"
+      - "cycles"
+      - "eevee"
+      - "geometry nodes"
+      - "character rig"
+      - "physics simulation"
+
+    auto_includes:
+      - agent: "RENDER-MASTER"
+        condition: "always for final output"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Deliverables
+  # ─────────────────────────────────────────────────────────────────────────────
+  deliverables:
+    modeling_phase:
+      - base_meshes
+      - high_poly_sculpts
+      - retopologized_meshes
+      - uv_layouts
+
+    surfacing_phase:
+      - pbr_materials
+      - texture_maps
+      - material_libraries
+      - shader_node_setups
+
+    rigging_phase:
+      - character_rigs
+      - facial_rigs
+      - mechanical_rigs
+      - rig_documentation
+
+    animation_phase:
+      - keyframe_animations
+      - motion_graphics
+      - action_libraries
+      - animation_presets
+
+    simulation_phase:
+      - cloth_simulations
+      - fluid_caches
+      - particle_systems
+      - destruction_sequences
+
+    rendering_phase:
+      - still_renders
+      - animation_sequences
+      - vr_exports
+      - real_time_assets
+
+    documentation:
+      - project_files
+      - technical_specs
+      - style_guides
+      - python_scripts
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  "Seven minds, infinite possibilities—from vertex to final frame."
+#  — Blender Master Team
+# ═══════════════════════════════════════════════════════════════════════════════

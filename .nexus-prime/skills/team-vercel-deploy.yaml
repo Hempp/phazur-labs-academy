@@ -1,0 +1,773 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: Vercel Deployment Master Team
+#  Edge-First Deployment | Serverless Infrastructure | Global CDN
+#  "Zero downtime. Infinite scale. Every deployment perfected."
+# ═══════════════════════════════════════════════════════════════════════════════
+
+skill:
+  id: "TEAM-VERCEL"
+  name: "Vercel Deployment Master Team"
+  version: "1.0.0"
+  tier: "master-team"
+  status: "active"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Team Identity
+  # ─────────────────────────────────────────────────────────────────────────────
+  identity:
+    title: "Vercel Deployment & Infrastructure Swarm"
+    tagline: "Ship faster. Scale infinitely. Deploy fearlessly."
+    description: |
+      A coordinated swarm of 6 guru-level specialists who architect, deploy,
+      and optimize applications on Vercel's edge network. From local dev to
+      global production in seconds.
+
+    combined_experience: "180+ years (30 years x 6 specialists)"
+
+    capabilities:
+      - "Zero-config deployments"
+      - "Edge function optimization"
+      - "Serverless architecture"
+      - "Preview deployments & branching"
+      - "Environment management"
+      - "Domain & DNS configuration"
+      - "Analytics & monitoring"
+      - "Team & access management"
+      - "CI/CD pipeline integration"
+      - "Monorepo support"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Agents
+  # ─────────────────────────────────────────────────────────────────────────────
+  agents:
+    lead:
+      id: "VCL-001"
+      codename: "DEPLOY-MASTER"
+      role: "Lead Deployment Architect"
+      years_experience: 30
+      responsibilities:
+        - deployment_strategy
+        - pipeline_orchestration
+        - team_coordination
+        - release_management
+        - incident_response
+      expertise:
+        - "Zero-downtime deployments"
+        - "Blue-green & canary releases"
+        - "Rollback strategies"
+        - "Multi-environment management"
+        - "Deployment automation"
+
+    specialists:
+      - id: "VCL-002"
+        codename: "EDGE-OPS"
+        role: "Edge Function Specialist"
+        focus: "Serverless functions, edge middleware, runtime optimization"
+        expertise:
+          - "Edge runtime optimization"
+          - "Middleware architecture"
+          - "ISR & SSR strategies"
+          - "Cold start optimization"
+          - "Edge caching patterns"
+
+      - id: "VCL-003"
+        codename: "DOMAIN-HANDLER"
+        role: "Domain & DNS Expert"
+        focus: "Custom domains, SSL/TLS, DNS propagation"
+        expertise:
+          - "DNS configuration"
+          - "SSL certificate management"
+          - "Domain verification"
+          - "Subdomain routing"
+          - "Redirect rules"
+
+      - id: "VCL-004"
+        codename: "ENV-CONFIG"
+        role: "Environment & Secrets Manager"
+        focus: "Environment variables, secrets, configuration"
+        expertise:
+          - "Environment variable management"
+          - "Secret rotation"
+          - "Multi-environment configs"
+          - "Integration tokens"
+          - "Secure variable handling"
+
+      - id: "VCL-005"
+        codename: "PREVIEW-MASTER"
+        role: "Preview & Branch Deployment Specialist"
+        focus: "Preview deployments, branch management, PR workflows"
+        expertise:
+          - "Preview deployment strategies"
+          - "Branch protection rules"
+          - "PR comment integrations"
+          - "Staging environments"
+          - "Feature flag deployments"
+
+      - id: "VCL-006"
+        codename: "METRICS-WATCH"
+        role: "Analytics & Performance Monitor"
+        focus: "Web Vitals, analytics, error tracking, observability"
+        expertise:
+          - "Core Web Vitals optimization"
+          - "Real User Monitoring (RUM)"
+          - "Error tracking & alerting"
+          - "Performance budgets"
+          - "Usage analytics"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  commands:
+    deployment:
+      - command: "/deploy-vercel"
+        description: "Deploy current project to Vercel"
+        aliases: ["/vercel-deploy", "/v-deploy"]
+        agent: "DEPLOY-MASTER"
+        options:
+          - "--prod: Deploy to production"
+          - "--preview: Create preview deployment"
+          - "--force: Force rebuild"
+          - "--env <name>: Target environment"
+
+      - command: "/vercel-rollback"
+        description: "Rollback to previous deployment"
+        agent: "DEPLOY-MASTER"
+        options:
+          - "--deployment <id>: Specific deployment ID"
+          - "--confirm: Skip confirmation"
+
+      - command: "/vercel-promote"
+        description: "Promote preview to production"
+        agent: "DEPLOY-MASTER"
+
+    team_management:
+      - command: "/vercel-teams"
+        description: "List and manage Vercel teams"
+        aliases: ["/v-teams"]
+        agent: "DEPLOY-MASTER"
+        subcommands:
+          - "ls: List all teams"
+          - "switch <name>: Switch active team"
+          - "create <name>: Create new team"
+          - "invite <email>: Invite team member"
+
+      - command: "/vercel-projects"
+        description: "Manage Vercel projects"
+        aliases: ["/v-projects"]
+        agent: "DEPLOY-MASTER"
+        subcommands:
+          - "ls: List all projects"
+          - "link: Link current directory"
+          - "rm <name>: Remove project"
+
+    environment:
+      - command: "/vercel-env"
+        description: "Manage environment variables"
+        aliases: ["/v-env"]
+        agent: "ENV-CONFIG"
+        subcommands:
+          - "ls: List all env vars"
+          - "add <key> <value>: Add variable"
+          - "rm <key>: Remove variable"
+          - "pull: Pull env to .env.local"
+          - "push: Push local env to Vercel"
+
+      - command: "/vercel-secrets"
+        description: "Manage secrets"
+        agent: "ENV-CONFIG"
+
+    domains:
+      - command: "/vercel-domains"
+        description: "Manage domains"
+        aliases: ["/v-domains"]
+        agent: "DOMAIN-HANDLER"
+        subcommands:
+          - "ls: List domains"
+          - "add <domain>: Add domain"
+          - "rm <domain>: Remove domain"
+          - "verify <domain>: Verify domain"
+          - "inspect <domain>: Show DNS records"
+
+      - command: "/vercel-dns"
+        description: "Configure DNS records"
+        agent: "DOMAIN-HANDLER"
+
+    monitoring:
+      - command: "/vercel-logs"
+        description: "View deployment logs"
+        aliases: ["/v-logs"]
+        agent: "METRICS-WATCH"
+        options:
+          - "--follow: Stream logs"
+          - "--filter <pattern>: Filter logs"
+
+      - command: "/vercel-analytics"
+        description: "View analytics and Web Vitals"
+        agent: "METRICS-WATCH"
+
+      - command: "/vercel-inspect"
+        description: "Inspect deployment details"
+        agent: "DEPLOY-MASTER"
+
+    edge:
+      - command: "/vercel-edge"
+        description: "Manage edge functions"
+        agent: "EDGE-OPS"
+        subcommands:
+          - "ls: List edge functions"
+          - "test: Test edge function locally"
+          - "config: Configure edge runtime"
+
+      - command: "/vercel-middleware"
+        description: "Configure middleware"
+        agent: "EDGE-OPS"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Settings & Configuration
+  # ─────────────────────────────────────────────────────────────────────────────
+  settings:
+    vercel_config:
+      file: "vercel.json"
+      schema:
+        version: 2
+        builds: []
+        routes: []
+        regions: ["iad1"]
+        functions: {}
+        env: {}
+
+    project_settings:
+      framework_detection: true
+      root_directory: "./"
+      output_directory: null
+      install_command: null
+      build_command: null
+      dev_command: null
+
+    deployment_settings:
+      auto_assign_custom_domains: true
+      preview_deployment_suffix: true
+      production_branch: "main"
+      preview_branches: ["develop", "staging"]
+      ignored_build_step: null
+
+    security_settings:
+      password_protection: false
+      trusted_ips: []
+      attack_challenge_mode: "disabled"
+      deployment_retention:
+        production: "unlimited"
+        preview: "90d"
+
+    environment_types:
+      - name: "production"
+        auto_expose: true
+        encryption: "AES-256"
+      - name: "preview"
+        auto_expose: true
+        encryption: "AES-256"
+      - name: "development"
+        auto_expose: false
+        encryption: "AES-256"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Hooks (Deployment Lifecycle)
+  # ─────────────────────────────────────────────────────────────────────────────
+  hooks:
+    pre_deployment:
+      - name: "lint-check"
+        description: "Run linting before deploy"
+        command: "npm run lint"
+        fail_on_error: true
+        agent: "DEPLOY-MASTER"
+
+      - name: "type-check"
+        description: "Run TypeScript checks"
+        command: "npm run type-check"
+        fail_on_error: true
+        agent: "DEPLOY-MASTER"
+
+      - name: "test-suite"
+        description: "Run test suite"
+        command: "npm run test"
+        fail_on_error: true
+        agent: "DEPLOY-MASTER"
+
+      - name: "security-scan"
+        description: "Run security audit"
+        command: "npm audit --audit-level=high"
+        fail_on_error: false
+        agent: "DEPLOY-MASTER"
+
+      - name: "env-validation"
+        description: "Validate environment variables"
+        agent: "ENV-CONFIG"
+        action: "validate_required_env_vars"
+
+    build:
+      - name: "cache-restore"
+        description: "Restore build cache"
+        agent: "DEPLOY-MASTER"
+
+      - name: "dependency-install"
+        description: "Install dependencies"
+        command: "npm ci"
+        agent: "DEPLOY-MASTER"
+
+      - name: "asset-optimization"
+        description: "Optimize static assets"
+        agent: "EDGE-OPS"
+
+    post_deployment:
+      - name: "smoke-tests"
+        description: "Run smoke tests against deployment"
+        agent: "DEPLOY-MASTER"
+        action: "run_smoke_tests"
+
+      - name: "lighthouse-check"
+        description: "Run Lighthouse performance audit"
+        agent: "METRICS-WATCH"
+        action: "run_lighthouse"
+
+      - name: "notify-team"
+        description: "Send deployment notification"
+        agent: "DEPLOY-MASTER"
+        action: "send_notification"
+        channels: ["slack", "email"]
+
+      - name: "warm-cache"
+        description: "Warm edge caches"
+        agent: "EDGE-OPS"
+        action: "warm_edge_caches"
+
+    rollback:
+      - name: "capture-state"
+        description: "Capture current state before rollback"
+        agent: "DEPLOY-MASTER"
+
+      - name: "notify-rollback"
+        description: "Notify team of rollback"
+        agent: "DEPLOY-MASTER"
+
+    pr_preview:
+      - name: "preview-comment"
+        description: "Comment preview URL on PR"
+        agent: "PREVIEW-MASTER"
+        action: "add_pr_comment"
+
+      - name: "visual-diff"
+        description: "Generate visual diff screenshots"
+        agent: "PREVIEW-MASTER"
+        action: "generate_visual_diff"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  MCP Server Integration
+  # ─────────────────────────────────────────────────────────────────────────────
+  mcp:
+    server:
+      name: "vercel-mcp-server"
+      description: "MCP server for Vercel API integration"
+      transport: "stdio"
+      command: "node"
+      args: ["~/.nexus-prime/mcp/vercel-server/index.js"]
+
+    tools:
+      - name: "vercel_deploy"
+        description: "Deploy project to Vercel"
+        parameters:
+          project_name: "string"
+          environment: "production | preview | development"
+          force_rebuild: "boolean"
+
+      - name: "vercel_list_deployments"
+        description: "List recent deployments"
+        parameters:
+          project_name: "string"
+          limit: "number"
+          state: "READY | ERROR | BUILDING | QUEUED"
+
+      - name: "vercel_get_deployment"
+        description: "Get deployment details"
+        parameters:
+          deployment_id: "string"
+
+      - name: "vercel_cancel_deployment"
+        description: "Cancel in-progress deployment"
+        parameters:
+          deployment_id: "string"
+
+      - name: "vercel_list_projects"
+        description: "List all projects"
+        parameters:
+          team_id: "string (optional)"
+
+      - name: "vercel_get_project"
+        description: "Get project details"
+        parameters:
+          project_name: "string"
+
+      - name: "vercel_list_env_vars"
+        description: "List environment variables"
+        parameters:
+          project_name: "string"
+          environment: "string"
+
+      - name: "vercel_set_env_var"
+        description: "Set environment variable"
+        parameters:
+          project_name: "string"
+          key: "string"
+          value: "string"
+          environment: "string[]"
+
+      - name: "vercel_delete_env_var"
+        description: "Delete environment variable"
+        parameters:
+          project_name: "string"
+          env_var_id: "string"
+
+      - name: "vercel_list_domains"
+        description: "List domains"
+        parameters:
+          project_name: "string"
+
+      - name: "vercel_add_domain"
+        description: "Add domain to project"
+        parameters:
+          project_name: "string"
+          domain: "string"
+
+      - name: "vercel_verify_domain"
+        description: "Verify domain ownership"
+        parameters:
+          domain: "string"
+
+      - name: "vercel_get_logs"
+        description: "Get deployment logs"
+        parameters:
+          deployment_id: "string"
+          follow: "boolean"
+
+      - name: "vercel_list_teams"
+        description: "List user's teams"
+        parameters: {}
+
+      - name: "vercel_switch_team"
+        description: "Switch active team"
+        parameters:
+          team_id: "string"
+
+    resources:
+      - uri: "vercel://deployments"
+        description: "Recent deployments list"
+
+      - uri: "vercel://projects"
+        description: "Projects list"
+
+      - uri: "vercel://teams"
+        description: "Teams list"
+
+      - uri: "vercel://analytics/{project_name}"
+        description: "Project analytics"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Plugins
+  # ─────────────────────────────────────────────────────────────────────────────
+  plugins:
+    core:
+      - id: "vercel-cli"
+        name: "Vercel CLI Integration"
+        description: "Core CLI commands and wrappers"
+        enabled: true
+        config:
+          auto_install: true
+          version: "latest"
+
+      - id: "vercel-git"
+        name: "Git Integration"
+        description: "GitHub/GitLab/Bitbucket integration"
+        enabled: true
+        config:
+          auto_deploy_branches: ["main", "master"]
+          preview_branches: true
+          commit_comments: true
+
+    monitoring:
+      - id: "vercel-analytics"
+        name: "Vercel Analytics Plugin"
+        description: "Web Vitals and usage analytics"
+        enabled: true
+        agent: "METRICS-WATCH"
+
+      - id: "vercel-speed-insights"
+        name: "Speed Insights"
+        description: "Real-time performance monitoring"
+        enabled: true
+        agent: "METRICS-WATCH"
+
+      - id: "vercel-logs"
+        name: "Log Drain Plugin"
+        description: "Stream logs to external services"
+        enabled: false
+        config:
+          destinations: ["datadog", "logflare", "sentry"]
+
+    security:
+      - id: "vercel-firewall"
+        name: "Web Application Firewall"
+        description: "DDoS protection and rate limiting"
+        enabled: true
+        agent: "DEPLOY-MASTER"
+        config:
+          rate_limiting: true
+          attack_challenge: "managed"
+
+      - id: "vercel-password-protect"
+        name: "Password Protection"
+        description: "Password protect deployments"
+        enabled: false
+        agent: "ENV-CONFIG"
+
+    integrations:
+      - id: "vercel-postgres"
+        name: "Vercel Postgres"
+        description: "Serverless PostgreSQL database"
+        enabled: false
+        agent: "DEPLOY-MASTER"
+
+      - id: "vercel-kv"
+        name: "Vercel KV"
+        description: "Serverless Redis-compatible store"
+        enabled: false
+        agent: "EDGE-OPS"
+
+      - id: "vercel-blob"
+        name: "Vercel Blob"
+        description: "File storage solution"
+        enabled: false
+        agent: "DEPLOY-MASTER"
+
+      - id: "vercel-edge-config"
+        name: "Edge Config"
+        description: "Ultra-low latency data store"
+        enabled: false
+        agent: "EDGE-OPS"
+
+    notifications:
+      - id: "slack-notify"
+        name: "Slack Notifications"
+        description: "Send deployment notifications to Slack"
+        enabled: false
+        config:
+          webhook_url: "${SLACK_WEBHOOK_URL}"
+          events: ["deployment.created", "deployment.ready", "deployment.error"]
+
+      - id: "discord-notify"
+        name: "Discord Notifications"
+        description: "Send deployment notifications to Discord"
+        enabled: false
+
+      - id: "email-notify"
+        name: "Email Notifications"
+        description: "Send deployment emails"
+        enabled: true
+        config:
+          events: ["deployment.error", "deployment.promoted"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Framework Presets
+  # ─────────────────────────────────────────────────────────────────────────────
+  framework_presets:
+    nextjs:
+      name: "Next.js"
+      build_command: "next build"
+      output_directory: ".next"
+      install_command: "npm install"
+      dev_command: "next dev"
+      features:
+        - "ISR"
+        - "SSR"
+        - "Edge Runtime"
+        - "App Router"
+        - "API Routes"
+
+    remix:
+      name: "Remix"
+      build_command: "remix build"
+      output_directory: "build"
+      features:
+        - "SSR"
+        - "Edge Runtime"
+        - "Streaming"
+
+    astro:
+      name: "Astro"
+      build_command: "astro build"
+      output_directory: "dist"
+      features:
+        - "Static Generation"
+        - "SSR (optional)"
+        - "Islands Architecture"
+
+    sveltekit:
+      name: "SvelteKit"
+      build_command: "vite build"
+      output_directory: "build"
+      features:
+        - "SSR"
+        - "Static Generation"
+        - "Edge Functions"
+
+    nuxt:
+      name: "Nuxt"
+      build_command: "nuxt build"
+      output_directory: ".output"
+      features:
+        - "SSR"
+        - "Static Generation"
+        - "Edge Rendering"
+
+    vite:
+      name: "Vite (SPA)"
+      build_command: "vite build"
+      output_directory: "dist"
+      features:
+        - "Static Hosting"
+        - "Fast HMR"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Coordination Protocol
+  # ─────────────────────────────────────────────────────────────────────────────
+  swarm_protocol:
+    communication:
+      style: "collaborative_parallel"
+      lead_coordinator: "DEPLOY-MASTER"
+      decision_authority: "DEPLOY-MASTER with specialist input"
+
+    workflow_phases:
+      setup:
+        lead: "DEPLOY-MASTER"
+        support: ["ENV-CONFIG", "DOMAIN-HANDLER"]
+        outputs: ["project_linked", "env_configured", "domains_setup"]
+
+      development:
+        lead: "DEPLOY-MASTER"
+        parallel:
+          - agent: "PREVIEW-MASTER"
+            task: "manage_preview_deployments"
+          - agent: "EDGE-OPS"
+            task: "optimize_edge_functions"
+          - agent: "ENV-CONFIG"
+            task: "manage_dev_environment"
+        sync_point: "development_review"
+
+      staging:
+        lead: "DEPLOY-MASTER"
+        parallel:
+          - agent: "PREVIEW-MASTER"
+            task: "deploy_staging"
+          - agent: "METRICS-WATCH"
+            task: "performance_baseline"
+        sync_point: "staging_approval"
+
+      production:
+        lead: "DEPLOY-MASTER"
+        sequence:
+          - agent: "ENV-CONFIG"
+            task: "validate_prod_env"
+          - agent: "DEPLOY-MASTER"
+            task: "execute_deployment"
+          - agent: "EDGE-OPS"
+            task: "warm_caches"
+          - agent: "METRICS-WATCH"
+            task: "monitor_release"
+        rollback_agent: "DEPLOY-MASTER"
+
+      monitoring:
+        lead: "METRICS-WATCH"
+        continuous:
+          - agent: "METRICS-WATCH"
+            task: "track_web_vitals"
+          - agent: "EDGE-OPS"
+            task: "monitor_edge_performance"
+
+    handoff_protocols:
+      ENV_CONFIG_to_DEPLOY_MASTER:
+        trigger: "environment configured"
+        data: ["env_vars", "secrets", "config_status"]
+
+      DEPLOY_MASTER_to_EDGE_OPS:
+        trigger: "deployment ready"
+        data: ["deployment_url", "function_endpoints"]
+
+      DEPLOY_MASTER_to_METRICS_WATCH:
+        trigger: "deployment complete"
+        data: ["deployment_id", "production_url"]
+
+      PREVIEW_MASTER_to_DEPLOY_MASTER:
+        trigger: "preview approved"
+        data: ["preview_url", "approval_status"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Activation
+  # ─────────────────────────────────────────────────────────────────────────────
+  activation:
+    commands:
+      - "/deploy-vercel"
+      - "/vercel"
+      - "/v-deploy"
+      - "/team-vercel"
+      - "/nexus-deploy DEPLOY-MASTER"
+
+    triggers:
+      - "vercel"
+      - "deploy"
+      - "deployment"
+      - "edge function"
+      - "serverless"
+      - "preview deployment"
+      - "production deploy"
+      - "next.js deploy"
+
+    auto_includes:
+      - agent: "METRICS-WATCH"
+        condition: "always for monitoring"
+      - agent: "ENV-CONFIG"
+        condition: "when environment changes detected"
+      - agent: "EDGE-OPS"
+        condition: "when edge functions present"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Deliverables
+  # ─────────────────────────────────────────────────────────────────────────────
+  deliverables:
+    setup:
+      - vercel_project_linked
+      - vercel_json_configured
+      - environment_variables_set
+      - domains_configured
+      - git_integration_enabled
+
+    deployment:
+      - production_url
+      - preview_urls
+      - deployment_logs
+      - build_output
+      - function_endpoints
+
+    monitoring:
+      - web_vitals_report
+      - analytics_dashboard
+      - error_tracking
+      - performance_metrics
+
+    documentation:
+      - deployment_guide
+      - environment_reference
+      - domain_configuration
+      - troubleshooting_guide
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  "Six specialists, one mission—deploy to the edge, serve the world."
+#  — Vercel Deployment Master Team
+# ═══════════════════════════════════════════════════════════════════════════════

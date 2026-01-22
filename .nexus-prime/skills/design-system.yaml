@@ -1,0 +1,289 @@
+name: design-system
+version: 1.0.0
+description: Design system audit, creation, and extension workflows
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /design-system
+  - /ds-audit
+  - /ds-create
+  - /ds-extend
+
+parameters:
+  - name: action
+    type: enum
+    values: [audit, create, extend, document, migrate]
+    required: true
+  - name: target
+    type: string
+    required: false
+    description: Existing system to audit/extend, or name for new system
+  - name: framework
+    type: enum
+    values: [react, vue, svelte, web-components, figma-only]
+    required: false
+
+workflows:
+
+  audit:
+    name: Design System Health Check
+    description: Comprehensive evaluation of existing design system
+    steps:
+      - step: token_analysis
+        check:
+          - Are design tokens properly abstracted?
+          - Semantic vs primitive token separation?
+          - Theme-ability (dark mode, brands)?
+          - CSS custom properties or build-time?
+        scoring:
+          - No tokens (0)
+          - Basic tokens (1)
+          - Semantic layers (2)
+          - Full abstraction (3)
+
+      - step: component_maturity
+        check:
+          - Documentation quality
+          - Prop API consistency
+          - Accessibility built-in
+          - Test coverage
+          - Variant completeness
+        maturity_levels:
+          - Level 0: No documentation
+          - Level 1: Basic docs
+          - Level 2: Props documented
+          - Level 3: Examples + guidelines
+          - Level 4: Do/Don't + accessibility
+          - Level 5: Interactive playground
+
+      - step: composition_patterns
+        check:
+          - Layout primitives (Box, Stack, Grid)
+          - Compound components
+          - Render prop / slot patterns
+          - Responsive utilities
+        evaluate: Can complex UIs be built without custom CSS?
+
+      - step: developer_experience
+        check:
+          - TypeScript support
+          - IDE autocomplete
+          - Error messages helpful
+          - Bundle size reasonable
+          - Tree-shaking works
+
+      - step: governance
+        check:
+          - Contribution process defined?
+          - Versioning strategy?
+          - Deprecation policy?
+          - Breaking change communication?
+          - Design-dev sync process?
+
+    output_template: |
+      ## Design System Audit: [System Name]
+
+      ### Overall Health Score: [X/100]
+
+      ### Token Architecture
+      **Score:** [X/3]
+      **Findings:**
+      - [Token structure analysis]
+      **Recommendations:**
+      - [Improvements]
+
+      ### Component Maturity
+      | Component | Docs | A11y | Tests | Variants | Score |
+      |-----------|------|------|-------|----------|-------|
+
+      **Average Maturity Level:** [X/5]
+
+      ### Composition Capability
+      **Score:** [X/3]
+      - [ ] Layout primitives
+      - [ ] Compound components
+      - [ ] Responsive utilities
+
+      ### Developer Experience
+      **Score:** [X/5]
+      - [ ] TypeScript
+      - [ ] Autocomplete
+      - [ ] Bundle optimization
+
+      ### Governance
+      **Score:** [X/5]
+      - [ ] Contribution docs
+      - [ ] Versioning
+      - [ ] Deprecation policy
+
+      ### Priority Improvements
+      1. [Highest impact improvement]
+      2. [Second priority]
+      3. [Third priority]
+
+      ### Comparison to Industry Leaders
+      | Aspect | Yours | Radix | Shadcn | MUI |
+
+  create:
+    name: Design System Creation
+    description: Bootstrap a new design system with best practices
+    steps:
+      - step: foundation
+        deliverables:
+          - Design principles document
+          - Token architecture (primitive → semantic → component)
+          - Color system (with accessibility)
+          - Typography scale (modular)
+          - Spacing scale (consistent)
+          - Elevation/shadow system
+          - Motion/animation tokens
+          - Breakpoint system
+
+      - step: primitives
+        components:
+          - Box (spacing, color, border)
+          - Flex (alignment, gap)
+          - Grid (responsive layouts)
+          - Stack (vertical/horizontal)
+          - Text (typography)
+          - Heading (semantic headings)
+          - VisuallyHidden (a11y)
+
+      - step: core_components
+        priority_order:
+          - Button (variants, sizes, states)
+          - Input (text, validation)
+          - Select (native, custom)
+          - Checkbox / Radio
+          - Switch / Toggle
+          - Modal / Dialog
+          - Toast / Notification
+          - Card
+          - Avatar
+          - Badge
+          - Tooltip
+          - Dropdown Menu
+
+      - step: documentation
+        structure:
+          - Getting started guide
+          - Design principles
+          - Token reference
+          - Component catalog
+          - Pattern library
+          - Accessibility guidelines
+          - Contributing guide
+          - Changelog
+
+    tech_recommendations:
+      tokens:
+        recommended: Style Dictionary
+        alternatives: [Cobalt, Specify, Tokens Studio]
+
+      components:
+        headless_first:
+          - Radix UI (React)
+          - Ark UI (Multi-framework)
+          - Kobalte (Solid)
+          - Melt UI (Svelte)
+        styled:
+          - Shadcn/ui (Radix + Tailwind)
+          - Park UI (Ark + Panda)
+
+      documentation:
+        recommended: Storybook 8
+        alternatives: [Histoire, Supernova, zeroheight]
+
+      testing:
+        visual: [Chromatic, Percy, Argos]
+        a11y: [axe, jest-axe, Storybook a11y addon]
+        interaction: [Storybook interaction testing, Playwright]
+
+  extend:
+    name: Design System Extension
+    description: Add new components or patterns to existing system
+    process:
+      - step: research
+        questions:
+          - What problem does this solve?
+          - How do similar systems handle this?
+          - What are the use cases?
+          - What variants are needed?
+
+      - step: design
+        deliverables:
+          - Component specification
+          - Figma component
+          - State documentation
+          - Accessibility requirements
+          - Responsive behavior
+
+      - step: implement
+        checklist:
+          - [ ] Follows token system
+          - [ ] API consistent with other components
+          - [ ] All states handled
+          - [ ] Keyboard accessible
+          - [ ] Screen reader tested
+          - [ ] Responsive
+          - [ ] Dark mode works
+          - [ ] Performance acceptable
+
+      - step: document
+        requirements:
+          - [ ] Props table
+          - [ ] Usage examples
+          - [ ] Do/Don't guidelines
+          - [ ] Accessibility notes
+          - [ ] Related components
+
+      - step: release
+        checklist:
+          - [ ] Changelog updated
+          - [ ] Version bumped appropriately
+          - [ ] Migration guide (if breaking)
+          - [ ] Announcement prepared
+
+component_spec_template: |
+  ## Component Specification: [Name]
+
+  ### Purpose
+  [What this component does]
+
+  ### Anatomy
+  [Parts of the component]
+
+  ### Props/API
+  | Prop | Type | Default | Description |
+  |------|------|---------|-------------|
+
+  ### Variants
+  [Visual/behavioral variants]
+
+  ### States
+  - Default
+  - Hover
+  - Focus
+  - Active
+  - Disabled
+  - Loading
+  - Error
+
+  ### Accessibility
+  - ARIA role: [role]
+  - Keyboard: [interactions]
+  - Screen reader: [announcements]
+
+  ### Responsive Behavior
+  [How it adapts]
+
+  ### Do's and Don'ts
+  **Do:**
+  - [Good usage]
+
+  **Don't:**
+  - [Anti-pattern]
+
+  ### Examples
+  [Code examples]

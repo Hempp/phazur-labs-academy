@@ -1,0 +1,289 @@
+name: ops-observability
+version: 1.0.0
+description: Observability, monitoring, alerting, and SLO management
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-observe
+  - /ops-alerts
+  - /ops-dashboard
+  - /ops-slo
+
+parameters:
+  - name: service
+    type: string
+    required: true
+    description: Service or system to observe
+  - name: type
+    type: enum
+    values: [metrics, logs, traces, all]
+    default: all
+
+three_pillars:
+
+  metrics:
+    red_method:
+      description: Request-focused metrics for services
+      metrics:
+        rate: Requests per second
+        errors: Failed requests per second
+        duration: Latency distribution (p50, p95, p99)
+
+    use_method:
+      description: Resource-focused metrics for infrastructure
+      metrics:
+        utilization: Percent time resource busy
+        saturation: Queue depth, backlog
+        errors: Error events count
+
+    golden_signals:
+      description: Google SRE golden signals
+      signals:
+        latency: Time to serve request
+        traffic: Demand on system
+        errors: Rate of failed requests
+        saturation: How full the system is
+
+    collection:
+      tools:
+        - prometheus
+        - datadog
+        - newrelic
+        - cloudwatch
+        - opentelemetry
+
+      best_practices:
+        - consistent_naming
+        - appropriate_cardinality
+        - histogram_over_summary
+        - recording_rules
+        - federation_for_scale
+
+  logs:
+    standards:
+      format: JSON structured logging
+      fields:
+        - timestamp
+        - level
+        - message
+        - correlation_id
+        - service
+        - environment
+        - version
+
+    levels:
+      ERROR: Failures requiring attention
+      WARN: Potential issues
+      INFO: Normal operations
+      DEBUG: Detailed debugging (off in prod)
+
+    aggregation:
+      tools:
+        - elasticsearch
+        - loki
+        - splunk
+        - cloudwatch_logs
+        - datadog_logs
+
+      best_practices:
+        - centralized_collection
+        - retention_policies
+        - index_optimization
+        - sensitive_data_masking
+        - correlation_ids
+
+  traces:
+    instrumentation:
+      standard: OpenTelemetry
+      propagation: W3C Trace Context
+      sampling: Head-based or tail-based
+
+    tools:
+      - jaeger
+      - zipkin
+      - tempo
+      - xray
+      - datadog_apm
+
+    best_practices:
+      - automatic_instrumentation
+      - custom_spans_for_business
+      - appropriate_sampling
+      - trace_context_propagation
+      - service_dependency_mapping
+
+slo_framework:
+
+  sli_types:
+    availability:
+      definition: Proportion of successful requests
+      calculation: successful_requests / total_requests
+      good_threshold: ">= 99.9%"
+
+    latency:
+      definition: Proportion of fast requests
+      calculation: requests_under_threshold / total_requests
+      good_threshold: "p99 < 200ms"
+
+    throughput:
+      definition: Rate of successful operations
+      calculation: successful_operations / time_period
+      good_threshold: ">= 1000 rps"
+
+    freshness:
+      definition: Proportion of fresh data
+      calculation: fresh_records / total_records
+      good_threshold: ">= 99%"
+
+  slo_definition:
+    template: |
+      name: [Service] - [SLI Type]
+      sli:
+        type: [availability|latency|throughput]
+        query: [Metric query]
+        threshold: [Good threshold]
+      objective:
+        target: [99.9%]
+        window: [30d rolling]
+      alerting:
+        burn_rate_short: [14.4x for 1h]
+        burn_rate_long: [6x for 6h]
+
+  error_budget:
+    calculation: (1 - SLO_target) * time_window
+    alerts:
+      - 2x_burn_rate: "Warning: fast consumption"
+      - 10x_burn_rate: "Critical: budget depleting rapidly"
+      - budget_exhausted: "Feature freeze, focus on reliability"
+
+    policies:
+      budget_available: "Ship features, experiment"
+      budget_low: "Careful with changes"
+      budget_exhausted: "Reliability work only"
+
+alerting:
+
+  best_practices:
+    - symptom_based: Alert on user impact, not causes
+    - actionable: Every alert should have clear action
+    - documented: Runbook linked to every alert
+    - tiered: Page only for user-impacting issues
+    - tuned: Minimize false positives
+
+  severity_levels:
+    critical:
+      criteria: User-facing outage
+      response: Page on-call immediately
+      examples:
+        - Service completely down
+        - Data loss occurring
+        - Security breach
+
+    warning:
+      criteria: Degraded but functional
+      response: Notify during business hours
+      examples:
+        - Elevated error rates
+        - High latency
+        - Approaching capacity
+
+    info:
+      criteria: Awareness needed
+      response: Log for review
+      examples:
+        - Deployment completed
+        - Scaling event
+        - Configuration change
+
+  anti_patterns:
+    - alert_fatigue: Too many non-actionable alerts
+    - cause_based: Alerting on CPU instead of latency
+    - no_runbook: Alerts without remediation steps
+    - no_owner: Alerts nobody responds to
+
+dashboards:
+
+  types:
+    overview:
+      purpose: High-level system health
+      audience: Leadership, on-call
+      content:
+        - SLO status
+        - Error rates
+        - Request volume
+        - Key business metrics
+
+    service:
+      purpose: Deep-dive into single service
+      audience: Service owners
+      content:
+        - RED metrics
+        - Dependency health
+        - Resource utilization
+        - Recent deployments
+
+    infrastructure:
+      purpose: Resource health
+      audience: Platform team
+      content:
+        - USE metrics
+        - Cluster health
+        - Node status
+        - Cost metrics
+
+    incident:
+      purpose: Incident investigation
+      audience: On-call, responders
+      content:
+        - Timeline correlation
+        - Error details
+        - Trace examples
+        - Related alerts
+
+  best_practices:
+    - consistent_layout: Same structure across dashboards
+    - appropriate_timerange: Default to useful window
+    - drill_down: Link to detailed views
+    - annotations: Mark deployments, incidents
+    - thresholds: Visual indicators for good/bad
+
+tools:
+  visualization:
+    - grafana
+    - datadog
+    - newrelic
+    - kibana
+
+  alerting:
+    - prometheus_alertmanager
+    - pagerduty
+    - opsgenie
+    - victorops
+
+  slo:
+    - sloth
+    - pyrra
+    - nobl9
+    - datadog_slo
+
+workflows:
+
+  setup_observability:
+    command: /ops-observe
+    steps:
+      - metrics: Configure metric collection
+      - logs: Set up log aggregation
+      - traces: Enable distributed tracing
+      - dashboards: Create standard dashboards
+      - alerts: Configure baseline alerts
+
+  define_slo:
+    command: /ops-slo
+    steps:
+      - identify: Determine critical user journeys
+      - measure: Define SLIs
+      - target: Set SLO targets
+      - budget: Configure error budgets
+      - alert: Set up burn rate alerts
+      - review: Schedule regular SLO reviews

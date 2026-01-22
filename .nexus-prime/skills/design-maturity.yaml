@@ -1,0 +1,375 @@
+name: design-maturity
+version: 1.0.0
+description: Design maturity models, assessment, and roadmaps
+agent: VISION-PRIME
+category: design-leadership
+
+triggers:
+  - /design-maturity-audit
+  - /design-maturity-model
+  - /design-maturity-roadmap
+  - /design-maturity-benchmark
+
+parameters:
+  - name: organization
+    type: string
+    required: true
+    description: Organization to assess
+  - name: scope
+    type: enum
+    values: [full, leadership, process, research, systems, metrics]
+    default: full
+
+maturity_levels:
+
+  level_1:
+    name: Initial
+    score_range: 0-19
+    description: Minimal design investment
+    characteristics:
+      leadership: No design role at leadership
+      process: Ad-hoc, inconsistent
+      research: None or rare
+      systems: No design system
+      metrics: None
+      culture: Design seen as decoration
+    indicators:
+      - Design is an afterthought
+      - No dedicated design headcount
+      - Design done by non-designers
+      - No user research
+      - No quality standards
+
+  level_2:
+    name: Project-Based
+    score_range: 20-39
+    description: Design applied inconsistently
+    characteristics:
+      leadership: Design manager exists
+      process: Some process documentation
+      research: Occasional projects
+      systems: Basic component library
+      metrics: Output tracking only
+      culture: Design valued for aesthetics
+    indicators:
+      - Some design roles exist
+      - Design involved in some projects
+      - Inconsistent design quality
+      - Research for major initiatives only
+      - Design system beginning
+
+  level_3:
+    name: Functional
+    score_range: 40-59
+    description: Design as established function
+    characteristics:
+      leadership: Design Director/VP
+      process: Defined process and tools
+      research: Regular research cadence
+      systems: Mature design system
+      metrics: Quality metrics tracked
+      culture: Design recognized as important
+    indicators:
+      - Design team structure in place
+      - Consistent design process
+      - Design system with adoption
+      - Research informs decisions
+      - Design metrics exist
+
+  level_4:
+    name: Integrated
+    score_range: 60-79
+    description: Design embedded in all decisions
+    characteristics:
+      leadership: Design at exec table
+      process: Optimized, measured
+      research: Continuous research practice
+      systems: Design system as platform
+      metrics: Outcome metrics tracked
+      culture: Design as competitive advantage
+    indicators:
+      - Design influences strategy
+      - Cross-functional partnerships strong
+      - Research drives roadmap
+      - Design system widely adopted
+      - Design impact measured
+
+  level_5:
+    name: Design-Led
+    score_range: 80-100
+    description: Design drives business strategy
+    characteristics:
+      leadership: CDO, design-led company
+      process: Continuous improvement
+      research: Research ops established
+      systems: Industry-leading system
+      metrics: Business impact proven
+      culture: Design is the strategy
+    indicators:
+      - Design shapes business direction
+      - Design culture throughout org
+      - Design-led innovation
+      - Industry-recognized excellence
+      - Measurable business impact
+
+maturity_dimensions:
+
+  leadership:
+    weight: 20
+    levels:
+      level_1: No design role in leadership
+      level_2: Design manager exists
+      level_3: Design Director/VP
+      level_4: Design at executive table
+      level_5: CDO, design shapes strategy
+
+    assessment:
+      - Does design have a seat at the executive table?
+      - Does design influence company strategy?
+      - Does design have budget authority?
+      - Is there a clear design vision?
+      - Does design leadership drive culture?
+
+  process:
+    weight: 20
+    levels:
+      level_1: Ad-hoc, no documentation
+      level_2: Some documentation
+      level_3: Defined process and tools
+      level_4: Optimized and measured
+      level_5: Continuous improvement
+
+    assessment:
+      - Is the design process documented?
+      - Are tools standardized?
+      - Are there quality gates?
+      - Is design process measured?
+      - Is there continuous improvement?
+
+  research:
+    weight: 20
+    levels:
+      level_1: None
+      level_2: Occasional projects
+      level_3: Regular cadence
+      level_4: Continuous practice
+      level_5: Research ops established
+
+    assessment:
+      - Is user research conducted regularly?
+      - Does research inform decisions?
+      - Is there a research repository?
+      - Are researchers on the team?
+      - Is there research operations?
+
+  systems:
+    weight: 20
+    levels:
+      level_1: No design system
+      level_2: Basic component library
+      level_3: Mature design system
+      level_4: Design system as platform
+      level_5: Industry-leading system
+
+    assessment:
+      - Does a design system exist?
+      - Is the system well-documented?
+      - Is adoption tracked and high?
+      - Does the system include code?
+      - Is contribution model defined?
+
+  metrics:
+    weight: 20
+    levels:
+      level_1: None
+      level_2: Output metrics only
+      level_3: Quality metrics
+      level_4: Outcome metrics
+      level_5: Business impact proven
+
+    assessment:
+      - Are design metrics defined?
+      - Is design quality measured?
+      - Are user outcomes tracked?
+      - Is design ROI calculated?
+      - Is impact communicated?
+
+assessment_template:
+
+  leadership_questions:
+    - question: Is there a design leader at the executive level?
+      scoring:
+        level_1: No design leadership
+        level_2: Design manager, not exec
+        level_3: Director, not exec
+        level_4: VP, sometimes at exec
+        level_5: CDO/SVP at exec table
+
+    - question: Does design influence company strategy?
+      scoring:
+        level_1: Never consulted
+        level_2: Occasionally consulted
+        level_3: Consulted on design decisions
+        level_4: Consulted on product strategy
+        level_5: Drives business strategy
+
+    - question: Does design have budget authority?
+      scoring:
+        level_1: No budget
+        level_2: Limited budget
+        level_3: Defined budget
+        level_4: Significant budget
+        level_5: Strategic investment
+
+  process_questions:
+    - question: Is the design process documented?
+      scoring:
+        level_1: Not documented
+        level_2: Partially documented
+        level_3: Fully documented
+        level_4: Documented and measured
+        level_5: Continuously improved
+
+    - question: Are design tools standardized?
+      scoring:
+        level_1: Everyone uses different tools
+        level_2: Some standardization
+        level_3: Fully standardized
+        level_4: Integrated tool stack
+        level_5: Optimized and automated
+
+  research_questions:
+    - question: How often is user research conducted?
+      scoring:
+        level_1: Never
+        level_2: Occasionally (major projects)
+        level_3: Regularly (monthly)
+        level_4: Continuously (weekly)
+        level_5: Research ops (always-on)
+
+    - question: Does research inform product decisions?
+      scoring:
+        level_1: Never
+        level_2: Sometimes
+        level_3: Often
+        level_4: Always
+        level_5: Research drives roadmap
+
+  systems_questions:
+    - question: Does a design system exist?
+      scoring:
+        level_1: No system
+        level_2: Basic library
+        level_3: Mature system
+        level_4: System with code
+        level_5: Platform with governance
+
+    - question: What is design system adoption?
+      scoring:
+        level_1: "<20%"
+        level_2: "20-50%"
+        level_3: "50-70%"
+        level_4: "70-90%"
+        level_5: ">90%"
+
+  metrics_questions:
+    - question: Are design metrics tracked?
+      scoring:
+        level_1: No metrics
+        level_2: Output only
+        level_3: Quality metrics
+        level_4: Outcome metrics
+        level_5: Business impact
+
+    - question: Is design ROI measured?
+      scoring:
+        level_1: Never
+        level_2: Rarely
+        level_3: Sometimes
+        level_4: Regularly
+        level_5: Always, part of planning
+
+roadmap_template:
+
+  level_1_to_2:
+    timeline: 6-12 months
+    priorities:
+      - Hire first design leader
+      - Establish basic process
+      - Select and standardize tools
+      - Begin documenting guidelines
+      - Conduct first research study
+    quick_wins:
+      - Design tool standardization
+      - Basic file organization
+      - First design review ritual
+
+  level_2_to_3:
+    timeline: 12-18 months
+    priorities:
+      - Hire design team
+      - Document full process
+      - Build design system v1
+      - Establish research cadence
+      - Define design metrics
+    quick_wins:
+      - Process documentation
+      - Component library
+      - Regular research sessions
+
+  level_3_to_4:
+    timeline: 12-24 months
+    priorities:
+      - Elevate design leadership
+      - Mature design system
+      - Establish continuous research
+      - Track outcome metrics
+      - Build cross-functional partnerships
+    quick_wins:
+      - Executive design reviews
+      - System adoption tracking
+      - Research repository
+
+  level_4_to_5:
+    timeline: 18-36 months
+    priorities:
+      - Design at exec level
+      - Design system as platform
+      - Research ops
+      - Prove business impact
+      - Industry recognition
+    quick_wins:
+      - Business metric connection
+      - External thought leadership
+      - Design culture programs
+
+workflows:
+
+  maturity_audit:
+    command: /design-maturity-audit
+    steps:
+      - survey: Distribute assessment
+      - interview: Leadership interviews
+      - review: Artifact review
+      - score: Calculate scores
+      - analyze: Identify patterns
+      - report: Present findings
+
+  maturity_roadmap:
+    command: /design-maturity-roadmap
+    steps:
+      - baseline: Current level
+      - target: Desired level
+      - gaps: Priority gaps
+      - initiatives: Key investments
+      - timeline: Quarterly plan
+      - resources: Budget and headcount
+
+  benchmark:
+    command: /design-maturity-benchmark
+    steps:
+      - assess: Own maturity
+      - research: Industry data
+      - compare: Gap analysis
+      - contextualize: Size and stage
+      - recommend: Target positioning

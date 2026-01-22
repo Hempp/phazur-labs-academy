@@ -1,0 +1,218 @@
+name: ux-celebrate
+version: 1.0.0
+description: Recognize and document excellent UX decisions with educational context
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /ux-celebrate
+  - /ux-win
+  - /design-win
+  - /ux-kudos
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: Element, flow, or decision to celebrate
+  - name: category
+    type: enum
+    values:
+      - microinteraction
+      - accessibility
+      - cognitive-load
+      - progressive-disclosure
+      - error-handling
+      - emotional-design
+      - innovation
+      - performance
+      - inclusivity
+      - delight
+    required: false
+
+recognition_categories:
+
+  microinteraction:
+    name: Delightful Microinteractions
+    criteria:
+      - Animation enhances understanding
+      - Provides meaningful feedback
+      - Doesn't delay or distract
+      - Reinforces brand personality
+      - Respects reduced motion preferences
+    examples:
+      - "Button state transitions that confirm action"
+      - "Loading skeletons that set expectations"
+      - "Success animations that celebrate completion"
+      - "Hover states that reveal affordances"
+
+  accessibility:
+    name: Inclusive Design Excellence
+    criteria:
+      - Goes beyond WCAG compliance
+      - Considers edge cases and disabilities
+      - Multiple interaction modes supported
+      - Content accessible to all
+      - Assistive technology tested
+    examples:
+      - "Focus management in modals"
+      - "Comprehensive alt text strategy"
+      - "Keyboard shortcuts with discoverability"
+      - "High contrast mode support"
+
+  cognitive_load:
+    name: Cognitive Load Reduction
+    criteria:
+      - Simplifies without dumbing down
+      - Chunked information effectively
+      - Smart defaults reduce decisions
+      - Recognition over recall
+      - Progressive complexity
+    examples:
+      - "Wizard breaking complex task into steps"
+      - "Smart defaults based on user context"
+      - "Recently used items surfaced"
+      - "Inline help at point of need"
+
+  progressive_disclosure:
+    name: Progressive Disclosure Mastery
+    criteria:
+      - Right information at right time
+      - Complexity revealed as needed
+      - Primary actions prominent
+      - Secondary actions accessible but not overwhelming
+      - Expert features discoverable
+    examples:
+      - "Advanced options in collapsed section"
+      - "Contextual actions appearing on hover"
+      - "Learn more links for depth"
+      - "Feature flags for power users"
+
+  error_handling:
+    name: Graceful Error Recovery
+    criteria:
+      - Errors prevented before they occur
+      - Clear, human-readable messages
+      - Actionable recovery path
+      - State preserved on failure
+      - No data loss
+    examples:
+      - "Autosave preventing work loss"
+      - "Inline validation before submit"
+      - "Specific error with fix suggestion"
+      - "Undo for destructive actions"
+
+  emotional_design:
+    name: Emotional Resonance
+    criteria:
+      - Creates connection with user
+      - Appropriate tone and voice
+      - Celebrates user achievements
+      - Builds trust through transparency
+      - Memorable moments
+    examples:
+      - "Empty states that encourage action"
+      - "Onboarding that feels welcoming"
+      - "Celebration of milestones"
+      - "Human copywriting"
+
+  innovation:
+    name: Novel Problem Solving
+    criteria:
+      - New solution to common problem
+      - Challenges convention appropriately
+      - Evidence-based innovation
+      - User-tested before shipping
+      - Sets new standard
+    examples:
+      - "Command palette for power users"
+      - "AI-assisted task completion"
+      - "Novel navigation paradigm"
+      - "Unique onboarding approach"
+
+  performance:
+    name: Perceived Performance Excellence
+    criteria:
+      - Instant feedback on actions
+      - Optimistic UI updates
+      - Meaningful loading states
+      - Background processing
+      - Graceful degradation
+    examples:
+      - "Skeleton screens during load"
+      - "Optimistic updates with rollback"
+      - "Staggered content reveal"
+      - "Offline-first architecture"
+
+  inclusivity:
+    name: Inclusive Design
+    criteria:
+      - Considers diverse users
+      - Avoids assumptions
+      - Flexible input methods
+      - Respects user preferences
+      - Global-ready
+    examples:
+      - "Gender-inclusive forms"
+      - "Name field handling edge cases"
+      - "RTL language support"
+      - "Reduced motion respect"
+
+  delight:
+    name: Moments of Delight
+    criteria:
+      - Unexpected positive surprise
+      - Enhances rather than distracts
+      - Brand-appropriate
+      - Memorable
+      - Shareable
+    examples:
+      - "Easter eggs for discovery"
+      - "Playful 404 pages"
+      - "Achievement celebrations"
+      - "Personality in error states"
+
+output_template: |
+  ★ Design Win ─────────────────────────────────────
+  **Category:** [Category Name]
+
+  **What's Excellent:**
+  [Specific description of the good design]
+
+  **Why It Works:**
+  • [Principle or research backing]
+  • [User benefit]
+  • [Business impact]
+
+  **Pattern Reference:**
+  [Similar implementations in well-known products]
+
+  **Learn More:**
+  [Links to research or examples]
+
+  **Future Enhancement:**
+  [How this could evolve]
+  ─────────────────────────────────────────────────
+
+win_documentation:
+  format: |
+    ## UX Win: [Title]
+    **Date:** [Date]
+    **Product/Feature:** [Context]
+    **Category:** [Category]
+
+    ### The Win
+    [Description]
+
+    ### Evidence
+    [Screenshot or recording]
+
+    ### Impact
+    - User benefit: [X]
+    - Business metric: [Y]
+    - Team learning: [Z]
+
+    ### Replication
+    [How to apply this pattern elsewhere]
+
+  storage: ./ux-wins/[date]-[slug].md

@@ -1,0 +1,1165 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NEXUS-PRIME: GitHub Master Team
+#  Version Control | CI/CD | Collaboration | DevOps Excellence
+#  "Code flows. Teams collaborate. Software ships."
+# ═══════════════════════════════════════════════════════════════════════════════
+
+skill:
+  id: "TEAM-GITHUB"
+  name: "GitHub Master Team"
+  version: "1.0.0"
+  tier: "master-team"
+  status: "active"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Team Identity
+  # ─────────────────────────────────────────────────────────────────────────────
+  identity:
+    title: "GitHub DevOps & Collaboration Swarm"
+    tagline: "Code flows. Teams collaborate. Software ships."
+    description: |
+      A coordinated swarm of 8 guru-level specialists who master GitHub's entire
+      ecosystem—from repository management to CI/CD pipelines, from code review
+      to security scanning. Every commit matters. Every merge counts.
+
+    combined_experience: "240+ years (30 years x 8 specialists)"
+
+    capabilities:
+      - "Repository management & architecture"
+      - "GitHub Actions & CI/CD pipelines"
+      - "Pull request workflows & code review"
+      - "Branch protection & policies"
+      - "GitHub Packages & container registry"
+      - "Security scanning & Dependabot"
+      - "GitHub Projects & issue tracking"
+      - "GitHub Pages & documentation"
+      - "GitHub Copilot integration"
+      - "Webhooks & integrations"
+      - "GitHub Apps & OAuth"
+      - "Enterprise administration"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Agents
+  # ─────────────────────────────────────────────────────────────────────────────
+  agents:
+    lead:
+      id: "GH-001"
+      codename: "REPO-MASTER"
+      role: "Lead Repository Architect"
+      years_experience: 30
+      responsibilities:
+        - repository_strategy
+        - team_coordination
+        - workflow_orchestration
+        - migration_management
+        - governance_policies
+      expertise:
+        - "Repository architecture"
+        - "Monorepo & polyrepo strategies"
+        - "Git workflows (Gitflow, Trunk-based)"
+        - "Migration & consolidation"
+        - "Access management"
+
+    specialists:
+      - id: "GH-002"
+        codename: "ACTIONS-GURU"
+        role: "CI/CD Pipeline Architect"
+        focus: "GitHub Actions, workflows, automation"
+        expertise:
+          - "GitHub Actions mastery"
+          - "Reusable workflows"
+          - "Matrix builds"
+          - "Self-hosted runners"
+          - "Pipeline optimization"
+          - "Artifact management"
+
+      - id: "GH-003"
+        codename: "PR-SENTINEL"
+        role: "Code Review & PR Specialist"
+        focus: "Pull requests, reviews, merge strategies"
+        expertise:
+          - "Code review best practices"
+          - "PR templates & automation"
+          - "CODEOWNERS configuration"
+          - "Branch protection rules"
+          - "Merge strategies"
+          - "Review automation"
+
+      - id: "GH-004"
+        codename: "SECURITY-HAWK"
+        role: "Security & Compliance Expert"
+        focus: "Security scanning, secrets, compliance"
+        expertise:
+          - "GitHub Advanced Security"
+          - "Dependabot configuration"
+          - "Secret scanning"
+          - "Code scanning (CodeQL)"
+          - "Security policies"
+          - "Vulnerability management"
+
+      - id: "GH-005"
+        codename: "ISSUE-TRACKER"
+        role: "Project Management Specialist"
+        focus: "Issues, projects, milestones, labels"
+        expertise:
+          - "GitHub Projects (v2)"
+          - "Issue templates"
+          - "Milestone planning"
+          - "Label taxonomy"
+          - "Automation rules"
+          - "Sprint management"
+
+      - id: "GH-006"
+        codename: "PACKAGE-KEEPER"
+        role: "Package & Registry Expert"
+        focus: "GitHub Packages, containers, releases"
+        expertise:
+          - "GitHub Packages"
+          - "Container registry"
+          - "npm/Maven/NuGet publishing"
+          - "Release management"
+          - "Semantic versioning"
+          - "Artifact lifecycle"
+
+      - id: "GH-007"
+        codename: "PAGES-BUILDER"
+        role: "Documentation & Pages Specialist"
+        focus: "GitHub Pages, wikis, documentation"
+        expertise:
+          - "GitHub Pages deployment"
+          - "Jekyll & static site generators"
+          - "Wiki management"
+          - "README optimization"
+          - "Documentation workflows"
+          - "Custom domains"
+
+      - id: "GH-008"
+        codename: "WEBHOOK-WARDEN"
+        role: "Integration & Automation Expert"
+        focus: "Webhooks, GitHub Apps, API integration"
+        expertise:
+          - "GitHub REST & GraphQL APIs"
+          - "Webhook management"
+          - "GitHub Apps development"
+          - "OAuth applications"
+          - "Third-party integrations"
+          - "Event-driven automation"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Commands
+  # ─────────────────────────────────────────────────────────────────────────────
+  commands:
+    repository:
+      - command: "/github-init"
+        description: "Initialize GitHub repository with best practices"
+        aliases: ["/gh-init", "/repo-init"]
+        agent: "REPO-MASTER"
+        options:
+          - "--template <name>: Use template repository"
+          - "--private: Create private repository"
+          - "--org <name>: Create in organization"
+          - "--license <type>: Add license"
+
+      - command: "/github-clone"
+        description: "Clone repository with optimal setup"
+        aliases: ["/gh-clone"]
+        agent: "REPO-MASTER"
+
+      - command: "/github-fork"
+        description: "Fork repository with upstream tracking"
+        aliases: ["/gh-fork"]
+        agent: "REPO-MASTER"
+
+      - command: "/github-archive"
+        description: "Archive repository properly"
+        agent: "REPO-MASTER"
+
+    branches:
+      - command: "/github-branch"
+        description: "Branch management operations"
+        aliases: ["/gh-branch"]
+        agent: "PR-SENTINEL"
+        subcommands:
+          - "create <name>: Create new branch"
+          - "protect <name>: Add branch protection"
+          - "delete <name>: Delete branch"
+          - "list: List all branches"
+          - "sync: Sync with upstream"
+
+      - command: "/github-protect"
+        description: "Configure branch protection rules"
+        agent: "PR-SENTINEL"
+        options:
+          - "--require-reviews <n>: Required reviewers"
+          - "--require-checks: Require status checks"
+          - "--no-force-push: Prevent force push"
+
+    pull_requests:
+      - command: "/github-pr"
+        description: "Pull request operations"
+        aliases: ["/gh-pr", "/pr"]
+        agent: "PR-SENTINEL"
+        subcommands:
+          - "create: Create pull request"
+          - "list: List pull requests"
+          - "review: Review pull request"
+          - "merge: Merge pull request"
+          - "close: Close pull request"
+          - "checkout <n>: Checkout PR locally"
+
+      - command: "/github-review"
+        description: "Code review operations"
+        aliases: ["/gh-review"]
+        agent: "PR-SENTINEL"
+        options:
+          - "--approve: Approve PR"
+          - "--request-changes: Request changes"
+          - "--comment: Add review comment"
+
+    actions:
+      - command: "/github-actions"
+        description: "GitHub Actions management"
+        aliases: ["/gh-actions", "/actions"]
+        agent: "ACTIONS-GURU"
+        subcommands:
+          - "list: List workflows"
+          - "run <workflow>: Trigger workflow"
+          - "logs <run-id>: View run logs"
+          - "cancel <run-id>: Cancel run"
+          - "create: Create new workflow"
+
+      - command: "/github-workflow"
+        description: "Workflow file operations"
+        aliases: ["/gh-workflow"]
+        agent: "ACTIONS-GURU"
+        subcommands:
+          - "init <type>: Initialize workflow"
+          - "validate: Validate workflow syntax"
+          - "debug: Debug workflow"
+
+      - command: "/github-runners"
+        description: "Self-hosted runner management"
+        agent: "ACTIONS-GURU"
+
+    issues:
+      - command: "/github-issue"
+        description: "Issue management"
+        aliases: ["/gh-issue", "/issue"]
+        agent: "ISSUE-TRACKER"
+        subcommands:
+          - "create: Create new issue"
+          - "list: List issues"
+          - "close <n>: Close issue"
+          - "assign <n> <user>: Assign issue"
+          - "label <n> <label>: Add label"
+
+      - command: "/github-project"
+        description: "GitHub Projects management"
+        aliases: ["/gh-project"]
+        agent: "ISSUE-TRACKER"
+        subcommands:
+          - "create: Create project"
+          - "list: List projects"
+          - "view <n>: View project board"
+          - "add <issue>: Add item to project"
+
+      - command: "/github-milestone"
+        description: "Milestone management"
+        agent: "ISSUE-TRACKER"
+
+    security:
+      - command: "/github-security"
+        description: "Security scanning and alerts"
+        aliases: ["/gh-security"]
+        agent: "SECURITY-HAWK"
+        subcommands:
+          - "scan: Run security scan"
+          - "alerts: View security alerts"
+          - "advisories: View advisories"
+          - "audit: Security audit"
+
+      - command: "/github-dependabot"
+        description: "Dependabot configuration"
+        aliases: ["/gh-dependabot"]
+        agent: "SECURITY-HAWK"
+        subcommands:
+          - "enable: Enable Dependabot"
+          - "alerts: View Dependabot alerts"
+          - "config: Configure update settings"
+
+      - command: "/github-secrets"
+        description: "Repository secrets management"
+        aliases: ["/gh-secrets"]
+        agent: "SECURITY-HAWK"
+        subcommands:
+          - "list: List secrets"
+          - "set <name>: Set secret"
+          - "delete <name>: Delete secret"
+
+    packages:
+      - command: "/github-packages"
+        description: "GitHub Packages management"
+        aliases: ["/gh-packages"]
+        agent: "PACKAGE-KEEPER"
+        subcommands:
+          - "list: List packages"
+          - "publish: Publish package"
+          - "delete: Delete package version"
+
+      - command: "/github-release"
+        description: "Release management"
+        aliases: ["/gh-release"]
+        agent: "PACKAGE-KEEPER"
+        subcommands:
+          - "create: Create release"
+          - "list: List releases"
+          - "draft: Create draft release"
+          - "publish: Publish draft"
+          - "assets: Manage release assets"
+
+    pages:
+      - command: "/github-pages"
+        description: "GitHub Pages management"
+        aliases: ["/gh-pages"]
+        agent: "PAGES-BUILDER"
+        subcommands:
+          - "enable: Enable GitHub Pages"
+          - "deploy: Deploy to Pages"
+          - "status: Check deployment status"
+          - "domain: Configure custom domain"
+
+    integrations:
+      - command: "/github-webhook"
+        description: "Webhook management"
+        aliases: ["/gh-webhook"]
+        agent: "WEBHOOK-WARDEN"
+        subcommands:
+          - "list: List webhooks"
+          - "create: Create webhook"
+          - "delete: Delete webhook"
+          - "test: Test webhook delivery"
+
+      - command: "/github-api"
+        description: "GitHub API operations"
+        aliases: ["/gh-api"]
+        agent: "WEBHOOK-WARDEN"
+
+    team:
+      - command: "/deploy-github"
+        description: "Deploy full GitHub Master Team"
+        aliases: ["/github", "/gh"]
+        agent: "REPO-MASTER"
+
+      - command: "/github-status"
+        description: "View GitHub repository status"
+        aliases: ["/gh-status"]
+        agent: "REPO-MASTER"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Settings & Configuration
+  # ─────────────────────────────────────────────────────────────────────────────
+  settings:
+    repository_defaults:
+      visibility: "private"
+      allow_squash_merge: true
+      allow_merge_commit: true
+      allow_rebase_merge: true
+      delete_branch_on_merge: true
+      allow_auto_merge: false
+      allow_update_branch: true
+      default_branch: "main"
+
+    branch_protection:
+      main:
+        required_reviews: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        required_status_checks:
+          - "build"
+          - "test"
+          - "lint"
+        enforce_admins: false
+        restrict_pushes: false
+        allow_force_pushes: false
+        allow_deletions: false
+
+    labels:
+      types:
+        - { name: "bug", color: "d73a4a", description: "Something isn't working" }
+        - { name: "feature", color: "0075ca", description: "New feature request" }
+        - { name: "enhancement", color: "a2eeef", description: "Improvement to existing feature" }
+        - { name: "documentation", color: "0052cc", description: "Documentation updates" }
+        - { name: "security", color: "ee0701", description: "Security related" }
+        - { name: "performance", color: "fbca04", description: "Performance improvement" }
+      priority:
+        - { name: "priority: critical", color: "b60205", description: "Critical priority" }
+        - { name: "priority: high", color: "d93f0b", description: "High priority" }
+        - { name: "priority: medium", color: "fbca04", description: "Medium priority" }
+        - { name: "priority: low", color: "0e8a16", description: "Low priority" }
+      status:
+        - { name: "status: in progress", color: "0052cc", description: "Work in progress" }
+        - { name: "status: blocked", color: "b60205", description: "Blocked by dependency" }
+        - { name: "status: needs review", color: "fbca04", description: "Needs code review" }
+        - { name: "status: ready", color: "0e8a16", description: "Ready for merge" }
+
+    issue_templates:
+      bug_report:
+        enabled: true
+        name: "Bug Report"
+        about: "Report a bug to help us improve"
+
+      feature_request:
+        enabled: true
+        name: "Feature Request"
+        about: "Suggest a new feature"
+
+      security_vulnerability:
+        enabled: true
+        name: "Security Vulnerability"
+        about: "Report a security issue"
+
+    pr_template:
+      enabled: true
+      sections:
+        - "## Description"
+        - "## Type of Change"
+        - "## Testing"
+        - "## Checklist"
+
+    dependabot:
+      version: 2
+      updates:
+        - package_ecosystem: "npm"
+          directory: "/"
+          schedule:
+            interval: "weekly"
+          open_pull_requests_limit: 10
+
+        - package_ecosystem: "github-actions"
+          directory: "/"
+          schedule:
+            interval: "weekly"
+
+    codeowners:
+      enabled: true
+      default_reviewers: ["@org/core-team"]
+
+    github_actions:
+      default_workflow_permissions: "read"
+      can_approve_pr: false
+      allowed_actions: "all"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Hooks (Git & GitHub Lifecycle)
+  # ─────────────────────────────────────────────────────────────────────────────
+  hooks:
+    pre_commit:
+      - name: "lint-staged"
+        description: "Run linting on staged files"
+        command: "npx lint-staged"
+        fail_on_error: true
+        agent: "PR-SENTINEL"
+
+      - name: "type-check"
+        description: "Run TypeScript type checking"
+        command: "npm run type-check"
+        fail_on_error: true
+        agent: "PR-SENTINEL"
+
+      - name: "secret-scan"
+        description: "Scan for secrets in commits"
+        command: "npx secretlint"
+        fail_on_error: true
+        agent: "SECURITY-HAWK"
+
+    commit_msg:
+      - name: "conventional-commits"
+        description: "Enforce conventional commit format"
+        command: "npx commitlint --edit"
+        fail_on_error: true
+        agent: "PR-SENTINEL"
+
+    pre_push:
+      - name: "test-suite"
+        description: "Run test suite before push"
+        command: "npm test"
+        fail_on_error: true
+        agent: "ACTIONS-GURU"
+
+      - name: "build-check"
+        description: "Verify build passes"
+        command: "npm run build"
+        fail_on_error: true
+        agent: "ACTIONS-GURU"
+
+    post_merge:
+      - name: "dependency-update"
+        description: "Update dependencies after merge"
+        command: "npm install"
+        agent: "PACKAGE-KEEPER"
+
+      - name: "changelog-update"
+        description: "Update changelog after merge"
+        agent: "PACKAGE-KEEPER"
+        action: "update_changelog"
+
+    pr_opened:
+      - name: "auto-assign"
+        description: "Auto-assign reviewers"
+        agent: "PR-SENTINEL"
+        action: "assign_reviewers"
+
+      - name: "label-pr"
+        description: "Auto-label PR based on files"
+        agent: "ISSUE-TRACKER"
+        action: "auto_label"
+
+      - name: "size-label"
+        description: "Add size label to PR"
+        agent: "ISSUE-TRACKER"
+        action: "add_size_label"
+
+    pr_merged:
+      - name: "delete-branch"
+        description: "Delete merged branch"
+        agent: "PR-SENTINEL"
+        action: "delete_branch"
+
+      - name: "update-project"
+        description: "Move issue to Done"
+        agent: "ISSUE-TRACKER"
+        action: "update_project_item"
+
+      - name: "notify-team"
+        description: "Notify team of merge"
+        agent: "WEBHOOK-WARDEN"
+        channels: ["slack"]
+
+    release_created:
+      - name: "publish-package"
+        description: "Publish package on release"
+        agent: "PACKAGE-KEEPER"
+        action: "publish_to_registry"
+
+      - name: "update-docs"
+        description: "Update documentation"
+        agent: "PAGES-BUILDER"
+        action: "deploy_docs"
+
+      - name: "notify-release"
+        description: "Announce release"
+        agent: "WEBHOOK-WARDEN"
+        channels: ["slack", "discord", "twitter"]
+
+    security_alert:
+      - name: "create-issue"
+        description: "Create issue for security alert"
+        agent: "SECURITY-HAWK"
+        action: "create_security_issue"
+
+      - name: "notify-security"
+        description: "Alert security team"
+        agent: "SECURITY-HAWK"
+        channels: ["slack", "email"]
+        priority: "urgent"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  MCP Server Integration
+  # ─────────────────────────────────────────────────────────────────────────────
+  mcp:
+    server:
+      name: "github-mcp-server"
+      description: "MCP server for GitHub API integration"
+      transport: "stdio"
+      command: "node"
+      args: ["~/.nexus-prime/mcp/github-server/index.js"]
+
+    tools:
+      repository:
+        - name: "github_create_repo"
+          description: "Create new repository"
+          parameters:
+            name: "string"
+            description: "string"
+            private: "boolean"
+            org: "string (optional)"
+
+        - name: "github_get_repo"
+          description: "Get repository details"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+        - name: "github_list_repos"
+          description: "List repositories"
+          parameters:
+            user: "string (optional)"
+            org: "string (optional)"
+            type: "all | public | private"
+
+        - name: "github_delete_repo"
+          description: "Delete repository"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+      branches:
+        - name: "github_create_branch"
+          description: "Create new branch"
+          parameters:
+            owner: "string"
+            repo: "string"
+            branch: "string"
+            from_branch: "string"
+
+        - name: "github_protect_branch"
+          description: "Add branch protection"
+          parameters:
+            owner: "string"
+            repo: "string"
+            branch: "string"
+            rules: "object"
+
+        - name: "github_list_branches"
+          description: "List branches"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+      pull_requests:
+        - name: "github_create_pr"
+          description: "Create pull request"
+          parameters:
+            owner: "string"
+            repo: "string"
+            title: "string"
+            head: "string"
+            base: "string"
+            body: "string"
+
+        - name: "github_merge_pr"
+          description: "Merge pull request"
+          parameters:
+            owner: "string"
+            repo: "string"
+            pull_number: "number"
+            merge_method: "merge | squash | rebase"
+
+        - name: "github_review_pr"
+          description: "Review pull request"
+          parameters:
+            owner: "string"
+            repo: "string"
+            pull_number: "number"
+            event: "APPROVE | REQUEST_CHANGES | COMMENT"
+            body: "string"
+
+        - name: "github_list_prs"
+          description: "List pull requests"
+          parameters:
+            owner: "string"
+            repo: "string"
+            state: "open | closed | all"
+
+      issues:
+        - name: "github_create_issue"
+          description: "Create issue"
+          parameters:
+            owner: "string"
+            repo: "string"
+            title: "string"
+            body: "string"
+            labels: "string[]"
+            assignees: "string[]"
+
+        - name: "github_update_issue"
+          description: "Update issue"
+          parameters:
+            owner: "string"
+            repo: "string"
+            issue_number: "number"
+            state: "open | closed"
+            labels: "string[]"
+
+        - name: "github_list_issues"
+          description: "List issues"
+          parameters:
+            owner: "string"
+            repo: "string"
+            state: "open | closed | all"
+            labels: "string"
+
+      actions:
+        - name: "github_list_workflows"
+          description: "List workflows"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+        - name: "github_trigger_workflow"
+          description: "Trigger workflow dispatch"
+          parameters:
+            owner: "string"
+            repo: "string"
+            workflow_id: "string"
+            ref: "string"
+            inputs: "object"
+
+        - name: "github_get_workflow_run"
+          description: "Get workflow run details"
+          parameters:
+            owner: "string"
+            repo: "string"
+            run_id: "number"
+
+        - name: "github_list_workflow_runs"
+          description: "List workflow runs"
+          parameters:
+            owner: "string"
+            repo: "string"
+            workflow_id: "string"
+            status: "queued | in_progress | completed"
+
+        - name: "github_cancel_workflow_run"
+          description: "Cancel workflow run"
+          parameters:
+            owner: "string"
+            repo: "string"
+            run_id: "number"
+
+      releases:
+        - name: "github_create_release"
+          description: "Create release"
+          parameters:
+            owner: "string"
+            repo: "string"
+            tag_name: "string"
+            name: "string"
+            body: "string"
+            draft: "boolean"
+            prerelease: "boolean"
+
+        - name: "github_list_releases"
+          description: "List releases"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+        - name: "github_upload_release_asset"
+          description: "Upload release asset"
+          parameters:
+            owner: "string"
+            repo: "string"
+            release_id: "number"
+            name: "string"
+            data: "binary"
+
+      security:
+        - name: "github_list_alerts"
+          description: "List security alerts"
+          parameters:
+            owner: "string"
+            repo: "string"
+            type: "dependabot | code-scanning | secret-scanning"
+
+        - name: "github_dismiss_alert"
+          description: "Dismiss security alert"
+          parameters:
+            owner: "string"
+            repo: "string"
+            alert_number: "number"
+            reason: "string"
+
+      secrets:
+        - name: "github_set_secret"
+          description: "Set repository secret"
+          parameters:
+            owner: "string"
+            repo: "string"
+            secret_name: "string"
+            secret_value: "string"
+
+        - name: "github_list_secrets"
+          description: "List repository secrets"
+          parameters:
+            owner: "string"
+            repo: "string"
+
+        - name: "github_delete_secret"
+          description: "Delete repository secret"
+          parameters:
+            owner: "string"
+            repo: "string"
+            secret_name: "string"
+
+    resources:
+      - uri: "github://repos/{owner}"
+        description: "User/org repositories"
+
+      - uri: "github://repo/{owner}/{repo}"
+        description: "Repository details"
+
+      - uri: "github://prs/{owner}/{repo}"
+        description: "Pull requests"
+
+      - uri: "github://issues/{owner}/{repo}"
+        description: "Issues"
+
+      - uri: "github://actions/{owner}/{repo}"
+        description: "Workflow runs"
+
+      - uri: "github://releases/{owner}/{repo}"
+        description: "Releases"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Plugins
+  # ─────────────────────────────────────────────────────────────────────────────
+  plugins:
+    core:
+      - id: "gh-cli"
+        name: "GitHub CLI Integration"
+        description: "Core gh CLI commands and wrappers"
+        enabled: true
+        config:
+          auto_install: true
+          version: "latest"
+
+      - id: "git-hooks"
+        name: "Git Hooks Manager"
+        description: "Husky-based git hooks"
+        enabled: true
+        config:
+          manager: "husky"
+          auto_install: true
+
+    code_quality:
+      - id: "codeql"
+        name: "CodeQL Analysis"
+        description: "GitHub code scanning with CodeQL"
+        enabled: true
+        agent: "SECURITY-HAWK"
+        config:
+          languages: ["javascript", "typescript", "python"]
+          schedule: "weekly"
+
+      - id: "super-linter"
+        name: "GitHub Super-Linter"
+        description: "Multi-language linting action"
+        enabled: true
+        agent: "ACTIONS-GURU"
+
+      - id: "codecov"
+        name: "Codecov Integration"
+        description: "Code coverage reporting"
+        enabled: true
+        agent: "ACTIONS-GURU"
+
+    security:
+      - id: "dependabot"
+        name: "Dependabot"
+        description: "Automated dependency updates"
+        enabled: true
+        agent: "SECURITY-HAWK"
+        config:
+          ecosystems: ["npm", "pip", "github-actions"]
+          schedule: "weekly"
+          auto_merge: false
+
+      - id: "secret-scanning"
+        name: "Secret Scanning"
+        description: "Detect secrets in commits"
+        enabled: true
+        agent: "SECURITY-HAWK"
+
+      - id: "gitleaks"
+        name: "Gitleaks"
+        description: "Git secret scanning tool"
+        enabled: true
+        agent: "SECURITY-HAWK"
+
+    automation:
+      - id: "auto-merge"
+        name: "Auto-Merge"
+        description: "Auto-merge PRs meeting criteria"
+        enabled: false
+        agent: "PR-SENTINEL"
+        config:
+          require_approvals: 2
+          require_passing_checks: true
+
+      - id: "stale"
+        name: "Stale Bot"
+        description: "Close stale issues and PRs"
+        enabled: true
+        agent: "ISSUE-TRACKER"
+        config:
+          days_before_stale: 60
+          days_before_close: 14
+
+      - id: "labeler"
+        name: "PR Labeler"
+        description: "Auto-label PRs by files changed"
+        enabled: true
+        agent: "ISSUE-TRACKER"
+
+      - id: "size-label"
+        name: "Size Label"
+        description: "Add size labels to PRs"
+        enabled: true
+        agent: "ISSUE-TRACKER"
+
+    notifications:
+      - id: "slack-github"
+        name: "Slack GitHub Integration"
+        description: "GitHub notifications to Slack"
+        enabled: false
+        config:
+          webhook_url: "${SLACK_WEBHOOK_URL}"
+          events: ["push", "pull_request", "release", "issues"]
+
+      - id: "discord-github"
+        name: "Discord GitHub Integration"
+        description: "GitHub notifications to Discord"
+        enabled: false
+
+    documentation:
+      - id: "readme-generator"
+        name: "README Generator"
+        description: "Auto-generate README sections"
+        enabled: true
+        agent: "PAGES-BUILDER"
+
+      - id: "changelog-generator"
+        name: "Changelog Generator"
+        description: "Auto-generate CHANGELOG from commits"
+        enabled: true
+        agent: "PACKAGE-KEEPER"
+        config:
+          format: "keepachangelog"
+          commit_format: "conventional"
+
+      - id: "api-docs"
+        name: "API Documentation"
+        description: "Auto-deploy API docs to Pages"
+        enabled: false
+        agent: "PAGES-BUILDER"
+
+    ci_cd:
+      - id: "semantic-release"
+        name: "Semantic Release"
+        description: "Automated versioning and releases"
+        enabled: false
+        agent: "PACKAGE-KEEPER"
+        config:
+          branches: ["main"]
+          plugins:
+            - "@semantic-release/commit-analyzer"
+            - "@semantic-release/release-notes-generator"
+            - "@semantic-release/changelog"
+            - "@semantic-release/npm"
+            - "@semantic-release/github"
+
+      - id: "release-drafter"
+        name: "Release Drafter"
+        description: "Draft releases based on merged PRs"
+        enabled: true
+        agent: "PACKAGE-KEEPER"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Workflow Templates
+  # ─────────────────────────────────────────────────────────────────────────────
+  workflow_templates:
+    ci:
+      name: "CI Pipeline"
+      description: "Standard CI workflow"
+      triggers: ["push", "pull_request"]
+      jobs:
+        - lint
+        - test
+        - build
+
+    cd:
+      name: "CD Pipeline"
+      description: "Deployment workflow"
+      triggers: ["push to main", "release"]
+      jobs:
+        - build
+        - deploy
+
+    release:
+      name: "Release Workflow"
+      description: "Create and publish releases"
+      triggers: ["manual", "tag push"]
+      jobs:
+        - changelog
+        - build
+        - publish
+        - notify
+
+    security:
+      name: "Security Scan"
+      description: "Security scanning workflow"
+      triggers: ["schedule", "pull_request"]
+      jobs:
+        - codeql
+        - dependency_review
+        - secret_scan
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Git Workflow Strategies
+  # ─────────────────────────────────────────────────────────────────────────────
+  git_workflows:
+    gitflow:
+      name: "Gitflow"
+      branches:
+        main: "Production releases"
+        develop: "Development integration"
+        feature/*: "Feature development"
+        release/*: "Release preparation"
+        hotfix/*: "Production hotfixes"
+      merge_strategy: "merge"
+
+    trunk_based:
+      name: "Trunk-Based Development"
+      branches:
+        main: "Single source of truth"
+        feature/*: "Short-lived feature branches"
+      merge_strategy: "squash"
+      feature_flags: true
+
+    github_flow:
+      name: "GitHub Flow"
+      branches:
+        main: "Always deployable"
+        feature/*: "Feature branches"
+      merge_strategy: "squash"
+      deploy_on_merge: true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Swarm Coordination Protocol
+  # ─────────────────────────────────────────────────────────────────────────────
+  swarm_protocol:
+    communication:
+      style: "collaborative_parallel"
+      lead_coordinator: "REPO-MASTER"
+      decision_authority: "REPO-MASTER with specialist input"
+
+    workflow_phases:
+      setup:
+        lead: "REPO-MASTER"
+        support: ["SECURITY-HAWK", "ACTIONS-GURU"]
+        outputs: ["repo_created", "branch_protection", "workflows_configured"]
+
+      development:
+        lead: "REPO-MASTER"
+        parallel:
+          - agent: "PR-SENTINEL"
+            task: "manage_pull_requests"
+          - agent: "ISSUE-TRACKER"
+            task: "manage_issues"
+          - agent: "SECURITY-HAWK"
+            task: "monitor_security"
+        sync_point: "pr_review"
+
+      ci_cd:
+        lead: "ACTIONS-GURU"
+        parallel:
+          - agent: "ACTIONS-GURU"
+            task: "run_pipelines"
+          - agent: "SECURITY-HAWK"
+            task: "security_scans"
+        sync_point: "all_checks_passed"
+
+      release:
+        lead: "PACKAGE-KEEPER"
+        sequence:
+          - agent: "PACKAGE-KEEPER"
+            task: "create_release"
+          - agent: "PAGES-BUILDER"
+            task: "update_docs"
+          - agent: "WEBHOOK-WARDEN"
+            task: "notify_stakeholders"
+        rollback_agent: "REPO-MASTER"
+
+    handoff_protocols:
+      PR_SENTINEL_to_ACTIONS_GURU:
+        trigger: "pr_created"
+        data: ["pr_number", "head_branch", "base_branch"]
+
+      ACTIONS_GURU_to_PR_SENTINEL:
+        trigger: "checks_completed"
+        data: ["check_status", "artifacts"]
+
+      PR_SENTINEL_to_PACKAGE_KEEPER:
+        trigger: "pr_merged_to_main"
+        data: ["merge_commit", "changelog_entries"]
+
+      SECURITY_HAWK_to_ISSUE_TRACKER:
+        trigger: "vulnerability_detected"
+        data: ["severity", "cve", "affected_package"]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Activation
+  # ─────────────────────────────────────────────────────────────────────────────
+  activation:
+    commands:
+      - "/deploy-github"
+      - "/github"
+      - "/gh"
+      - "/team-github"
+      - "/nexus-deploy REPO-MASTER"
+
+    triggers:
+      - "github"
+      - "repository"
+      - "pull request"
+      - "github actions"
+      - "ci/cd"
+      - "branch protection"
+      - "code review"
+      - "security scanning"
+      - "release management"
+
+    auto_includes:
+      - agent: "SECURITY-HAWK"
+        condition: "always for security monitoring"
+      - agent: "ACTIONS-GURU"
+        condition: "when workflows present"
+      - agent: "PR-SENTINEL"
+        condition: "when PRs involved"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Deliverables
+  # ─────────────────────────────────────────────────────────────────────────────
+  deliverables:
+    setup:
+      - repository_initialized
+      - branch_protection_configured
+      - workflows_created
+      - issue_templates_added
+      - codeowners_configured
+      - security_enabled
+
+    development:
+      - pr_templates
+      - code_review_guidelines
+      - contribution_guide
+      - branch_strategy_doc
+
+    ci_cd:
+      - ci_workflow
+      - cd_workflow
+      - security_workflow
+      - release_workflow
+
+    documentation:
+      - readme
+      - contributing_guide
+      - code_of_conduct
+      - security_policy
+      - changelog
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  "Eight specialists, one mission—master GitHub, ship software that matters."
+#  — GitHub Master Team
+# ═══════════════════════════════════════════════════════════════════════════════

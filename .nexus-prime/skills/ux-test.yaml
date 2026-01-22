@@ -1,0 +1,252 @@
+name: ux-test
+version: 1.0.0
+description: Usability testing framework with multiple methodologies and script generation
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /ux-test
+  - /usability-test
+  - /test-ux
+
+parameters:
+  - name: type
+    type: enum
+    values:
+      - heuristic
+      - cognitive-walkthrough
+      - five-second
+      - tree-test
+      - preference
+      - accessibility
+      - competitive
+      - task-analysis
+    required: true
+    description: Testing methodology to apply
+  - name: target
+    type: string
+    required: true
+    description: What to test (URL, design, flow)
+  - name: tasks
+    type: array
+    required: false
+    description: Specific tasks to evaluate
+  - name: personas
+    type: array
+    required: false
+    description: User personas to consider
+
+test_methodologies:
+
+  heuristic:
+    name: Heuristic Evaluation
+    duration: 30-60 minutes
+    output: Severity-ranked issue list
+    process:
+      - Review interface systematically
+      - Apply Nielsen's 10 heuristics
+      - Document violations with evidence
+      - Rate severity (0-4 scale)
+      - Prioritize by impact × frequency
+    template: |
+      ## Heuristic Evaluation: [Target]
+
+      ### Methodology
+      Expert review against Nielsen's 10 Usability Heuristics
+
+      ### Findings by Heuristic
+
+      #### 1. Visibility of System Status
+      **Score:** [0-4]
+      **Issues:**
+      - [Issue with evidence]
+      **Recommendation:**
+
+      [Repeat for all 10 heuristics]
+
+      ### Summary Matrix
+      | Heuristic | Score | Critical Issues |
+
+      ### Priority Fixes
+      1. [Highest impact fix]
+
+  cognitive-walkthrough:
+    name: Cognitive Walkthrough
+    duration: 45-90 minutes
+    output: Task flow friction map
+    process:
+      - Define user goals and tasks
+      - Walk through each step as novice user
+      - At each step ask:
+        - Will user try to achieve this effect?
+        - Will user notice the correct action?
+        - Will user understand the feedback?
+      - Document friction points
+      - Map happy path vs actual path
+    template: |
+      ## Cognitive Walkthrough: [Task Name]
+
+      ### User Goal
+      [What user is trying to accomplish]
+
+      ### Assumed Knowledge
+      [What user knows coming in]
+
+      ### Step-by-Step Analysis
+
+      #### Step 1: [Action]
+      - **Will user try?** [Yes/No - Why]
+      - **Will user see it?** [Yes/No - Why]
+      - **Will user understand feedback?** [Yes/No - Why]
+      - **Friction Level:** [Low/Medium/High]
+
+      [Repeat for each step]
+
+      ### Friction Map
+      [Visual representation of pain points]
+
+      ### Recommendations
+      [How to smooth the path]
+
+  five-second:
+    name: Five-Second Test
+    duration: 5 seconds exposure + analysis
+    output: First impression comprehension score
+    process:
+      - Show design for exactly 5 seconds
+      - Analyze what's memorable/clear
+      - Evaluate:
+        - What is this page about?
+        - What can you do here?
+        - Who is this for?
+        - What's the main action?
+      - Score comprehension percentage
+    template: |
+      ## Five-Second Test: [Target]
+
+      ### First Impression Analysis
+
+      **Clear within 5 seconds:**
+      - [ ] Purpose of the page
+      - [ ] Primary action
+      - [ ] Brand identity
+      - [ ] Target audience
+      - [ ] Value proposition
+
+      **Visual Hierarchy Score:** [1-10]
+
+      **Comprehension Estimate:** [X%]
+
+      ### What Stands Out
+      1. [Most prominent element]
+      2. [Second most prominent]
+      3. [Third most prominent]
+
+      ### What's Missing/Unclear
+      - [Element that should be clearer]
+
+      ### Recommendations
+      [How to improve first impression]
+
+  accessibility:
+    name: Accessibility Audit
+    duration: 60-120 minutes
+    output: WCAG 2.2 compliance report
+    process:
+      - Automated scan (axe, WAVE, Lighthouse)
+      - Manual keyboard navigation test
+      - Screen reader walkthrough
+      - Color contrast verification
+      - Touch target measurement
+      - Motion sensitivity check
+      - Cognitive accessibility review
+    template: |
+      ## Accessibility Audit: [Target]
+
+      ### Compliance Level Target
+      [WCAG 2.2 AA / AAA]
+
+      ### Automated Scan Results
+      | Tool | Errors | Warnings | Passes |
+
+      ### Manual Testing Results
+
+      #### Keyboard Navigation
+      - [ ] All interactive elements focusable
+      - [ ] Focus order logical
+      - [ ] Focus indicator visible
+      - [ ] No keyboard traps
+      - [ ] Skip links present
+
+      #### Screen Reader
+      - [ ] Headings hierarchy correct
+      - [ ] Images have alt text
+      - [ ] Forms properly labeled
+      - [ ] ARIA used correctly
+      - [ ] Dynamic content announced
+
+      #### Visual
+      - [ ] Color contrast passes (4.5:1 text, 3:1 UI)
+      - [ ] Color not sole indicator
+      - [ ] Text resizable to 200%
+      - [ ] Content reflows at 400% zoom
+
+      #### Motor
+      - [ ] Touch targets 44x44px minimum
+      - [ ] Adequate spacing between targets
+      - [ ] No time limits (or adjustable)
+
+      #### Cognitive
+      - [ ] Clear, simple language
+      - [ ] Consistent navigation
+      - [ ] Error messages helpful
+      - [ ] No unexpected changes
+
+      ### Issues by WCAG Criterion
+      | Criterion | Level | Status | Issue |
+
+      ### Remediation Priority
+      1. [Critical fix]
+
+  competitive:
+    name: Competitive Analysis
+    duration: 2-4 hours
+    output: Feature/UX comparison matrix
+    process:
+      - Identify 3-5 competitors
+      - Define comparison criteria
+      - Evaluate each on same tasks
+      - Score UX quality metrics
+      - Identify gaps and opportunities
+      - Benchmark against best-in-class
+    template: |
+      ## Competitive UX Analysis
+
+      ### Competitors Evaluated
+      1. [Competitor A]
+      2. [Competitor B]
+      3. [Competitor C]
+
+      ### Comparison Matrix
+      | Criterion | Ours | Comp A | Comp B | Comp C |
+      |-----------|------|--------|--------|--------|
+      | Onboarding |  |  |  |  |
+      | Navigation |  |  |  |  |
+      | Core Task |  |  |  |  |
+      | Mobile |  |  |  |  |
+      | Accessibility |  |  |  |  |
+      | Performance |  |  |  |  |
+
+      ### Best Practices Found
+      - [What competitors do well]
+
+      ### Differentiation Opportunities
+      - [Where we can lead]
+
+      ### Gaps to Close
+      - [Where we're behind]
+
+output:
+  format: markdown
+  include_artifacts: true
+  save_to: ./ux-tests/[date]-[type].md

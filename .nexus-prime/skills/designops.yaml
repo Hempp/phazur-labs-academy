@@ -1,0 +1,352 @@
+name: designops
+version: 1.0.0
+description: Design operations functions, maturity, and implementation
+agent: VISION-PRIME
+category: design-leadership
+
+triggers:
+  - /designops-audit
+  - /designops-maturity
+  - /designops-roadmap
+  - /designops-tools
+
+parameters:
+  - name: organization
+    type: string
+    required: true
+    description: Organization to assess
+  - name: focus
+    type: enum
+    values: [all, workflow, people, impact]
+    default: all
+
+designops_pillars:
+
+  workflow:
+    name: How We Work
+    description: Process, tools, and systems that enable design
+
+    functions:
+      process_design:
+        description: Define how design work flows
+        activities:
+          - Document design process stages
+          - Define quality gates
+          - Create decision frameworks
+          - Establish handoff protocols
+        deliverables:
+          - Process documentation
+          - Workflow diagrams
+          - Checklists and templates
+          - Guidelines
+
+      tooling:
+        description: Select and manage design tools
+        activities:
+          - Evaluate tool needs
+          - Select and procure tools
+          - Configure integrations
+          - Manage licenses
+        tools:
+          design: [Figma, Sketch, Adobe XD]
+          prototyping: [Framer, Principle, ProtoPie]
+          research: [UserTesting, Maze, Dovetail]
+          handoff: [Zeplin, Abstract, Figma Dev Mode]
+          documentation: [Notion, Confluence, Storybook]
+
+      templates:
+        description: Standardize design deliverables
+        activities:
+          - Create file templates
+          - Define naming conventions
+          - Establish version control
+          - Maintain template library
+        templates:
+          - File structure templates
+          - Component templates
+          - Presentation templates
+          - Documentation templates
+
+      rituals:
+        description: Regular design ceremonies
+        activities:
+          - Design critique facilitation
+          - Design review coordination
+          - Show and tell organization
+          - Team meetings
+        rituals:
+          - Weekly critique
+          - Design reviews
+          - Bi-weekly show and tell
+          - Monthly all-hands
+
+      handoffs:
+        description: Design-to-development process
+        activities:
+          - Define handoff standards
+          - Create handoff checklists
+          - Manage handoff tools
+          - Track handoff quality
+        quality_checklist:
+          - Specs complete and accurate
+          - Assets exported correctly
+          - Interactions documented
+          - Edge cases covered
+          - Responsive behavior defined
+
+  people:
+    name: How We Grow
+    description: Talent acquisition, development, and culture
+
+    functions:
+      hiring:
+        description: Attract and assess design talent
+        activities:
+          - Write job descriptions
+          - Design interview process
+          - Create assessment rubrics
+          - Manage candidate experience
+        deliverables:
+          - Job descriptions library
+          - Interview guides
+          - Assessment rubrics
+          - Hiring dashboard
+
+      onboarding:
+        description: Ramp new designers effectively
+        activities:
+          - Create onboarding plan
+          - Assign onboarding buddy
+          - Define milestones
+          - Gather feedback
+        timeline:
+          day_1: Setup, intros, context
+          week_1: Shadow, small task
+          day_30: Own small project
+          day_60: Full contributor
+          day_90: Fully ramped
+
+      career_growth:
+        description: Define paths and support development
+        activities:
+          - Create career ladder
+          - Define competencies
+          - Support promotions
+          - Manage career conversations
+        deliverables:
+          - Career ladder document
+          - Competency matrix
+          - Promotion criteria
+          - Development plans
+
+      learning:
+        description: Skills development programs
+        activities:
+          - Identify skill gaps
+          - Curate learning resources
+          - Organize workshops
+          - Track development
+        programs:
+          - Conference budget
+          - Course subscriptions
+          - Internal workshops
+          - Mentorship program
+          - Book club
+
+      community:
+        description: Build design culture
+        activities:
+          - Organize events
+          - Facilitate connections
+          - Recognize contributions
+          - Build traditions
+        activities:
+          - Design team outings
+          - Guest speakers
+          - Design awards
+          - Knowledge sharing
+
+  impact:
+    name: How We Impact
+    description: Measuring and communicating design value
+
+    functions:
+      metrics:
+        description: Track design effectiveness
+        activities:
+          - Define design metrics
+          - Build dashboards
+          - Track progress
+          - Report regularly
+        metrics:
+          process:
+            - Cycle time
+            - Review pass rate
+            - System adoption
+          quality:
+            - Usability scores
+            - Accessibility compliance
+            - Design consistency
+          outcome:
+            - User satisfaction
+            - Task completion
+            - Business impact
+
+      storytelling:
+        description: Communicate design value
+        activities:
+          - Create case studies
+          - Build presentations
+          - Share at forums
+          - Maintain portfolio
+        formats:
+          - Case study template
+          - Quarterly report
+          - Project retrospective
+          - Impact one-pager
+
+      stakeholders:
+        description: Build organizational relationships
+        activities:
+          - Map stakeholders
+          - Define engagement model
+          - Build relationships
+          - Manage expectations
+        stakeholder_matrix:
+          executives: Inform (monthly)
+          product: Partner (weekly)
+          engineering: Partner (daily)
+          marketing: Consult (per project)
+          support: Consult (per release)
+
+      budget:
+        description: Resource planning and allocation
+        activities:
+          - Capacity planning
+          - Budget forecasting
+          - Resource allocation
+          - ROI tracking
+        planning:
+          - Headcount planning
+          - Tool budget
+          - Training budget
+          - Contractor budget
+
+maturity_model:
+
+  level_1:
+    name: Ad-hoc
+    description: No dedicated DesignOps
+    characteristics:
+      - Each designer manages own process
+      - No standardized tools
+      - Inconsistent practices
+      - No metrics
+    focus: Awareness
+
+  level_2:
+    name: Emerging
+    description: Part-time DesignOps attention
+    characteristics:
+      - Design lead owns some DesignOps
+      - Basic tool standardization
+      - Some documentation
+      - Beginning to measure
+    focus: Foundation
+
+  level_3:
+    name: Defined
+    description: Dedicated DesignOps role
+    characteristics:
+      - DesignOps person or team
+      - Documented processes
+      - Tool stack defined
+      - Metrics tracked
+    focus: Consistency
+
+  level_4:
+    name: Managed
+    description: DesignOps team with clear scope
+    characteristics:
+      - DesignOps team (2-3 people)
+      - Mature processes
+      - Full tool integration
+      - Data-driven decisions
+    focus: Optimization
+
+  level_5:
+    name: Optimized
+    description: DesignOps as strategic function
+    characteristics:
+      - Full DesignOps function
+      - Continuous improvement
+      - Strategic partner to leadership
+      - Industry-leading practices
+    focus: Innovation
+
+tool_stack:
+
+  core:
+    design:
+      recommended: Figma
+      alternatives: [Sketch, Adobe XD]
+      criteria: Collaboration, plugins, dev handoff
+
+    prototyping:
+      recommended: Figma + Framer
+      alternatives: [Principle, ProtoPie]
+      criteria: Fidelity, learning curve, sharing
+
+    research:
+      recommended: Maze + Dovetail
+      alternatives: [UserTesting, Lookback]
+      criteria: Quantitative + qualitative, repository
+
+  extended:
+    design_system:
+      tokens: [Figma Variables, Style Dictionary]
+      documentation: [Storybook, Supernova, zeroheight]
+
+    project_management:
+      options: [Asana, Monday, Linear, Jira]
+      integration: With design and dev tools
+
+    knowledge_management:
+      options: [Notion, Confluence, Coda]
+      use: Process docs, research repo, team wiki
+
+    asset_management:
+      options: [Brandfolder, Bynder, Frontify]
+      use: Brand assets, icon libraries, imagery
+
+workflows:
+
+  designops_audit:
+    command: /designops-audit
+    steps:
+      - inventory: Current tools and processes
+      - assess: Each pillar maturity
+      - interview: Team feedback
+      - analyze: Gaps and opportunities
+      - benchmark: Industry comparison
+      - report: Findings and recommendations
+
+  designops_roadmap:
+    command: /designops-roadmap
+    steps:
+      - baseline: Current maturity level
+      - target: Desired maturity level
+      - gaps: Identify key gaps
+      - prioritize: Quick wins vs strategic
+      - plan: Quarterly milestones
+      - resource: Budget and headcount
+
+  tool_evaluation:
+    command: /designops-tools
+    steps:
+      - needs: Gather requirements
+      - research: Evaluate options
+      - trial: Pilot with team
+      - decide: Selection criteria
+      - implement: Rollout plan
+      - measure: Adoption tracking

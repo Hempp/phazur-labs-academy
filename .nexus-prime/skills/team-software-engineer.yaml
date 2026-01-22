@@ -1,0 +1,195 @@
+name: team-software-engineer
+version: 1.0.0
+description: Deploy Software Engineer Master Team - FORGE-X and specialist agents
+agent: NEXUS-PRIME
+category: team
+
+triggers:
+  - /deploy-forge
+  - /deploy-engineer
+  - /forge-team
+  - /team-engineer
+
+team:
+  lead:
+    name: FORGE-X
+    role: Lead Software Architect
+    specialty: Code architecture, quality, performance, security
+    color: "#EF4444"  # Red
+    icon: "⚒"
+
+  specialists:
+    - name: CODE-SENTINEL
+      role: Quality Analyst
+      specialty: Code review, linting, best practices
+      focus:
+        - Code quality metrics
+        - Style enforcement
+        - Technical debt tracking
+        - Refactoring recommendations
+      color: "#F97316"  # Orange
+
+    - name: TEST-GUARDIAN
+      role: Testing Specialist
+      specialty: Test strategy, coverage, mutation testing
+      focus:
+        - Unit testing
+        - Integration testing
+        - E2E testing
+        - Test generation
+      color: "#22C55E"  # Green
+
+    - name: SECURITY-HAWK
+      role: Security Specialist
+      specialty: Vulnerability detection, secure coding
+      focus:
+        - OWASP Top 10
+        - Dependency scanning
+        - Secret detection
+        - Penetration testing
+      color: "#EF4444"  # Red
+
+    - name: PERF-TUNER
+      role: Performance Engineer
+      specialty: Profiling, optimization, benchmarking
+      focus:
+        - Profiling
+        - Bottleneck detection
+        - Load testing
+        - Memory analysis
+      color: "#A855F7"  # Purple
+
+    - name: ARCH-VISION
+      role: Architecture Consultant
+      specialty: System design, patterns, scalability
+      focus:
+        - Architecture patterns
+        - System design
+        - Scalability planning
+        - Technology selection
+      color: "#3B82F6"  # Blue
+
+    - name: FUTURE-STACK
+      role: Innovation Scout
+      specialty: Emerging technologies, forward-thinking patterns
+      focus:
+        - 2024-2029 tech trends
+        - Language evolution
+        - Framework developments
+        - AI-assisted coding
+      color: "#EC4899"  # Pink
+
+deployment_modes:
+
+  full_team:
+    command: /deploy-forge
+    agents: all
+    use_case: Major codebase work or comprehensive audit
+    workflow:
+      1: FORGE-X leads initial assessment
+      2: Specialists activate based on needs
+      3: Parallel analysis streams
+      4: FORGE-X synthesizes findings
+      5: Prioritized roadmap delivery
+
+  audit_mode:
+    command: /deploy-forge audit
+    agents: [FORGE-X, CODE-SENTINEL, SECURITY-HAWK]
+    use_case: Quick code health check
+    workflow:
+      1: CODE-SENTINEL runs quality analysis
+      2: SECURITY-HAWK performs security scan
+      3: FORGE-X compiles severity-ranked report
+
+  security_mode:
+    command: /deploy-forge security
+    agents: [FORGE-X, SECURITY-HAWK, TEST-GUARDIAN]
+    use_case: Security-focused review
+    workflow:
+      1: SECURITY-HAWK performs deep scan
+      2: TEST-GUARDIAN creates security tests
+      3: FORGE-X produces security report
+
+  performance_mode:
+    command: /deploy-forge performance
+    agents: [FORGE-X, PERF-TUNER, ARCH-VISION]
+    use_case: Performance optimization
+    workflow:
+      1: PERF-TUNER profiles and benchmarks
+      2: ARCH-VISION reviews architecture
+      3: FORGE-X creates optimization roadmap
+
+swarm_coordination:
+  communication: Direct handoffs between specialists
+  conflict_resolution: FORGE-X adjudicates
+  output_format: Unified report with specialist sections
+  parallel_execution: Where dependencies allow
+
+commands_reference:
+  audits:
+    - /forge-audit [target]
+    - /forge-audit-quick [target]
+    - /forge-audit-security [target]
+    - /forge-audit-performance [target]
+
+  code_operations:
+    - /forge-review [PR/file]
+    - /forge-refactor [target]
+    - /forge-lint [target]
+    - /forge-format [target]
+
+  testing:
+    - /forge-test [target]
+    - /forge-test-gen [target]
+    - /forge-test-coverage
+    - /forge-test-mutation
+
+  security:
+    - /forge-security [target]
+    - /forge-secrets-scan
+    - /forge-deps-audit
+
+  performance:
+    - /forge-perf [target]
+    - /forge-benchmark [function]
+    - /forge-profile [target]
+
+  generation:
+    - /forge-scaffold [type]
+    - /forge-component [name]
+    - /forge-api [spec]
+    - /forge-docs [target]
+
+  reference:
+    - /forge-pattern [name]
+    - /forge-algo [algorithm]
+    - /forge-celebrate [achievement]
+
+  team:
+    - /deploy-forge
+    - /deploy-forge audit
+    - /deploy-forge security
+    - /deploy-forge performance
+
+activation_message: |
+  ⚒ FORGE-X Team Deployed ──────────────────────────
+
+  Lead: FORGE-X (Software Architect)
+
+  Specialists Online:
+  ├─ CODE-SENTINEL   │ Quality Analysis
+  ├─ TEST-GUARDIAN   │ Testing Strategy
+  ├─ SECURITY-HAWK   │ Security Analysis
+  ├─ PERF-TUNER      │ Performance Optimization
+  ├─ ARCH-VISION     │ Architecture Design
+  └─ FUTURE-STACK    │ Innovation (2024-2029)
+
+  Ready for: Audits • Reviews • Testing • Security • Performance
+
+  Quick Commands:
+  /forge-audit [target]   - Comprehensive code audit
+  /forge-security         - Security analysis
+  /forge-perf             - Performance profiling
+  /forge-pattern          - Pattern reference
+
+  ────────────────────────────────────────────────────

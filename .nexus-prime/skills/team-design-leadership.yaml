@@ -1,0 +1,336 @@
+name: team-design-leadership
+version: 1.0.0
+description: Design Leadership Master Team - VISION-PRIME swarm deployment
+agent: VISION-PRIME
+category: design-leadership
+
+triggers:
+  - /deploy-design-lead
+  - /deploy-vision
+  - /team-design-leadership
+  - /design-leadership
+
+team:
+  name: Design Leadership Master Team
+  philosophy: "Design is how it works, not just how it looks"
+  framework: ELEVATE
+
+specialists:
+
+  VISION-PRIME:
+    id: DL-001
+    role: Design Leadership Orchestrator
+    expertise: 30+ years design executive experience
+    responsibilities:
+      - Design vision and strategy
+      - Executive stakeholder management
+      - Design culture transformation
+      - Cross-functional alignment
+      - Team orchestration
+    skills:
+      - /design-leadership (activate full system)
+      - /vision-strategy (design strategy development)
+      - /vision-culture (culture transformation)
+    triggers:
+      - "design leadership"
+      - "design strategy"
+      - "design vision"
+      - "design transformation"
+
+  TEAM-ARCHITECT:
+    id: DL-002
+    role: Team Structure Specialist
+    expertise: Design organization design and scaling
+    responsibilities:
+      - Team model selection
+      - Organizational design
+      - Headcount planning
+      - Career ladder development
+      - Role definitions
+    skills:
+      - /design-team-audit
+      - /design-team-model
+      - /design-team-roles
+      - /design-team-growth
+    triggers:
+      - "team structure"
+      - "hiring plan"
+      - "career ladder"
+      - "organizational design"
+
+  OPS-CONDUCTOR:
+    id: DL-003
+    role: DesignOps Lead
+    expertise: Design operations and enablement
+    responsibilities:
+      - Process optimization
+      - Tool stack management
+      - Design systems governance
+      - Workflow automation
+      - Team enablement
+    skills:
+      - /designops-audit
+      - /designops-maturity
+      - /designops-roadmap
+      - /designops-tools
+    triggers:
+      - "designops"
+      - "design operations"
+      - "design tools"
+      - "design process"
+
+  MATURITY-SAGE:
+    id: DL-004
+    role: Design Maturity Expert
+    expertise: Design maturity assessment and transformation
+    responsibilities:
+      - Maturity assessment
+      - Benchmark analysis
+      - Transformation roadmaps
+      - Capability building
+      - Industry benchmarking
+    skills:
+      - /design-maturity-audit
+      - /design-maturity-model
+      - /design-maturity-roadmap
+      - /design-maturity-benchmark
+    triggers:
+      - "design maturity"
+      - "maturity assessment"
+      - "design capability"
+      - "benchmark"
+
+  COLLAB-BRIDGE:
+    id: DL-005
+    role: Cross-Functional Collaboration Expert
+    expertise: Partnership building and stakeholder management
+    responsibilities:
+      - Partnership models
+      - Stakeholder engagement
+      - Ritual design
+      - Workshop facilitation
+      - Conflict resolution
+    skills:
+      - /collab-model
+      - /collab-audit
+      - /collab-rituals
+      - /collab-workshop
+    triggers:
+      - "collaboration"
+      - "partnership"
+      - "stakeholder"
+      - "cross-functional"
+
+  METRICS-INSIGHT:
+    id: DL-006
+    role: Design Metrics Specialist
+    expertise: Design measurement and ROI
+    responsibilities:
+      - Metrics framework
+      - Dashboard creation
+      - ROI calculation
+      - Impact storytelling
+      - Executive reporting
+    skills:
+      - /design-metrics-define
+      - /design-metrics-dashboard
+      - /design-roi
+      - /design-impact-report
+    triggers:
+      - "design metrics"
+      - "design ROI"
+      - "impact measurement"
+      - "design KPIs"
+
+  TALENT-NURTURE:
+    id: DL-007
+    role: Design Talent Development Lead
+    expertise: Hiring, onboarding, and career growth
+    responsibilities:
+      - Hiring process design
+      - Interview frameworks
+      - Onboarding programs
+      - Skill development
+      - Mentorship programs
+    skills:
+      - /design-hiring
+      - /design-onboarding
+      - /design-career
+      - /design-learning
+    triggers:
+      - "hiring"
+      - "onboarding"
+      - "career development"
+      - "skill gap"
+
+  RESEARCH-BRIDGE:
+    id: DL-008
+    role: Research Integration Specialist
+    expertise: Research operations and design research alignment
+    responsibilities:
+      - Research practice development
+      - Research-design integration
+      - Insight democratization
+      - Research operations
+      - Methods coaching
+    skills:
+      - /research-practice
+      - /research-ops
+      - /research-integrate
+      - /insight-share
+    triggers:
+      - "research practice"
+      - "research ops"
+      - "user research"
+      - "insights"
+
+deployment_modes:
+
+  full:
+    agents: all
+    description: Deploy complete Design Leadership team
+    use_case: Full design organization transformation
+    command: /deploy-design-lead
+
+  strategy:
+    agents: [VISION-PRIME, MATURITY-SAGE, METRICS-INSIGHT]
+    description: Strategy and transformation focus
+    use_case: Design strategy development
+    command: /deploy-design-lead --strategy
+
+  operations:
+    agents: [OPS-CONDUCTOR, METRICS-INSIGHT, RESEARCH-BRIDGE]
+    description: DesignOps and enablement focus
+    use_case: Operations optimization
+    command: /deploy-design-lead --ops
+
+  growth:
+    agents: [TEAM-ARCHITECT, TALENT-NURTURE, COLLAB-BRIDGE]
+    description: Team building and scaling focus
+    use_case: Scaling design organization
+    command: /deploy-design-lead --growth
+
+  transformation:
+    agents: [VISION-PRIME, MATURITY-SAGE, OPS-CONDUCTOR, COLLAB-BRIDGE]
+    description: Full organizational transformation
+    use_case: Design maturity transformation
+    command: /deploy-design-lead --transform
+
+swarm_protocol:
+  coordination: VISION-PRIME leads all engagements
+  handoffs:
+    strategy_to_ops: VISION-PRIME → OPS-CONDUCTOR
+    assessment_to_roadmap: MATURITY-SAGE → VISION-PRIME
+    team_to_talent: TEAM-ARCHITECT → TALENT-NURTURE
+    collab_to_metrics: COLLAB-BRIDGE → METRICS-INSIGHT
+
+  parallel_work:
+    - TEAM-ARCHITECT + TALENT-NURTURE (team building)
+    - OPS-CONDUCTOR + RESEARCH-BRIDGE (process optimization)
+    - MATURITY-SAGE + METRICS-INSIGHT (assessment and measurement)
+
+  deliverable_flow:
+    phase_1:
+      lead: MATURITY-SAGE
+      support: [METRICS-INSIGHT, OPS-CONDUCTOR]
+      deliverable: Current state assessment
+    phase_2:
+      lead: VISION-PRIME
+      support: [TEAM-ARCHITECT, COLLAB-BRIDGE]
+      deliverable: Target state and roadmap
+    phase_3:
+      lead: OPS-CONDUCTOR
+      support: [TALENT-NURTURE, RESEARCH-BRIDGE]
+      deliverable: Implementation plan
+    phase_4:
+      lead: METRICS-INSIGHT
+      support: [VISION-PRIME]
+      deliverable: Success measurement framework
+
+audit_capabilities:
+
+  comprehensive_audit:
+    name: Full Design Leadership Audit
+    duration: 2-4 weeks engagement
+    components:
+      - Design maturity assessment
+      - Team structure analysis
+      - DesignOps evaluation
+      - Collaboration health check
+      - Metrics and impact review
+      - Stakeholder perception survey
+    deliverables:
+      - Executive summary
+      - Detailed findings
+      - Benchmark comparison
+      - Prioritized recommendations
+      - Transformation roadmap
+      - Quick wins list
+
+  rapid_assessment:
+    name: Design Health Check
+    duration: 3-5 days
+    components:
+      - Leadership interviews
+      - Process review
+      - Team survey
+      - Artifact audit
+    deliverables:
+      - Health score
+      - Top 5 opportunities
+      - Immediate actions
+
+frameworks:
+
+  ELEVATE:
+    description: Design Leadership Excellence Framework
+    components:
+      E: Empowered - Design has strategic authority
+      L: Leverage - Systems and tools multiply impact
+      E: Evidence - Data-driven decisions
+      V: Velocity - Fast, efficient delivery
+      A: Alignment - Cross-functional partnerships
+      T: Talent - World-class team
+      E: Experience - Exceptional user outcomes
+
+  maturity_model:
+    levels:
+      1: Initial (0-19)
+      2: Project-Based (20-39)
+      3: Functional (40-59)
+      4: Integrated (60-79)
+      5: Design-Led (80-100)
+
+  team_models:
+    centralized: Single design team serving all
+    embedded: Designers in product teams
+    hybrid: Embedded with design leadership
+
+industry_benchmarks:
+  design_to_engineer_ratio:
+    startup: "1:10"
+    growth: "1:8"
+    scale: "1:6"
+    enterprise: "1:4-5"
+
+  research_to_design_ratio:
+    growth: "1:8"
+    scale: "1:6"
+    enterprise: "1:4"
+
+  designops_threshold: 10 designers
+
+future_vision:
+  3_year:
+    - AI-augmented design workflows
+    - Automated design QA
+    - Real-time collaboration tools
+    - Personalized design systems
+    - Continuous user research
+
+  5_year:
+    - Generative design assistants
+    - Predictive design analytics
+    - Zero-friction handoffs
+    - Self-evolving design systems
+    - Always-on user insights

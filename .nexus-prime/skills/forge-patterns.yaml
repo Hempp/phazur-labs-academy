@@ -1,0 +1,289 @@
+name: forge-patterns
+version: 1.0.0
+description: Design patterns and architecture reference library
+agent: FORGE-X
+category: engineering
+
+triggers:
+  - /forge-pattern
+  - /forge-architect
+  - /forge-algo
+
+parameters:
+  - name: pattern
+    type: string
+    required: true
+    description: Pattern name or category to lookup
+
+patterns:
+
+  creational:
+    - name: Factory Method
+      intent: Define interface for creating objects, let subclasses decide
+      use_when:
+        - Class cannot anticipate which objects to create
+        - Class wants subclasses to specify objects
+      example_languages: [typescript, python, go]
+
+    - name: Abstract Factory
+      intent: Create families of related objects without concrete classes
+      use_when:
+        - System should be independent of how products are created
+        - Multiple families of products need support
+      example_languages: [typescript, python, java]
+
+    - name: Builder
+      intent: Separate construction of complex object from representation
+      use_when:
+        - Object has many optional parameters
+        - Construction process must allow different representations
+      example_languages: [typescript, rust, go]
+
+    - name: Singleton
+      intent: Ensure class has only one instance with global access
+      use_when:
+        - Exactly one instance needed (config, logging)
+        - Global access point required
+      warning: Often overused, consider dependency injection
+
+    - name: Prototype
+      intent: Create objects by copying existing instance
+      use_when:
+        - Creating objects is expensive
+        - Runtime object composition needed
+      example_languages: [javascript, python]
+
+  structural:
+    - name: Adapter
+      intent: Convert interface to one clients expect
+      use_when:
+        - Integrating incompatible interfaces
+        - Wrapping legacy code
+      example_languages: [typescript, python, go]
+
+    - name: Decorator
+      intent: Attach additional responsibilities dynamically
+      use_when:
+        - Adding behaviors without subclassing
+        - Responsibilities can be added/removed
+      example_languages: [typescript, python]
+
+    - name: Facade
+      intent: Provide unified interface to subsystem
+      use_when:
+        - Simplifying complex subsystem
+        - Reducing coupling between clients and subsystem
+      example_languages: [typescript, python, go]
+
+    - name: Proxy
+      intent: Provide surrogate for another object
+      use_when:
+        - Lazy initialization
+        - Access control
+        - Logging/caching
+      example_languages: [typescript, python, go]
+
+    - name: Composite
+      intent: Compose objects into tree structures
+      use_when:
+        - Representing part-whole hierarchies
+        - Treating individual and composite uniformly
+      example_languages: [typescript, python]
+
+  behavioral:
+    - name: Strategy
+      intent: Define family of algorithms, make them interchangeable
+      use_when:
+        - Many related classes differ only in behavior
+        - Algorithm variants needed
+      example_languages: [typescript, python, go]
+
+    - name: Observer
+      intent: Define one-to-many dependency for state changes
+      use_when:
+        - Change in one object requires changing others
+        - Object should notify unknown number of dependents
+      example_languages: [typescript, python]
+
+    - name: Command
+      intent: Encapsulate request as object
+      use_when:
+        - Parameterize objects with operations
+        - Support undo/redo
+        - Queue operations
+      example_languages: [typescript, python]
+
+    - name: State
+      intent: Alter behavior when internal state changes
+      use_when:
+        - Behavior depends on state
+        - Large conditional statements based on state
+      example_languages: [typescript, python]
+
+    - name: Chain of Responsibility
+      intent: Pass request along chain of handlers
+      use_when:
+        - Multiple objects may handle request
+        - Handler set dynamically determined
+      example_languages: [typescript, python, go]
+
+  cloud_native:
+    - name: Circuit Breaker
+      intent: Prevent cascading failures in distributed systems
+      use_when:
+        - Calling external services
+        - Protecting against failure propagation
+      implementation: opossum, hystrix, resilience4j
+
+    - name: Bulkhead
+      intent: Isolate components to contain failures
+      use_when:
+        - Preventing resource exhaustion
+        - Isolating critical from non-critical
+      implementation: Thread pools, connection pools
+
+    - name: Sidecar
+      intent: Deploy helper components alongside main application
+      use_when:
+        - Cross-cutting concerns (logging, monitoring)
+        - Language-agnostic functionality
+      implementation: Envoy, Linkerd
+
+    - name: Ambassador
+      intent: Offload common connectivity tasks
+      use_when:
+        - Proxying connections
+        - Retries, circuit breaking at edge
+      implementation: Kubernetes, service mesh
+
+    - name: Saga
+      intent: Manage distributed transactions
+      use_when:
+        - Long-running transactions across services
+        - Need for compensating transactions
+      types: [choreography, orchestration]
+
+architectures:
+
+  hexagonal:
+    also_known_as: Ports and Adapters
+    intent: Isolate domain from infrastructure
+    layers:
+      - domain: Business logic, pure functions
+      - application: Use cases, orchestration
+      - infrastructure: External systems, frameworks
+    benefits:
+      - Highly testable
+      - Technology agnostic
+      - Clear boundaries
+    use_when:
+      - Domain is complex
+      - Multiple interfaces needed
+      - Long-term maintainability important
+
+  event_driven:
+    intent: React to events asynchronously
+    components:
+      - event_producers
+      - event_consumers
+      - event_bus
+      - event_store
+    benefits:
+      - Loose coupling
+      - Scalability
+      - Temporal decoupling
+    use_when:
+      - High throughput needed
+      - Audit trail required
+      - Multiple consumers of events
+
+  cqrs:
+    full_name: Command Query Responsibility Segregation
+    intent: Separate read and write models
+    benefits:
+      - Optimized read/write paths
+      - Scalability
+      - Complex query support
+    use_when:
+      - Read/write ratios very different
+      - Complex business logic
+      - Multiple read representations needed
+
+  serverless:
+    intent: Execute code without managing servers
+    benefits:
+      - Pay per use
+      - Auto-scaling
+      - Reduced ops burden
+    considerations:
+      - Cold starts
+      - Vendor lock-in
+      - State management
+    use_when:
+      - Variable workloads
+      - Event-driven processing
+      - Cost optimization needed
+
+  local_first:
+    intent: Work offline, sync when connected
+    components:
+      - local_database
+      - sync_engine
+      - conflict_resolution
+    benefits:
+      - Works offline
+      - Fast local operations
+      - Resilient to network issues
+    use_when:
+      - Mobile apps
+      - Unreliable connectivity
+      - Collaboration features
+
+algorithms:
+
+  complexity_reference:
+    data_structures:
+      array:
+        access: O(1)
+        search: O(n)
+        insert: O(n)
+        delete: O(n)
+      hash_map:
+        access: O(1)
+        search: O(1)
+        insert: O(1)
+        delete: O(1)
+      binary_tree:
+        access: O(log n)
+        search: O(log n)
+        insert: O(log n)
+        delete: O(log n)
+      linked_list:
+        access: O(n)
+        search: O(n)
+        insert: O(1)
+        delete: O(1)
+
+    sorting:
+      quicksort:
+        best: O(n log n)
+        average: O(n log n)
+        worst: O(n²)
+        space: O(log n)
+      mergesort:
+        best: O(n log n)
+        average: O(n log n)
+        worst: O(n log n)
+        space: O(n)
+      heapsort:
+        best: O(n log n)
+        average: O(n log n)
+        worst: O(n log n)
+        space: O(1)
+
+    searching:
+      linear: O(n)
+      binary: O(log n)
+      hash: O(1)
+      bfs: O(V + E)
+      dfs: O(V + E)

@@ -1,0 +1,357 @@
+name: ux-generate
+version: 1.0.0
+description: Generate UX artifacts - wireframes, flows, personas, journey maps, and critique
+agent: PRISM-UX
+category: design
+
+triggers:
+  - /ux-wireframe
+  - /ux-flow
+  - /ux-persona
+  - /ux-journey
+  - /ux-critique
+  - /ux-improve
+
+parameters:
+  - name: type
+    type: enum
+    values: [wireframe, flow, persona, journey-map, critique, improve]
+    required: true
+  - name: context
+    type: string
+    required: true
+    description: Description of what to generate or analyze
+  - name: fidelity
+    type: enum
+    values: [low, medium, high]
+    default: low
+    required: false
+
+generators:
+
+  wireframe:
+    name: Wireframe Specification
+    description: Generate detailed wireframe specs for implementation
+    output: |
+      ## Wireframe: [Screen/Component Name]
+
+      ### Purpose
+      [What this screen accomplishes]
+
+      ### User Goal
+      [What user is trying to achieve]
+
+      ### Layout Structure
+      ```
+      ┌─────────────────────────────────────┐
+      │ HEADER                              │
+      │ [Logo] [Nav] [Nav] [Nav]    [CTA]   │
+      ├─────────────────────────────────────┤
+      │                                     │
+      │ HERO SECTION                        │
+      │ [Headline - H1]                     │
+      │ [Subheadline - supporting text]     │
+      │ [Primary CTA] [Secondary CTA]       │
+      │                                     │
+      ├─────────────────────────────────────┤
+      │ CONTENT SECTION                     │
+      │ ┌─────┐ ┌─────┐ ┌─────┐            │
+      │ │Card │ │Card │ │Card │            │
+      │ │  1  │ │  2  │ │  3  │            │
+      │ └─────┘ └─────┘ └─────┘            │
+      ├─────────────────────────────────────┤
+      │ FOOTER                              │
+      └─────────────────────────────────────┘
+      ```
+
+      ### Element Specifications
+      | Element | Content | Priority | Notes |
+      |---------|---------|----------|-------|
+      | Header Logo | Brand mark | P0 | Links to home |
+      | Nav Items | 3-4 items | P1 | Dropdown on hover |
+      | Hero CTA | Primary action | P0 | High contrast |
+
+      ### Content Requirements
+      - Headline: [Max 8 words, action-oriented]
+      - Subheadline: [Max 20 words, benefit-focused]
+      - CTA: [Max 3 words, verb-first]
+
+      ### Responsive Behavior
+      - **Desktop (1200px+):** [Layout description]
+      - **Tablet (768-1199px):** [Adaptations]
+      - **Mobile (<768px):** [Stack/collapse behavior]
+
+      ### Interaction Notes
+      - [Hover states]
+      - [Click behaviors]
+      - [Scroll behaviors]
+
+      ### Accessibility Checklist
+      - [ ] Logical heading hierarchy
+      - [ ] Skip links
+      - [ ] Focus order
+      - [ ] Touch targets 44px+
+
+  flow:
+    name: User Flow Diagram
+    description: Map user journeys and decision paths
+    output: |
+      ## User Flow: [Flow Name]
+
+      ### Trigger
+      [What initiates this flow]
+
+      ### User Goal
+      [What user wants to accomplish]
+
+      ### Success Criteria
+      [How we know flow succeeded]
+
+      ### Flow Diagram
+      ```
+      [Entry Point]
+           │
+           ▼
+      ┌─────────┐
+      │ Step 1  │
+      │ [Action]│
+      └────┬────┘
+           │
+           ▼
+      ◇ Decision?
+      ├── Yes ──► [Path A]
+      │                │
+      │                ▼
+      │           ┌─────────┐
+      │           │ Step 2A │
+      │           └────┬────┘
+      │                │
+      └── No ───► [Path B]
+                      │
+                      ▼
+                 ┌─────────┐
+                 │ Step 2B │
+                 └────┬────┘
+                      │
+                      ▼
+                 [Success State]
+      ```
+
+      ### Step Details
+
+      #### Step 1: [Name]
+      - **Screen:** [Screen name]
+      - **User Action:** [What user does]
+      - **System Response:** [What happens]
+      - **Edge Cases:** [Error handling]
+
+      ### Metrics to Track
+      | Step | Metric | Target |
+      |------|--------|--------|
+      | Entry | Conversion to step 1 | >80% |
+      | Step 1 | Completion rate | >90% |
+      | Decision | Path A selection | Track |
+      | Success | Overall completion | >70% |
+
+      ### Drop-off Risk Points
+      1. [High friction point] - Mitigation: [X]
+      2. [Confusion point] - Mitigation: [Y]
+
+  persona:
+    name: Research-Based Persona
+    description: Create evidence-based user personas
+    output: |
+      ## Persona: [Name]
+
+      ### Quick Profile
+      | Attribute | Value |
+      |-----------|-------|
+      | Age Range | [X-Y] |
+      | Role | [Job/Life role] |
+      | Tech Savviness | [Low/Medium/High] |
+      | Primary Device | [Mobile/Desktop/Both] |
+
+      ### Photo Placeholder
+      [Description for AI image generation or stock photo search]
+
+      ### Bio
+      [2-3 sentences describing this person's life context]
+
+      ### Goals
+      1. **Primary:** [Main objective]
+      2. **Secondary:** [Supporting goal]
+      3. **Aspirational:** [Long-term desire]
+
+      ### Frustrations
+      1. [Pain point with current solutions]
+      2. [Time/effort waste]
+      3. [Unmet need]
+
+      ### Behaviors
+      - **Daily routine:** [Relevant habits]
+      - **Tool usage:** [Current solutions]
+      - **Decision making:** [How they choose]
+
+      ### Quote
+      > "[Something this persona would say]"
+
+      ### Scenario
+      [A typical day/situation where they'd use our product]
+
+      ### Success Metrics
+      How [Name] defines success with our product:
+      - [Metric 1]
+      - [Metric 2]
+
+      ### Design Implications
+      | Insight | Design Response |
+      |---------|-----------------|
+      | [Behavior] | [Feature/approach] |
+
+      ### Research Basis
+      - [Data source 1]
+      - [Interview finding]
+      - [Analytics insight]
+
+  journey_map:
+    name: User Journey Map
+    description: End-to-end experience mapping with emotions
+    output: |
+      ## Journey Map: [Journey Name]
+
+      ### Persona
+      [Persona name and quick context]
+
+      ### Scenario
+      [Specific situation being mapped]
+
+      ### Journey Phases
+
+      #### Phase 1: [Awareness/Trigger]
+      | Aspect | Details |
+      |--------|---------|
+      | **Doing** | [User actions] |
+      | **Thinking** | [Questions, considerations] |
+      | **Feeling** | [Emotional state] |
+      | **Touchpoints** | [Where interaction happens] |
+      | **Pain Points** | [Frustrations] |
+      | **Opportunities** | [How we can help] |
+
+      **Emotion:** 😟 ── 😐 ── 🙂 ── 😊 ── 🎉
+                  [X]
+
+      #### Phase 2: [Consideration]
+      [Same structure...]
+
+      #### Phase 3: [Decision]
+      [Same structure...]
+
+      #### Phase 4: [Use]
+      [Same structure...]
+
+      #### Phase 5: [Loyalty/Advocacy]
+      [Same structure...]
+
+      ### Emotional Journey Graph
+      ```
+      Emotion
+         ^
+      🎉 │                              ╭─╮
+      😊 │            ╭──╮         ╭───╯  │
+      🙂 │      ╭────╯   ╰───╮   ╭╯       │
+      😐 │  ╭──╯              ╰──╯        │
+      😟 │──╯                             │
+         └────────────────────────────────► Time
+            Phase1  Phase2  Phase3  Phase4  Phase5
+      ```
+
+      ### Key Insights
+      1. [Critical moment insight]
+      2. [Opportunity insight]
+      3. [Pain point insight]
+
+      ### Priority Opportunities
+      | Opportunity | Impact | Effort | Priority |
+      |-------------|--------|--------|----------|
+      | [Opp 1] | High | Low | P0 |
+
+      ### Moments of Truth
+      - **Make or break:** [Critical moment]
+      - **Delight opportunity:** [Where to exceed expectations]
+
+  critique:
+    name: Design Critique
+    description: Constructive, actionable design feedback
+    framework: |
+      ## Design Critique: [Design Name]
+
+      ### First Impressions (5-second test)
+      - What stands out: [X]
+      - What's unclear: [Y]
+      - Overall impression: [Z]
+
+      ### What's Working
+      [Specific praise with reasoning - be genuine]
+
+      ### Areas for Improvement
+
+      #### Visual Hierarchy
+      **Issue:** [Describe problem]
+      **Impact:** [Why it matters]
+      **Suggestion:** [Specific fix]
+      **Reference:** [Similar pattern done well]
+
+      #### Information Architecture
+      [Same structure]
+
+      #### Interaction Design
+      [Same structure]
+
+      #### Accessibility
+      [Same structure]
+
+      #### Consistency
+      [Same structure]
+
+      ### Questions to Consider
+      - [Clarifying question about intent]
+      - [Alternative approach to explore]
+
+      ### Priority Recommendations
+      1. **High Impact, Low Effort:** [Quick win]
+      2. **High Impact, High Effort:** [Plan for]
+      3. **Low Impact, Low Effort:** [If time allows]
+
+      ### Summary
+      [2-3 sentences synthesizing feedback]
+
+  improve:
+    name: Design Improvement Suggestions
+    description: Specific, implementable improvements
+    output: |
+      ## Improvement Recommendations: [Target]
+
+      ### Quick Wins (Implement Today)
+      | Issue | Fix | Effort |
+      |-------|-----|--------|
+      | [X] | [Specific fix] | 1hr |
+
+      ### Medium-Term Improvements
+      | Issue | Improvement | Impact | Effort |
+      |-------|-------------|--------|--------|
+
+      ### Strategic Enhancements
+      [Larger changes for future consideration]
+
+      ### Before/After Visualization
+      **Current State:**
+      [Description or ASCII representation]
+
+      **Improved State:**
+      [Description or ASCII representation]
+
+      ### Implementation Notes
+      [Technical considerations]
+
+      ### Metrics to Track
+      [How to measure improvement impact]

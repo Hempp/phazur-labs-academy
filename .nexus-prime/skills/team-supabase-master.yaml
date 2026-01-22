@@ -1,0 +1,571 @@
+# Supabase Master Team - NEXUS-PRIME Integration
+# Version: 1.0.0
+# Backend-as-a-Service swarm with 8 guru-level specialists
+
+name: supabase-master-team
+version: "1.0.0"
+description: "Full-stack Supabase development swarm with database, auth, storage, edge functions, and realtime specialists"
+
+# ═══════════════════════════════════════════════════════════════
+# TEAM CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
+
+team:
+  name: "Supabase Master Team"
+  codename: "SUPA-SWARM"
+  tagline: "Build in a weekend. Scale to millions."
+
+  activation_commands:
+    - /deploy-supabase
+    - /supabase-team
+    - /nexus-deploy SUPA-MASTER
+
+  environment:
+    required:
+      - SUPABASE_URL
+      - SUPABASE_ANON_KEY
+      - SUPABASE_SERVICE_ROLE_KEY
+    optional:
+      - SUPABASE_DB_URL
+      - SUPABASE_PROJECT_REF
+      - SUPABASE_ACCESS_TOKEN
+
+# ═══════════════════════════════════════════════════════════════
+# AGENTS
+# ═══════════════════════════════════════════════════════════════
+
+agents:
+  # Lead Agent
+  - id: SUPA-MASTER
+    name: "Supabase Master"
+    role: "Lead Architect"
+    emoji: "🏗️"
+    expertise:
+      - Project architecture
+      - Service orchestration
+      - Migration strategy
+      - Performance optimization
+      - Multi-tenant design
+    responsibilities:
+      - Coordinate all Supabase services
+      - Design database schemas
+      - Plan migration strategies
+      - Optimize overall performance
+      - Manage team workflow
+    tools:
+      - supabase-cli
+      - schema-designer
+      - migration-planner
+    handoffs:
+      - AUTH-GUARD for authentication
+      - DATA-FORGE for database operations
+      - STORE-KEEPER for storage
+      - EDGE-RUNNER for serverless
+      - REALTIME-SYNC for subscriptions
+      - ROW-GUARD for RLS policies
+      - VECTOR-SAGE for AI/embeddings
+
+  # Authentication Specialist
+  - id: AUTH-GUARD
+    name: "Auth Guard"
+    role: "Authentication Specialist"
+    emoji: "🔐"
+    expertise:
+      - OAuth providers (Google, GitHub, Discord, etc.)
+      - Magic links & OTP
+      - JWT management
+      - Session handling
+      - Multi-factor authentication
+      - SSO/SAML integration
+    responsibilities:
+      - Configure auth providers
+      - Implement custom auth flows
+      - Manage user sessions
+      - Set up MFA
+      - Handle auth webhooks
+    tools:
+      - auth-config
+      - provider-setup
+      - jwt-debugger
+    templates:
+      - social-auth-setup
+      - magic-link-flow
+      - mfa-implementation
+      - custom-claims
+
+  # Database Specialist
+  - id: DATA-FORGE
+    name: "Data Forge"
+    role: "Database Architect"
+    emoji: "🗄️"
+    expertise:
+      - PostgreSQL optimization
+      - Schema design
+      - Migrations
+      - Indexes & performance
+      - Foreign keys & constraints
+      - Database functions
+      - Triggers & procedures
+    responsibilities:
+      - Design efficient schemas
+      - Write optimized queries
+      - Create database functions
+      - Manage migrations
+      - Optimize performance
+    tools:
+      - schema-generator
+      - migration-runner
+      - query-analyzer
+      - index-advisor
+    templates:
+      - normalized-schema
+      - audit-tables
+      - soft-delete
+      - multi-tenant
+
+  # Storage Specialist
+  - id: STORE-KEEPER
+    name: "Store Keeper"
+    role: "Storage Expert"
+    emoji: "📦"
+    expertise:
+      - Bucket management
+      - File uploads/downloads
+      - Image transformations
+      - CDN optimization
+      - Storage policies
+      - Resumable uploads
+    responsibilities:
+      - Configure storage buckets
+      - Set up access policies
+      - Optimize file delivery
+      - Implement transformations
+      - Handle large uploads
+    tools:
+      - bucket-manager
+      - policy-generator
+      - transform-config
+    templates:
+      - public-bucket
+      - private-bucket
+      - image-transforms
+      - avatar-upload
+
+  # Edge Functions Specialist
+  - id: EDGE-RUNNER
+    name: "Edge Runner"
+    role: "Serverless Specialist"
+    emoji: "⚡"
+    expertise:
+      - Deno runtime
+      - Edge function development
+      - API endpoints
+      - Webhooks
+      - Background jobs
+      - Third-party integrations
+    responsibilities:
+      - Develop edge functions
+      - Create API endpoints
+      - Handle webhooks
+      - Integrate external services
+      - Optimize cold starts
+    tools:
+      - function-generator
+      - local-dev-server
+      - deploy-manager
+    templates:
+      - api-endpoint
+      - webhook-handler
+      - stripe-integration
+      - email-sender
+      - cron-job
+
+  # Realtime Specialist
+  - id: REALTIME-SYNC
+    name: "Realtime Sync"
+    role: "Realtime Specialist"
+    emoji: "🔄"
+    expertise:
+      - Postgres Changes
+      - Broadcast channels
+      - Presence tracking
+      - Realtime subscriptions
+      - Channel management
+    responsibilities:
+      - Configure realtime tables
+      - Implement subscriptions
+      - Build presence features
+      - Optimize broadcast
+      - Handle reconnection
+    tools:
+      - realtime-config
+      - channel-manager
+      - presence-tracker
+    templates:
+      - table-subscription
+      - chat-room
+      - presence-feature
+      - live-cursor
+
+  # Row Level Security Specialist
+  - id: ROW-GUARD
+    name: "Row Guard"
+    role: "RLS Policy Expert"
+    emoji: "🛡️"
+    expertise:
+      - Row Level Security
+      - Policy design
+      - Performance optimization
+      - Multi-tenant RLS
+      - Complex access patterns
+    responsibilities:
+      - Design RLS policies
+      - Audit security gaps
+      - Optimize policy performance
+      - Implement tenant isolation
+      - Test access controls
+    tools:
+      - policy-generator
+      - security-auditor
+      - access-tester
+    templates:
+      - user-owned-rows
+      - org-based-access
+      - role-based-access
+      - public-read-auth-write
+
+  # AI/Vector Specialist
+  - id: VECTOR-SAGE
+    name: "Vector Sage"
+    role: "AI & Embeddings Expert"
+    emoji: "🧠"
+    expertise:
+      - pgvector extension
+      - Embedding generation
+      - Semantic search
+      - RAG implementations
+      - AI integrations
+    responsibilities:
+      - Configure vector storage
+      - Implement semantic search
+      - Build RAG pipelines
+      - Optimize vector queries
+      - Integrate AI models
+    tools:
+      - vector-config
+      - embedding-generator
+      - similarity-search
+    templates:
+      - document-search
+      - chatbot-memory
+      - recommendation-engine
+      - content-similarity
+
+# ═══════════════════════════════════════════════════════════════
+# COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+commands:
+  # Project Management
+  - command: /deploy-supabase
+    description: Deploy full Supabase team
+    action: activate_team
+    agents: all
+
+  - command: /supabase-init
+    description: Initialize new Supabase project
+    action: init_project
+    agents: [SUPA-MASTER]
+
+  - command: /supabase-link
+    description: Link to existing Supabase project
+    action: link_project
+    args:
+      - project_ref
+
+  # Database Commands
+  - command: /supabase-db
+    description: Database operations
+    subcommands:
+      - push: Push local migrations to remote
+      - pull: Pull remote schema to local
+      - reset: Reset local database
+      - diff: Show schema differences
+      - lint: Lint database schema
+    agents: [DATA-FORGE]
+
+  - command: /supabase-migrate
+    description: Create new migration
+    action: create_migration
+    args:
+      - name
+    agents: [DATA-FORGE]
+
+  - command: /supabase-schema
+    description: Generate schema from description
+    action: generate_schema
+    agents: [DATA-FORGE]
+
+  # Auth Commands
+  - command: /supabase-auth
+    description: Auth configuration
+    subcommands:
+      - providers: List/configure OAuth providers
+      - users: Manage users
+      - hooks: Configure auth hooks
+      - mfa: Set up MFA
+    agents: [AUTH-GUARD]
+
+  # Storage Commands
+  - command: /supabase-storage
+    description: Storage management
+    subcommands:
+      - buckets: List/create buckets
+      - policies: Manage storage policies
+      - upload: Upload files
+    agents: [STORE-KEEPER]
+
+  # Edge Functions
+  - command: /supabase-functions
+    description: Edge functions management
+    subcommands:
+      - new: Create new function
+      - deploy: Deploy functions
+      - serve: Local development server
+      - list: List deployed functions
+    agents: [EDGE-RUNNER]
+
+  - command: /supabase-function
+    description: Create new edge function
+    action: create_function
+    args:
+      - name
+      - template
+    agents: [EDGE-RUNNER]
+
+  # Realtime
+  - command: /supabase-realtime
+    description: Realtime configuration
+    subcommands:
+      - enable: Enable realtime for table
+      - disable: Disable realtime
+      - channels: Manage channels
+    agents: [REALTIME-SYNC]
+
+  # Security
+  - command: /supabase-rls
+    description: Row Level Security
+    subcommands:
+      - generate: Generate RLS policies
+      - audit: Audit existing policies
+      - test: Test policy access
+    agents: [ROW-GUARD]
+
+  # AI/Vectors
+  - command: /supabase-vectors
+    description: Vector/AI operations
+    subcommands:
+      - setup: Set up pgvector
+      - index: Create vector indexes
+      - search: Test similarity search
+    agents: [VECTOR-SAGE]
+
+  # Utility Commands
+  - command: /supabase-types
+    description: Generate TypeScript types
+    action: generate_types
+    output: types/supabase.ts
+
+  - command: /supabase-status
+    description: View project status
+    action: show_status
+
+  - command: /supabase-logs
+    description: View logs
+    args:
+      - service: [api, db, auth, storage, realtime, functions]
+
+  - command: /supabase-secrets
+    description: Manage secrets
+    subcommands:
+      - list: List secrets
+      - set: Set a secret
+      - unset: Remove a secret
+
+# ═══════════════════════════════════════════════════════════════
+# WORKFLOWS
+# ═══════════════════════════════════════════════════════════════
+
+workflows:
+  new_project:
+    name: "New Supabase Project"
+    steps:
+      - command: /supabase-init
+        agent: SUPA-MASTER
+      - command: /supabase-schema
+        agent: DATA-FORGE
+      - command: /supabase-rls generate
+        agent: ROW-GUARD
+      - command: /supabase-auth providers
+        agent: AUTH-GUARD
+      - command: /supabase-types
+        agent: SUPA-MASTER
+
+  add_auth:
+    name: "Add Authentication"
+    steps:
+      - command: /supabase-auth providers
+        agent: AUTH-GUARD
+      - command: /supabase-rls generate
+        agent: ROW-GUARD
+      - command: /supabase-types
+        agent: SUPA-MASTER
+
+  add_realtime:
+    name: "Add Realtime Features"
+    steps:
+      - command: /supabase-realtime enable
+        agent: REALTIME-SYNC
+      - command: /supabase-rls audit
+        agent: ROW-GUARD
+
+  add_ai:
+    name: "Add AI/Vector Search"
+    steps:
+      - command: /supabase-vectors setup
+        agent: VECTOR-SAGE
+      - command: /supabase-function embedding-generator
+        agent: EDGE-RUNNER
+      - command: /supabase-schema
+        agent: DATA-FORGE
+
+# ═══════════════════════════════════════════════════════════════
+# TEMPLATES
+# ═══════════════════════════════════════════════════════════════
+
+templates:
+  schemas:
+    user_profiles:
+      description: "User profiles with auth integration"
+      tables:
+        - profiles
+        - user_settings
+      rls: true
+      realtime: true
+
+    multi_tenant:
+      description: "Multi-tenant SaaS schema"
+      tables:
+        - organizations
+        - organization_members
+        - invitations
+      rls: true
+
+    blog:
+      description: "Blog/CMS schema"
+      tables:
+        - posts
+        - categories
+        - comments
+        - tags
+      rls: true
+      storage: true
+
+    ecommerce:
+      description: "E-commerce schema"
+      tables:
+        - products
+        - orders
+        - order_items
+        - customers
+      rls: true
+      storage: true
+
+    chat:
+      description: "Real-time chat schema"
+      tables:
+        - channels
+        - messages
+        - participants
+      rls: true
+      realtime: true
+
+  edge_functions:
+    - stripe-webhook
+    - send-email
+    - generate-pdf
+    - openai-completion
+    - image-resize
+    - scheduled-task
+
+  rls_policies:
+    - user-owned
+    - org-based
+    - role-based
+    - public-read
+    - admin-only
+
+# ═══════════════════════════════════════════════════════════════
+# SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+settings:
+  auto_generate_types: true
+  auto_rls_audit: true
+  migration_format: timestamped
+  default_schema: public
+  type_output: "src/types/supabase.ts"
+
+  cli:
+    workdir: ./supabase
+    db_url_env: DATABASE_URL
+
+  logging:
+    level: info
+    services:
+      - api
+      - auth
+      - db
+
+# ═══════════════════════════════════════════════════════════════
+# HOOKS
+# ═══════════════════════════════════════════════════════════════
+
+hooks:
+  pre_migrate:
+    - action: backup_schema
+    - action: lint_migration
+
+  post_migrate:
+    - action: generate_types
+    - action: audit_rls
+
+  pre_deploy:
+    - action: type_check_functions
+    - action: test_functions
+
+  post_deploy:
+    - action: verify_deployment
+    - action: update_status
+
+# ═══════════════════════════════════════════════════════════════
+# INTEGRATIONS
+# ═══════════════════════════════════════════════════════════════
+
+integrations:
+  frameworks:
+    - nextjs
+    - nuxt
+    - sveltekit
+    - remix
+    - astro
+    - flutter
+    - react-native
+
+  services:
+    - stripe
+    - resend
+    - openai
+    - langchain
+    - clerk
+    - auth0

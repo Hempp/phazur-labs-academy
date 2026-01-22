@@ -1,0 +1,334 @@
+name: ops-cicd
+version: 1.0.0
+description: CI/CD pipeline design, deployment strategies, and release management
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-pipeline
+  - /ops-deploy
+  - /ops-rollback
+  - /ops-release
+
+parameters:
+  - name: service
+    type: string
+    required: true
+    description: Service to deploy
+  - name: environment
+    type: enum
+    values: [dev, staging, prod]
+    default: dev
+  - name: strategy
+    type: enum
+    values: [rolling, blue-green, canary, feature-flag]
+    default: rolling
+
+pipeline_stages:
+
+  build:
+    steps:
+      - checkout: Clone repository
+      - cache: Restore dependency cache
+      - install: Install dependencies
+      - compile: Build artifacts
+      - cache_save: Store dependency cache
+
+    best_practices:
+      - reproducible_builds: Pin all dependencies
+      - parallel_jobs: Parallelize where possible
+      - incremental_builds: Cache intermediate artifacts
+      - build_metadata: Embed version, commit, timestamp
+
+  test:
+    layers:
+      unit:
+        coverage_target: "80%"
+        parallelization: Full
+        timeout: 5m
+      integration:
+        coverage_target: "60%"
+        parallelization: Partial
+        timeout: 15m
+      e2e:
+        coverage_target: Critical paths
+        parallelization: None
+        timeout: 30m
+
+    quality_gates:
+      - coverage_threshold
+      - no_new_failures
+      - performance_regression
+      - security_scan_pass
+
+  security:
+    scans:
+      sast:
+        tools: [semgrep, codeql, sonarqube]
+        timing: Every commit
+        blocking: Critical/High findings
+
+      sca:
+        tools: [snyk, dependabot, trivy]
+        timing: Every commit
+        blocking: Critical findings
+
+      secrets:
+        tools: [gitleaks, trufflehog]
+        timing: Pre-commit + CI
+        blocking: Any finding
+
+      container:
+        tools: [trivy, grype, clair]
+        timing: Image build
+        blocking: Critical/High CVEs
+
+    compliance:
+      - sbom_generation
+      - license_scanning
+      - artifact_signing
+
+  package:
+    artifacts:
+      container:
+        registry: ECR/GCR/ACR
+        tagging: git-sha + semver
+        signing: cosign
+        scanning: Pre-push
+
+      binary:
+        storage: S3/GCS
+        versioning: Semantic
+        checksums: SHA256
+
+    best_practices:
+      - immutable_artifacts
+      - signed_artifacts
+      - reproducible_builds
+      - minimal_base_images
+
+  deploy:
+    environments:
+      dev:
+        trigger: Push to main
+        approval: None
+        rollback: Automatic
+      staging:
+        trigger: Push to main
+        approval: None
+        rollback: Automatic
+      prod:
+        trigger: Manual/Tag
+        approval: Required
+        rollback: One-click
+
+deployment_strategies:
+
+  rolling:
+    description: Gradual replacement of instances
+    use_case: Standard updates, stateless services
+    configuration:
+      max_surge: 25%
+      max_unavailable: 25%
+      min_ready_seconds: 30
+    pros:
+      - Zero downtime
+      - Resource efficient
+      - Simple to implement
+    cons:
+      - Mixed versions during deploy
+      - Slow rollback
+    kubernetes: |
+      spec:
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+
+  blue_green:
+    description: Full environment switch
+    use_case: Zero-downtime required, database migrations
+    configuration:
+      green_environment: Parallel stack
+      switch_mechanism: Load balancer/DNS
+      verification_time: 15m
+    pros:
+      - Instant rollback
+      - Full testing before switch
+      - No mixed versions
+    cons:
+      - Double resources during deploy
+      - Database schema challenges
+    implementation:
+      - Deploy green environment
+      - Run smoke tests
+      - Switch traffic
+      - Keep blue for rollback
+      - Decommission blue after verification
+
+  canary:
+    description: Gradual traffic shift
+    use_case: Risk mitigation, A/B testing
+    configuration:
+      initial_percentage: 5%
+      increment: 10%
+      evaluation_period: 15m
+      metrics_threshold:
+        error_rate: "<1%"
+        latency_p99: "<200ms"
+    pros:
+      - Low risk
+      - Real user testing
+      - Automatic rollback on metrics
+    cons:
+      - Complex setup
+      - Requires good observability
+    progression:
+      - stage_1: 5% traffic, 15m evaluation
+      - stage_2: 25% traffic, 15m evaluation
+      - stage_3: 50% traffic, 30m evaluation
+      - stage_4: 100% traffic
+
+  feature_flags:
+    description: Code-level deployment control
+    use_case: Gradual rollout, kill switch, experimentation
+    tools:
+      - launchdarkly
+      - split
+      - flagsmith
+      - unleash
+    patterns:
+      - percentage_rollout
+      - user_targeting
+      - environment_targeting
+      - time_based
+    best_practices:
+      - short_lived_flags
+      - flag_cleanup_process
+      - flag_naming_convention
+      - default_off_for_new
+
+gitops:
+
+  principles:
+    - declarative: Desired state in Git
+    - versioned: Git history as audit log
+    - automated: Changes reconciled automatically
+    - observable: Drift detection and alerting
+
+  tools:
+    argocd:
+      strength: Multi-cluster, UI, RBAC
+      pattern: Pull-based
+      sync_options:
+        - auto_sync
+        - self_heal
+        - prune
+
+    flux:
+      strength: Lightweight, GitOps toolkit
+      pattern: Pull-based
+      components:
+        - source_controller
+        - kustomize_controller
+        - helm_controller
+        - notification_controller
+
+  repository_structure:
+    mono_repo: |
+      infrastructure/
+      ├── base/
+      │   ├── deployment.yaml
+      │   ├── service.yaml
+      │   └── kustomization.yaml
+      ├── overlays/
+      │   ├── dev/
+      │   ├── staging/
+      │   └── prod/
+      └── apps/
+          ├── app-a/
+          └── app-b/
+
+    multi_repo:
+      app_repo: Application code + Dockerfile
+      config_repo: Kubernetes manifests
+      infra_repo: Terraform/Pulumi
+
+release_management:
+
+  versioning:
+    semantic:
+      format: "MAJOR.MINOR.PATCH"
+      major: Breaking changes
+      minor: New features (backward compatible)
+      patch: Bug fixes
+    calver:
+      format: "YYYY.MM.DD"
+      use_case: Continuous delivery
+
+  changelog:
+    format: Keep a Changelog
+    automation:
+      - conventional_commits
+      - auto_changelog_generation
+      - release_notes_from_prs
+
+  release_process:
+    - version_bump
+    - changelog_update
+    - tag_creation
+    - artifact_build
+    - environment_promotion
+    - announcement
+
+tools:
+
+  ci_platforms:
+    - github_actions
+    - gitlab_ci
+    - jenkins
+    - circleci
+    - tekton
+
+  cd_platforms:
+    - argocd
+    - flux
+    - spinnaker
+    - harness
+
+  artifact_management:
+    - docker_registry
+    - artifactory
+    - nexus
+    - github_packages
+
+workflows:
+
+  pipeline_audit:
+    command: /ops-pipeline-audit
+    steps:
+      - inventory: List all pipelines
+      - security: Check for hardcoded secrets
+      - efficiency: Analyze build times
+      - reliability: Check failure rates
+      - report: Generate recommendations
+
+  deploy_service:
+    command: /ops-deploy
+    steps:
+      - validate: Pre-deploy checks
+      - plan: Show deployment plan
+      - approve: Get approval if needed
+      - execute: Run deployment
+      - verify: Health checks
+      - monitor: Watch metrics
+
+  rollback:
+    command: /ops-rollback
+    steps:
+      - identify: Find previous version
+      - validate: Check rollback safety
+      - execute: Perform rollback
+      - verify: Confirm service health
+      - notify: Alert stakeholders

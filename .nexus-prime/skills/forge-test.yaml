@@ -1,0 +1,187 @@
+name: forge-test
+version: 1.0.0
+description: Testing strategy, generation, and execution
+agent: FORGE-X
+category: engineering
+
+triggers:
+  - /forge-test
+  - /forge-test-gen
+  - /forge-test-coverage
+  - /forge-test-mutation
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: File, function, or module to test
+  - name: type
+    type: enum
+    values: [unit, integration, e2e, mutation, all]
+    default: unit
+
+testing_pyramid:
+  unit:
+    percentage: 70
+    characteristics:
+      - Fast (<1s per test)
+      - Isolated (no external dependencies)
+      - Deterministic (same result every time)
+      - Focused (one behavior per test)
+    what_to_test:
+      - Business logic
+      - Pure functions
+      - Data transformations
+      - Edge cases and boundaries
+    tools:
+      typescript: [jest, vitest, mocha]
+      python: [pytest, unittest]
+      go: [testing, testify]
+      rust: [cargo test]
+
+  integration:
+    percentage: 20
+    characteristics:
+      - Tests component interactions
+      - May use test databases
+      - Slower than unit tests
+      - Tests boundaries
+    what_to_test:
+      - API endpoints
+      - Database operations
+      - Service interactions
+      - Message queues
+    tools:
+      api: [supertest, httpx, testify]
+      database: [testcontainers, sqlite-memory]
+
+  e2e:
+    percentage: 10
+    characteristics:
+      - Full system tests
+      - Slowest but highest confidence
+      - Tests critical user paths
+      - May be flaky
+    what_to_test:
+      - Critical user journeys
+      - Payment flows
+      - Authentication flows
+      - Key business processes
+    tools:
+      web: [playwright, cypress, puppeteer]
+      mobile: [detox, appium]
+      api: [postman, insomnia]
+
+test_patterns:
+
+  arrange_act_assert:
+    description: Standard test structure
+    sections:
+      - arrange: Set up test data and dependencies
+      - act: Execute the code under test
+      - assert: Verify the expected outcome
+
+  given_when_then:
+    description: BDD-style test structure
+    sections:
+      - given: Preconditions and setup
+      - when: Action being tested
+      - then: Expected outcome
+
+  test_data_patterns:
+    builder:
+      description: Build complex test objects fluently
+      use_when: Objects have many properties
+
+    fixture:
+      description: Pre-defined test data sets
+      use_when: Same data needed across tests
+
+    factory:
+      description: Generate test data dynamically
+      use_when: Need variations of similar objects
+
+test_quality_checklist:
+  - deterministic: No flaky tests, same result every run
+  - independent: Tests can run in any order
+  - fast: Unit tests <1s, integration <10s
+  - readable: Tests document expected behavior
+  - focused: One behavior per test
+  - complete: Happy paths AND failure paths
+
+mutation_testing:
+  description: Verify tests catch bugs by introducing mutations
+  tools:
+    typescript: stryker
+    python: mutmut
+    go: go-mutesting
+    java: pitest
+
+  target_score: ">80%"
+
+  mutation_types:
+    - arithmetic_operator_replacement
+    - conditional_boundary_change
+    - logical_operator_replacement
+    - return_value_mutation
+    - void_method_call_removal
+
+coverage_targets:
+  statements: ">80%"
+  branches: ">75%"
+  functions: ">90%"
+  lines: ">80%"
+
+  note: "Coverage measures what runs, not what's tested well"
+
+test_generation:
+  command: /forge-test-gen
+  capabilities:
+    - Generate test file structure
+    - Create test cases for happy paths
+    - Generate edge case tests
+    - Create boundary tests
+    - Generate error handling tests
+
+  output_format: |
+    describe('[Module/Function Name]', () => {
+      describe('[Method Name]', () => {
+        it('should [expected behavior] when [condition]', () => {
+          // Arrange
+          // Act
+          // Assert
+        });
+      });
+    });
+
+workflows:
+
+  test_driven:
+    name: Test-Driven Development
+    steps:
+      1: Write failing test for new behavior
+      2: Write minimum code to pass test
+      3: Refactor while keeping tests green
+      4: Repeat
+    benefits:
+      - Better design through testability
+      - Documentation through tests
+      - Confidence in changes
+
+  test_first_refactor:
+    name: Add Tests Before Refactoring
+    steps:
+      1: Understand existing behavior
+      2: Write characterization tests
+      3: Ensure tests pass
+      4: Refactor with safety net
+      5: Verify tests still pass
+
+best_practices:
+  - Test behavior, not implementation
+  - Avoid testing private methods directly
+  - Use descriptive test names
+  - Keep tests simple and readable
+  - Mock at boundaries, not internals
+  - Prefer integration over mocking when feasible
+  - Delete tests that no longer add value

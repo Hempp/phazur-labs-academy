@@ -1,0 +1,372 @@
+name: ops-platform
+version: 1.0.0
+description: Platform engineering, developer experience, and internal developer platforms
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-platform
+  - /ops-developer-experience
+  - /ops-self-service
+  - /ops-golden-path
+
+parameters:
+  - name: capability
+    type: enum
+    values: [compute, database, storage, secrets, observability]
+    required: false
+  - name: template
+    type: string
+    required: false
+
+platform_engineering:
+
+  definition: |
+    Platform Engineering is the discipline of designing and building
+    toolchains and workflows that enable self-service capabilities
+    for software engineering organizations.
+
+  goals:
+    - reduce_cognitive_load: Simplify infrastructure complexity
+    - enable_self_service: Developers provision own resources
+    - enforce_standards: Guardrails without gatekeeping
+    - accelerate_delivery: Faster time to production
+    - improve_reliability: Consistent, tested patterns
+
+  team_topology:
+    platform_team:
+      type: Enabling team
+      mission: Make other teams successful
+      customers: Application development teams
+      products: Internal developer platform
+
+    interaction_modes:
+      - collaboration: Joint work on new capabilities
+      - x_as_a_service: Self-service consumption
+      - facilitation: Training and enablement
+
+internal_developer_platform:
+
+  layers:
+    developer_portal:
+      purpose: Single entry point
+      tools:
+        - backstage
+        - port
+        - cortex
+        - opslevel
+      features:
+        - service_catalog
+        - documentation
+        - templates
+        - search
+
+    self_service:
+      purpose: Resource provisioning
+      capabilities:
+        - compute: Kubernetes namespaces, serverless
+        - database: Managed databases, caches
+        - storage: Object storage, file systems
+        - secrets: Vault, secrets managers
+        - networking: Load balancers, DNS
+      implementation:
+        - terraform_modules
+        - crossplane_compositions
+        - kubernetes_operators
+
+    golden_paths:
+      purpose: Paved roads for common patterns
+      templates:
+        - web_service
+        - api_service
+        - background_worker
+        - scheduled_job
+        - event_processor
+      includes:
+        - scaffolding
+        - ci_cd_pipeline
+        - observability
+        - security_baseline
+
+    observability:
+      purpose: Unified monitoring
+      stack:
+        - metrics: Prometheus/Datadog
+        - logs: Loki/ELK
+        - traces: Jaeger/Tempo
+        - dashboards: Grafana
+      features:
+        - automatic_instrumentation
+        - standard_dashboards
+        - alerting_templates
+
+    security:
+      purpose: Shift-left security
+      capabilities:
+        - secret_management
+        - certificate_automation
+        - policy_enforcement
+        - vulnerability_scanning
+
+golden_paths:
+
+  principles:
+    - opinionated_but_flexible: Defaults that can be overridden
+    - production_ready: Security, observability included
+    - continuously_improved: Feedback loop from users
+    - well_documented: Clear usage and customization
+
+  service_template:
+    structure: |
+      my-service/
+      ├── src/
+      ├── tests/
+      ├── Dockerfile
+      ├── .github/
+      │   └── workflows/
+      │       ├── ci.yml
+      │       └── cd.yml
+      ├── kubernetes/
+      │   ├── base/
+      │   └── overlays/
+      ├── docs/
+      │   └── runbook.md
+      └── catalog-info.yaml
+
+    includes:
+      - language_scaffolding
+      - dockerfile_optimized
+      - ci_pipeline
+      - cd_pipeline
+      - kubernetes_manifests
+      - observability_config
+      - security_baseline
+      - documentation_template
+
+  database_template:
+    options:
+      - postgresql: General purpose
+      - mysql: Legacy compatibility
+      - mongodb: Document store
+      - redis: Caching, sessions
+      - elasticsearch: Search, logs
+
+    includes:
+      - provisioning_automation
+      - backup_configuration
+      - monitoring_setup
+      - connection_pooling
+      - secret_rotation
+
+developer_experience:
+
+  metrics:
+    dora:
+      deployment_frequency:
+        elite: Multiple per day
+        high: Weekly to monthly
+        medium: Monthly to 6 months
+        low: "> 6 months"
+
+      lead_time:
+        elite: "< 1 hour"
+        high: "< 1 week"
+        medium: "1 week - 6 months"
+        low: "> 6 months"
+
+      mttr:
+        elite: "< 1 hour"
+        high: "< 1 day"
+        medium: "< 1 week"
+        low: "> 6 months"
+
+      change_failure_rate:
+        elite: "< 5%"
+        high: "< 15%"
+        medium: "< 30%"
+        low: "> 30%"
+
+    space:
+      satisfaction: Developer happiness
+      performance: Quality and impact
+      activity: Design, coding, CI/CD
+      communication: Collaboration quality
+      efficiency: Flow, interruptions
+
+  improvements:
+    local_development:
+      - fast_local_environment
+      - hot_reload
+      - local_debugging
+      - mock_services
+
+    ci_cd:
+      - fast_builds: "< 10 minutes"
+      - fast_tests: Parallelization
+      - fast_deploys: "< 15 minutes"
+      - preview_environments: PR-based
+
+    documentation:
+      - api_documentation
+      - architecture_decisions
+      - runbooks
+      - onboarding_guides
+
+    tooling:
+      - ide_integrations
+      - cli_tools
+      - slack_bots
+      - developer_portal
+
+self_service:
+
+  compute:
+    kubernetes_namespace:
+      request: Developer requests via portal/CLI
+      approval: Automatic with guardrails
+      provisioning: Terraform/Crossplane
+      includes:
+        - resource_quotas
+        - network_policies
+        - rbac
+        - observability
+
+    serverless_function:
+      request: Developer deploys via CI/CD
+      approval: Automatic
+      provisioning: Terraform
+      includes:
+        - function_runtime
+        - api_gateway
+        - logging
+        - monitoring
+
+  database:
+    managed_database:
+      request: Developer requests via portal
+      approval: Automatic for dev, manual for prod
+      provisioning: Terraform
+      includes:
+        - instance
+        - credentials_in_vault
+        - backup_policy
+        - monitoring
+
+  secrets:
+    secret_path:
+      request: Developer creates via CLI/portal
+      approval: Automatic with policy
+      provisioning: Vault
+      includes:
+        - secret_path
+        - access_policy
+        - rotation_config
+
+  networking:
+    load_balancer:
+      request: Via Kubernetes ingress
+      approval: Automatic
+      provisioning: Cloud provider
+      includes:
+        - ssl_certificate
+        - dns_record
+        - waf_rules
+
+backstage:
+
+  core_features:
+    software_catalog:
+      purpose: Service registry
+      entities:
+        - components
+        - apis
+        - resources
+        - systems
+        - domains
+
+    software_templates:
+      purpose: Golden path scaffolding
+      workflow:
+        - select_template
+        - fill_parameters
+        - create_repository
+        - bootstrap_ci_cd
+
+    techdocs:
+      purpose: Documentation as code
+      format: Markdown in repo
+      rendering: MkDocs
+
+    search:
+      purpose: Universal search
+      indexes:
+        - catalog
+        - documentation
+        - apis
+
+  plugins:
+    essential:
+      - kubernetes: Cluster visibility
+      - github: Repository integration
+      - pagerduty: On-call integration
+      - datadog: Metrics dashboard
+
+    recommended:
+      - cost_insights: FinOps
+      - security_insights: Vulnerability tracking
+      - tech_radar: Technology standards
+
+tools:
+
+  developer_portals:
+    - backstage
+    - port
+    - cortex
+    - opslevel
+    - configure8
+
+  self_service:
+    - crossplane
+    - terraform_cloud
+    - humanitec
+    - qovery
+
+  templates:
+    - cookiecutter
+    - yeoman
+    - backstage_templates
+    - copier
+
+workflows:
+
+  platform_capability:
+    command: /ops-platform
+    steps:
+      - discover: Understand developer needs
+      - design: Architecture and UX
+      - build: Implement capability
+      - document: Usage documentation
+      - enable: Training and rollout
+      - measure: Adoption and feedback
+
+  golden_path:
+    command: /ops-golden-path
+    steps:
+      - identify: Common pattern needed
+      - design: Template architecture
+      - implement: Build template
+      - test: Validate with users
+      - document: Clear instructions
+      - publish: Make available
+      - iterate: Improve from feedback
+
+  dx_assessment:
+    command: /ops-developer-experience
+    steps:
+      - survey: Developer satisfaction
+      - metrics: DORA metrics collection
+      - interviews: Deep dive conversations
+      - analysis: Identify pain points
+      - roadmap: Improvement plan
+      - implement: Execute improvements
+      - measure: Track impact

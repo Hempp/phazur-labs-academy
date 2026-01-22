@@ -1,0 +1,233 @@
+name: ops-kubernetes
+version: 1.0.0
+description: Kubernetes operations, auditing, and best practices
+agent: NEXUS-OPS
+category: devops
+
+triggers:
+  - /ops-k8s-audit
+  - /ops-helm
+  - /ops-k8s-security
+  - /ops-k8s-cost
+
+parameters:
+  - name: cluster
+    type: string
+    required: true
+    description: Kubernetes cluster to operate on
+  - name: namespace
+    type: string
+    required: false
+    description: Target namespace (default: all)
+
+cluster_audit:
+
+  security:
+    api_server:
+      - private_endpoint
+      - oidc_authentication
+      - audit_logging
+      - admission_controllers
+      - api_rate_limiting
+
+    nodes:
+      - cis_benchmark
+      - kernel_hardening
+      - containerd_config
+      - kubelet_security
+      - node_isolation
+
+    pods:
+      - security_context
+      - non_root_user
+      - read_only_rootfs
+      - no_privilege_escalation
+      - seccomp_profiles
+      - apparmor_profiles
+
+    network:
+      - network_policies
+      - pod_to_pod_encryption
+      - egress_controls
+      - service_mesh
+      - ingress_tls
+
+    secrets:
+      - external_secrets
+      - sealed_secrets
+      - vault_integration
+      - encryption_at_rest
+      - secret_rotation
+
+    rbac:
+      - least_privilege
+      - service_accounts
+      - cluster_roles
+      - namespace_isolation
+      - audit_trail
+
+  cost:
+    resources:
+      - request_limits_ratio
+      - over_provisioned_pods
+      - under_utilized_nodes
+      - orphaned_resources
+      - pvc_utilization
+
+    scaling:
+      - hpa_effectiveness
+      - vpa_recommendations
+      - cluster_autoscaler
+      - spot_node_usage
+      - reserved_capacity
+
+    efficiency:
+      - bin_packing
+      - node_utilization
+      - namespace_quotas
+      - limit_ranges
+      - priority_classes
+
+  reliability:
+    workloads:
+      - pod_disruption_budgets
+      - replica_counts
+      - health_checks
+      - resource_limits
+      - anti_affinity
+
+    cluster:
+      - control_plane_ha
+      - etcd_backup
+      - node_redundancy
+      - zone_distribution
+      - upgrade_strategy
+
+    observability:
+      - metrics_server
+      - logging_stack
+      - tracing_enabled
+      - alerting_rules
+      - dashboards
+
+best_practices:
+
+  pod_spec:
+    required:
+      - resource_requests
+      - resource_limits
+      - liveness_probe
+      - readiness_probe
+      - security_context
+
+    recommended:
+      - startup_probe
+      - termination_grace_period
+      - pod_anti_affinity
+      - topology_spread
+      - priority_class
+
+  deployment:
+    required:
+      - rolling_update_strategy
+      - replica_count_minimum
+      - pod_disruption_budget
+      - service_account
+
+    recommended:
+      - horizontal_pod_autoscaler
+      - pod_topology_spread
+      - revision_history_limit
+      - progress_deadline
+
+  service:
+    types:
+      ClusterIP: Default for internal services
+      NodePort: Development/testing only
+      LoadBalancer: External services
+      ExternalName: External service alias
+
+    recommendations:
+      - prefer_cluster_ip
+      - use_ingress_for_http
+      - service_mesh_for_mtls
+      - headless_for_stateful
+
+helm_standards:
+
+  chart_quality:
+    - values_schema_defined
+    - comprehensive_notes
+    - helper_templates
+    - conditional_resources
+    - upgrade_tested
+
+  security:
+    - no_hardcoded_secrets
+    - image_tag_required
+    - security_context_defaults
+    - network_policy_included
+    - rbac_scoped
+
+  testing:
+    - ct_lint_passing
+    - ct_install_tested
+    - upgrade_rollback_tested
+    - multi_values_tested
+
+tools:
+  security:
+    - kubeaudit
+    - kube_bench
+    - trivy
+    - falco
+    - opa_gatekeeper
+
+  cost:
+    - kubecost
+    - opencost
+    - goldilocks
+    - kube_resource_report
+
+  observability:
+    - prometheus
+    - grafana
+    - loki
+    - jaeger
+    - kiali
+
+  operations:
+    - kubectl
+    - helm
+    - kustomize
+    - argocd
+    - flux
+
+workflows:
+
+  cluster_audit:
+    command: /ops-k8s-audit
+    steps:
+      - inventory: List all resources
+      - security: Run security scanners
+      - cost: Analyze resource usage
+      - reliability: Check configurations
+      - report: Generate findings
+
+  helm_deploy:
+    command: /ops-helm
+    steps:
+      - lint: Validate chart
+      - template: Render manifests
+      - diff: Compare with current
+      - deploy: Apply changes
+      - verify: Health check
+
+  security_scan:
+    command: /ops-k8s-security
+    steps:
+      - cis_benchmark: Run kube-bench
+      - vulnerability: Scan images
+      - rbac_review: Audit permissions
+      - network: Check policies
+      - report: Security findings

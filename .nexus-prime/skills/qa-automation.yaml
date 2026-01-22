@@ -1,0 +1,242 @@
+name: qa-automation
+version: 1.0.0
+description: Puppeteer-based automated testing, site crawling, and bug detection
+agent: SENTINEL-QA
+category: testing
+
+triggers:
+  - /qa-full-audit
+  - /qa-crawl
+  - /qa-click-test
+  - /qa-form-test
+  - /qa-errors
+  - /deploy-sentinel-qa
+
+parameters:
+  - name: url
+    type: string
+    required: true
+    description: Target URL to test
+  - name: depth
+    type: integer
+    default: 3
+    description: How many levels deep to crawl
+  - name: timeout
+    type: integer
+    default: 30000
+    description: Page load timeout in ms
+
+workflows:
+
+  full_audit:
+    command: /qa-full-audit
+    description: Complete site audit with all tests
+    steps:
+      - step: setup
+        action: |
+          Initialize Puppeteer browser
+          Set up error tracking listeners
+          Configure viewport and user agent
+          Prepare results collection
+
+      - step: crawl
+        action: |
+          Navigate to start URL
+          Extract all internal links
+          Build page map
+          Track visited pages
+
+      - step: error_detection
+        action: |
+          Monitor console for errors/warnings
+          Track network failures
+          Capture JavaScript exceptions
+          Log resource loading failures
+
+      - step: performance
+        action: |
+          Measure page load times
+          Capture Core Web Vitals (LCP, CLS, FID)
+          Check resource sizes
+          Identify render-blocking resources
+
+      - step: accessibility
+        action: |
+          Run axe-core accessibility tests
+          Check color contrast
+          Verify keyboard navigation
+          Test screen reader compatibility
+
+      - step: interaction_test
+        action: |
+          Find all clickable elements
+          Test each button/link
+          Verify state changes
+          Check for broken interactions
+
+      - step: form_test
+        action: |
+          Identify all forms
+          Test with empty data
+          Test with invalid data
+          Test validation messages
+
+      - step: screenshots
+        action: |
+          Capture full-page screenshots
+          Document error states
+          Create visual evidence
+
+      - step: report
+        action: |
+          Compile all findings
+          Rank by severity
+          Generate recommendations
+          Create actionable report
+
+  click_test:
+    command: /qa-click-test
+    description: Systematic click-through of all interactive elements
+    selectors:
+      - 'button'
+      - 'a[href]'
+      - '[role="button"]'
+      - 'input[type="submit"]'
+      - 'input[type="button"]'
+      - '[onclick]'
+      - '[tabindex]:not([tabindex="-1"])'
+      - 'details > summary'
+      - '[data-toggle]'
+      - '[aria-haspopup]'
+    process:
+      - Find all matching elements
+      - Filter to visible elements
+      - For each element:
+        - Scroll into view
+        - Take before screenshot
+        - Click element
+        - Wait for network idle
+        - Check for errors
+        - Take after screenshot
+        - Compare states
+        - Log result
+
+  form_test:
+    command: /qa-form-test
+    description: Comprehensive form validation testing
+    test_cases:
+      empty_submission:
+        - Clear all fields
+        - Submit form
+        - Check validation triggers
+        - Verify error messages
+
+      invalid_data:
+        - Fill with invalid formats
+        - Test boundary values
+        - Check field-level validation
+        - Verify helpful errors
+
+      security_testing:
+        - XSS payload injection
+        - SQL injection attempts
+        - Check sanitization
+        - Verify no code execution
+
+      valid_submission:
+        - Fill with valid data
+        - Submit form
+        - Verify success
+        - Check data persistence
+
+  error_capture:
+    command: /qa-errors
+    description: Console and network error detection
+    monitors:
+      - console.error messages
+      - console.warn messages
+      - Uncaught exceptions
+      - Unhandled promise rejections
+      - Network request failures
+      - Resource loading errors
+      - CORS violations
+      - CSP violations
+
+mcp_tools:
+  puppeteer:
+    - mcp__puppeteer__puppeteer_navigate
+    - mcp__puppeteer__puppeteer_screenshot
+    - mcp__puppeteer__puppeteer_click
+    - mcp__puppeteer__puppeteer_fill
+    - mcp__puppeteer__puppeteer_select
+    - mcp__puppeteer__puppeteer_hover
+
+  playwright:
+    - mcp__playwright__browser_navigate
+    - mcp__playwright__browser_snapshot
+    - mcp__playwright__browser_click
+    - mcp__playwright__browser_type
+    - mcp__playwright__browser_take_screenshot
+    - mcp__playwright__browser_console_messages
+    - mcp__playwright__browser_network_requests
+
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - critical_issues
+    - errors_warnings
+    - broken_links
+    - performance_metrics
+    - accessibility_violations
+    - screenshots
+    - recommendations
+    - test_coverage
+
+severity_levels:
+  critical:
+    definition: Site broken, data loss risk
+    action: Fix immediately
+    color: "#DC2626"
+
+  high:
+    definition: Feature broken, major UX issue
+    action: Fix within 24h
+    color: "#EA580C"
+
+  medium:
+    definition: Degraded experience
+    action: Fix within sprint
+    color: "#CA8A04"
+
+  low:
+    definition: Minor issues, polish
+    action: Backlog
+    color: "#2563EB"
+
+  info:
+    definition: Observations, suggestions
+    action: Consider
+    color: "#6B7280"
+
+activation_message: |
+  ◈ SENTINEL-QA Deployed ──────────────────────────
+
+  Ready for automated testing:
+
+  Quick Commands:
+  /qa-full-audit [url]   - Complete site audit
+  /qa-click-test [url]   - Click all elements
+  /qa-form-test [url]    - Test all forms
+  /qa-errors [url]       - Capture all errors
+  /qa-perf [url]         - Performance metrics
+
+  I'll use Puppeteer/Playwright to:
+  • Crawl all pages
+  • Click every button
+  • Test every form
+  • Capture all errors
+  • Measure performance
+  • Check accessibility
+
+  ────────────────────────────────────────────────

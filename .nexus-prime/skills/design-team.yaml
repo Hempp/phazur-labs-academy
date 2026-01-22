@@ -1,0 +1,321 @@
+name: design-team
+version: 1.0.0
+description: Design team structure, models, roles, and growth planning
+agent: VISION-PRIME
+category: design-leadership
+
+triggers:
+  - /design-team-audit
+  - /design-team-model
+  - /design-team-roles
+  - /design-team-growth
+
+parameters:
+  - name: organization
+    type: string
+    required: true
+    description: Organization or team to assess
+  - name: size
+    type: enum
+    values: [startup, growth, scale, enterprise]
+    required: false
+
+team_models:
+
+  centralized:
+    description: Single design team serving all products
+    structure: |
+      Design Leadership
+          ↓
+      Design Teams (by discipline)
+          ↓
+      Assigned to projects as needed
+
+    characteristics:
+      reporting: All designers report to design leadership
+      assignment: Pool model, assigned to projects
+      community: Strong, single team identity
+      standards: High consistency
+
+    pros:
+      - Consistent design standards across products
+      - Strong design community and culture
+      - Clear career progression within design
+      - Efficient resource sharing
+      - Deep specialization possible
+
+    cons:
+      - Potential bottleneck for product teams
+      - Context switching for designers
+      - Slower decision-making
+      - May feel disconnected from products
+      - Competing priorities
+
+    best_for:
+      - Small to medium companies (<200)
+      - Strong design-led culture
+      - Need for high consistency
+      - Early design organization building
+
+  embedded:
+    description: Designers belong to product teams
+    structure: |
+      Product Teams
+          ↓
+      Each team has embedded designer(s)
+          ↓
+      Dotted line to design leadership (optional)
+
+    characteristics:
+      reporting: Designers report to product/eng leads
+      assignment: Permanent team members
+      community: Varies by connection to design org
+      standards: Risk of inconsistency
+
+    pros:
+      - Deep product context
+      - Fast decision-making
+      - Strong partnerships with PM/Eng
+      - High accountability to product outcomes
+      - Better product ownership
+
+    cons:
+      - Inconsistent design standards
+      - Designer isolation
+      - Weak design community
+      - Limited design career growth
+      - Quality varies by team
+
+    best_for:
+      - Engineering-led cultures
+      - Highly autonomous product teams
+      - Mature design system in place
+      - Strong design standards established
+
+  hybrid:
+    description: Embedded designers with design leadership
+    structure: |
+      Design Leadership
+          ↓
+      DesignOps + Design System + Research
+          ↓
+      Embedded Designers (solid to design, dotted to product)
+
+    characteristics:
+      reporting: Designers report to design managers
+      assignment: Embedded in product teams
+      community: Maintained by design leadership
+      standards: Enforced by design system and DesignOps
+
+    pros:
+      - Deep product context AND design community
+      - Consistent standards through systems
+      - Clear design career path
+      - Design voice at leadership level
+      - Best of both models
+
+    cons:
+      - More complex org structure
+      - Potential for reporting confusion
+      - Requires strong design leadership
+      - Coordination overhead
+      - Matrix management challenges
+
+    best_for:
+      - Growth and scale stage companies
+      - Companies investing in design
+      - Complex product portfolios
+      - Organizations valuing both consistency and speed
+
+team_sizing:
+
+  ratios:
+    startup:
+      design_to_pm: "1:2"
+      design_to_eng: "1:10"
+      research_to_design: "0:1"
+      designops_to_design: "0:1"
+      notes: Generalist designers, no specialists
+
+    growth:
+      design_to_pm: "1:1.5"
+      design_to_eng: "1:8"
+      research_to_design: "1:8"
+      designops_to_design: "0:1"
+      notes: Start specialization, add research
+
+    scale:
+      design_to_pm: "1:1"
+      design_to_eng: "1:6"
+      research_to_design: "1:6"
+      designops_to_design: "1:12"
+      notes: Full specialization, add DesignOps
+
+    enterprise:
+      design_to_pm: "1:1"
+      design_to_eng: "1:4-5"
+      research_to_design: "1:4"
+      designops_to_design: "1:10"
+      notes: Design system team, research ops
+
+  headcount_calculator:
+    inputs:
+      - product_managers
+      - engineers
+      - growth_rate
+      - design_maturity
+    formula: |
+      Base designers = engineers / target_ratio
+      Research = base_designers / 6
+      DesignOps = base_designers / 12 (if >10 designers)
+      Design System = 2-4 people (if >15 designers)
+
+role_definitions:
+
+  individual_contributors:
+    ic1:
+      title: Associate Product Designer
+      scope: Components, small features
+      autonomy: Works with guidance
+      skills:
+        - Design fundamentals
+        - Tool proficiency
+        - Communication basics
+      typical_experience: 0-2 years
+
+    ic2:
+      title: Product Designer
+      scope: Features, user flows
+      autonomy: Largely independent
+      skills:
+        - End-to-end design process
+        - User research basics
+        - Cross-functional collaboration
+      typical_experience: 2-5 years
+
+    ic3:
+      title: Senior Product Designer
+      scope: Product area, strategic projects
+      autonomy: Fully independent
+      skills:
+        - Design strategy
+        - Mentorship
+        - Stakeholder management
+        - System-level thinking
+      typical_experience: 5-8 years
+
+    ic4:
+      title: Staff Product Designer
+      scope: Multiple products, org-wide impact
+      autonomy: Defines approach
+      skills:
+        - Technical leadership
+        - Design vision
+        - Organizational influence
+        - Complex problem solving
+      typical_experience: 8-12 years
+
+    ic5:
+      title: Principal Product Designer
+      scope: Organization, industry impact
+      autonomy: Sets direction
+      skills:
+        - Strategic vision
+        - Executive influence
+        - Industry thought leadership
+        - Organizational transformation
+      typical_experience: 12+ years
+
+  management:
+    m1:
+      title: Design Manager
+      scope: Small team (3-6 ICs)
+      responsibilities:
+        - People management
+        - Career development
+        - Project quality
+        - Team rituals
+      typical_experience: 6+ years IC + management
+
+    m2:
+      title: Senior Design Manager
+      scope: Multiple teams (8-15 people)
+      responsibilities:
+        - Team leadership
+        - Strategy execution
+        - Cross-team coordination
+        - Process optimization
+      typical_experience: 2+ years management
+
+    m3:
+      title: Design Director
+      scope: Department (15-30 people)
+      responsibilities:
+        - Department strategy
+        - Executive stakeholder management
+        - Budget and headcount
+        - Organizational design
+      typical_experience: 4+ years management
+
+    m4:
+      title: VP of Design
+      scope: Function (30-100 people)
+      responsibilities:
+        - Function strategy
+        - Executive team member
+        - Company-wide influence
+        - Design culture
+      typical_experience: 6+ years management
+
+    m5:
+      title: Chief Design Officer
+      scope: Company
+      responsibilities:
+        - Design as business driver
+        - Board and investor relations
+        - Company strategy
+        - Brand and experience vision
+      typical_experience: 10+ years leadership
+
+  specialists:
+    ux_researcher:
+      titles: [UX Researcher, Senior Researcher, Research Lead]
+      focus: User research, insights, strategy
+      reports_to: Research or Design leadership
+
+    content_designer:
+      titles: [Content Designer, UX Writer, Content Lead]
+      focus: Content strategy, microcopy, voice
+      reports_to: Design or Content leadership
+
+    design_technologist:
+      titles: [Design Engineer, Creative Technologist]
+      focus: Prototyping, design system code
+      reports_to: Design or Engineering
+
+    designops:
+      titles: [DesignOps Manager, DesignOps Lead]
+      focus: Tools, process, operations
+      reports_to: Design leadership
+
+workflows:
+
+  team_audit:
+    command: /design-team-audit
+    steps:
+      - discover: Current team structure
+      - assess: Model effectiveness
+      - analyze: Ratios and gaps
+      - benchmark: Industry comparison
+      - recommend: Improvements
+      - roadmap: Implementation plan
+
+  growth_plan:
+    command: /design-team-growth
+    steps:
+      - baseline: Current state
+      - goals: Business needs
+      - calculate: Headcount needs
+      - prioritize: Hiring order
+      - timeline: Hiring roadmap
+      - budget: Cost projection

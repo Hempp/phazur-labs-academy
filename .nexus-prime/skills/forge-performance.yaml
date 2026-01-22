@@ -1,0 +1,238 @@
+name: forge-performance
+version: 1.0.0
+description: Performance analysis, profiling, and optimization
+agent: FORGE-X
+category: engineering
+
+triggers:
+  - /forge-perf
+  - /forge-benchmark
+  - /forge-profile
+
+parameters:
+  - name: target
+    type: string
+    required: true
+    description: Code, endpoint, or application to analyze
+  - name: type
+    type: enum
+    values: [profile, benchmark, audit, all]
+    default: audit
+
+performance_budgets:
+
+  web_application:
+    time_to_interactive: "<3s"
+    first_contentful_paint: "<1.5s"
+    largest_contentful_paint: "<2.5s"
+    cumulative_layout_shift: "<0.1"
+    first_input_delay: "<100ms"
+    bundle_size_gzip: "<200KB"
+    memory_usage: "<50MB"
+
+  api:
+    response_time_p50: "<100ms"
+    response_time_p95: "<200ms"
+    response_time_p99: "<500ms"
+    throughput: ">1000 rps"
+    error_rate: "<0.1%"
+    memory_usage: "<256MB"
+
+  cli:
+    startup_time: "<100ms"
+    memory_usage: "<100MB"
+    command_response: "<50ms"
+
+  mobile:
+    app_launch: "<2s"
+    screen_transition: "<300ms"
+    memory_usage: "<150MB"
+    battery_impact: "minimal"
+
+profiling_tools:
+
+  javascript:
+    - chrome_devtools: Browser profiling
+    - node_inspect: Node.js debugging
+    - clinic: Node.js performance
+    - 0x: Flamegraph generation
+
+  python:
+    - cprofile: Built-in profiler
+    - py_spy: Sampling profiler
+    - memory_profiler: Memory analysis
+    - line_profiler: Line-by-line timing
+
+  go:
+    - pprof: Built-in profiler
+    - trace: Execution tracing
+    - benchstat: Benchmark analysis
+
+  rust:
+    - perf: Linux profiler
+    - flamegraph: Visualization
+    - criterion: Benchmarking
+
+optimization_checklist:
+
+  database:
+    - query_optimization:
+        - Proper indexes exist
+        - No N+1 queries
+        - Query plans analyzed
+        - Slow queries logged
+    - connection_management:
+        - Connection pooling configured
+        - Proper pool sizing
+        - Timeout handling
+    - caching:
+        - Query result caching
+        - Cache invalidation strategy
+        - Read replicas for read-heavy
+
+  application:
+    - async_operations:
+        - I/O operations async
+        - Parallel where independent
+        - Proper await handling
+    - memory:
+        - No memory leaks
+        - Efficient data structures
+        - Object pooling where needed
+    - computation:
+        - Algorithm complexity optimized
+        - Hot paths identified
+        - Unnecessary work eliminated
+
+  frontend:
+    - loading:
+        - Code splitting
+        - Lazy loading
+        - Tree shaking
+        - Preloading critical resources
+    - rendering:
+        - Virtualization for long lists
+        - Memoization for expensive renders
+        - Proper key usage
+        - Avoiding layout thrashing
+    - assets:
+        - Image optimization
+        - Font loading strategy
+        - SVG optimization
+        - Compression enabled
+
+  infrastructure:
+    - caching:
+        - CDN configuration
+        - HTTP caching headers
+        - Application-level cache
+        - Redis/Memcached usage
+    - scaling:
+        - Horizontal scaling ready
+        - Load balancing configured
+        - Auto-scaling policies
+    - monitoring:
+        - APM instrumented
+        - Alerts configured
+        - Dashboards created
+
+common_bottlenecks:
+
+  n_plus_one:
+    description: Multiple queries when one would suffice
+    detection: Logging query count, APM tools
+    fix: Eager loading, batching, joins
+
+  memory_leaks:
+    description: Memory not released, growing over time
+    detection: Memory profiling, heap snapshots
+    fix: Proper cleanup, weak references, object pooling
+
+  blocking_io:
+    description: Synchronous I/O blocking event loop
+    detection: Profiling, event loop monitoring
+    fix: Async operations, worker threads
+
+  over_fetching:
+    description: Retrieving more data than needed
+    detection: Payload analysis, query review
+    fix: Field selection, pagination, GraphQL
+
+  missing_indexes:
+    description: Database scans instead of index lookups
+    detection: Query plans, slow query logs
+    fix: Add appropriate indexes
+
+  inefficient_serialization:
+    description: Slow JSON parsing/generation
+    detection: Profiling serialization
+    fix: Streaming, binary formats, caching
+
+benchmarking:
+
+  methodology:
+    - warmup: Run multiple iterations before measuring
+    - isolation: Minimize external factors
+    - repetition: Multiple runs for statistical significance
+    - baseline: Compare against known baseline
+    - environment: Document test environment
+
+  tools:
+    http:
+      - wrk: High-performance benchmarking
+      - hey: HTTP load generator
+      - k6: Modern load testing
+      - artillery: Developer-friendly load testing
+    micro:
+      - benchmark_js: JavaScript microbenchmarks
+      - pytest_benchmark: Python benchmarks
+      - go_bench: Go built-in benchmarking
+      - criterion_rs: Rust benchmarking
+
+workflows:
+
+  performance_audit:
+    command: /forge-perf
+    steps:
+      - baseline: Establish current metrics
+      - profile: Identify hot paths
+      - analyze: Find bottlenecks
+      - optimize: Apply improvements
+      - verify: Confirm improvements
+      - document: Record findings
+
+  load_test:
+    command: /forge-load-test
+    steps:
+      - plan: Define scenarios
+      - setup: Configure test environment
+      - warmup: Prepare system
+      - execute: Run load test
+      - monitor: Track metrics
+      - analyze: Process results
+      - report: Generate findings
+
+output_template: |
+  ## Performance Analysis: [Target]
+  **Date:** [Timestamp]
+  **Agent:** FORGE-X
+
+  ### Summary
+  - Current Performance: [Metrics]
+  - Target Performance: [Budgets]
+  - Status: Pass/Needs Work
+
+  ### Profiling Results
+  | Hot Path | Time % | Calls | Optimization |
+  |----------|--------|-------|--------------|
+
+  ### Bottlenecks Identified
+  | Issue | Impact | Effort | Priority |
+
+  ### Recommendations
+  1. [Quick Win]
+  2. [Medium Effort]
+  3. [Strategic Improvement]
+
+  ### Metrics After Optimization
+  | Metric | Before | After | Improvement |
