@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   GraduationCap,
@@ -7,6 +10,7 @@ import {
   Search,
   Tag
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const featuredPost = {
   id: 'future-of-tech-education-2024',
@@ -88,29 +92,18 @@ const categories = [
 ]
 
 export default function BlogPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors">Courses</Link>
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
-            <Link href="/blog" className="text-sm font-medium text-primary">Blog</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium hover:text-primary">Sign In</Link>
-            <Link href="/auth/register" className="h-10 px-4 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 flex items-center">
-              Start Free
-            </Link>
-          </div>
-        </div>
-      </nav>
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
 
+  const filteredPosts = posts.filter(post => {
+    const matchesCategory = activeCategory === 'All' || post.category === activeCategory
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
+
+  return (
+    <>
       {/* Hero */}
       <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4">
@@ -125,7 +118,9 @@ export default function BlogPage() {
             <input
               type="text"
               placeholder="Search articles..."
-              className="w-full h-12 pl-12 pr-4 rounded-full border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 pl-12 pr-4 rounded-full border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
@@ -138,11 +133,13 @@ export default function BlogPage() {
             {categories.map((category) => (
               <button
                 key={category}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  category === 'All'
+                onClick={() => setActiveCategory(category)}
+                className={cn(
+                  'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+                  activeCategory === category
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted hover:bg-muted/80'
-                }`}
+                )}
               >
                 {category}
               </button>
@@ -156,7 +153,7 @@ export default function BlogPage() {
         <div className="container mx-auto px-4">
           <Link
             href={`/blog/${featuredPost.id}`}
-            className="block bg-card border rounded-2xl overflow-hidden hover:shadow-xl transition-all group"
+            className="block bg-background border rounded-2xl overflow-hidden hover:shadow-xl transition-all group"
           >
             <div className="grid md:grid-cols-2 gap-0">
               <div className="h-64 md:h-auto bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center">
@@ -173,7 +170,7 @@ export default function BlogPage() {
                 <p className="text-muted-foreground mb-6">{featuredPost.excerpt}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
                       <span className="font-semibold text-primary">
                         {featuredPost.author.charAt(0)}
                       </span>
@@ -204,11 +201,11 @@ export default function BlogPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
+            {filteredPosts.map((post) => (
               <Link
                 key={post.id}
                 href={`/blog/${post.id}`}
-                className="group bg-card border rounded-xl overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1"
+                className="group bg-background border rounded-xl overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1"
               >
                 <div className="h-48 bg-gradient-to-br from-primary/10 to-violet-500/10 flex items-center justify-center">
                   <GraduationCap className="h-16 w-16 text-primary/20" />
@@ -234,18 +231,26 @@ export default function BlogPage() {
             ))}
           </div>
 
+          {filteredPosts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No articles found matching your criteria.</p>
+            </div>
+          )}
+
           {/* Load More */}
-          <div className="text-center mt-12">
-            <button className="inline-flex items-center h-12 px-8 border rounded-full font-medium hover:bg-muted">
-              Load More Articles
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
-          </div>
+          {filteredPosts.length > 0 && (
+            <div className="text-center mt-12">
+              <button className="inline-flex items-center h-12 px-8 border rounded-md font-medium hover:bg-muted">
+                Load More Articles
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Newsletter */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-surface-secondary">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
@@ -255,21 +260,14 @@ export default function BlogPage() {
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 h-12 px-4 rounded-full border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+              className="flex-1 h-12 px-4 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <button className="h-12 px-6 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90">
+            <button className="h-12 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90">
               Subscribe
             </button>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }

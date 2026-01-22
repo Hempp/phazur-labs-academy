@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import {
-  GraduationCap,
   MapPin,
   Clock,
   DollarSign,
@@ -8,12 +7,10 @@ import {
   Heart,
   Zap,
   Globe,
-  Users,
-  Coffee,
   Laptop,
   Plane,
   GraduationCap as Education,
-  Briefcase
+  Coffee
 } from 'lucide-react'
 
 const benefits = [
@@ -86,32 +83,11 @@ const departments = ['All', 'Engineering', 'AI/ML', 'Design', 'Content', 'Succes
 
 export default function CareersPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
-            <Link href="/careers" className="text-sm font-medium text-primary">Careers</Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">Blog</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium hover:text-primary">Sign In</Link>
-            <Link href="/auth/register" className="h-10 px-4 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 flex items-center">
-              Start Free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <>
       {/* Hero */}
       <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-light text-primary text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />
             We&apos;re Hiring
           </div>
@@ -123,7 +99,7 @@ export default function CareersPage() {
           </p>
           <Link
             href="#openings"
-            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90"
+            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
           >
             View Open Positions
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -165,7 +141,7 @@ export default function CareersPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex gap-4 p-6 border rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center flex-shrink-0">
                   <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -179,7 +155,7 @@ export default function CareersPage() {
       </section>
 
       {/* Open Positions */}
-      <section id="openings" className="py-20 bg-muted/30">
+      <section id="openings" className="py-20 bg-surface-secondary">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-center">Open Positions</h2>
           <p className="text-muted-foreground text-center mb-8 max-w-xl mx-auto">
@@ -194,7 +170,7 @@ export default function CareersPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   dept === 'All'
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-card border hover:bg-muted'
+                    : 'bg-background border hover:bg-muted'
                 }`}
               >
                 {dept}
@@ -208,7 +184,7 @@ export default function CareersPage() {
               <Link
                 key={job.id}
                 href={`/careers/${job.id}`}
-                className="block bg-card border rounded-xl p-6 hover:shadow-lg transition-all hover:-translate-y-1"
+                className="block bg-background border rounded-xl p-6 hover:shadow-lg transition-all hover:-translate-y-1"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
@@ -248,20 +224,13 @@ export default function CareersPage() {
           </p>
           <Link
             href="/contact"
-            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90"
+            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
           >
             Get in Touch
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }

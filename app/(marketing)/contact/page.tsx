@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  GraduationCap,
   Mail,
   Phone,
   MapPin,
@@ -14,6 +13,7 @@ import {
   Loader2,
   CheckCircle2
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const contactReasons = [
   { id: 'general', label: 'General Inquiry', icon: MessageSquare },
@@ -45,29 +45,8 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors">Courses</Link>
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
-            <Link href="/contact" className="text-sm font-medium text-primary">Contact</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium hover:text-primary">Sign In</Link>
-            <Link href="/auth/register" className="h-10 px-4 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 flex items-center">
-              Start Free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mx-auto px-4 py-20">
+    <div className="py-20">
+      <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h1>
@@ -83,7 +62,7 @@ export default function ContactPage() {
                 <h2 className="text-xl font-semibold mb-6">Contact Information</h2>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center flex-shrink-0">
                       <Mail className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -94,7 +73,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center flex-shrink-0">
                       <Phone className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -105,7 +84,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center flex-shrink-0">
                       <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -119,7 +98,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="p-6 bg-muted/50 rounded-xl">
+              <div className="p-6 bg-surface-secondary rounded-xl">
                 <h3 className="font-semibold mb-2">Enterprise Inquiries</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Looking for team or enterprise solutions? Our sales team is ready to help.
@@ -128,7 +107,7 @@ export default function ContactPage() {
                   href="/enterprise"
                   className="text-primary text-sm font-medium hover:underline"
                 >
-                  Learn about Enterprise →
+                  Learn about Enterprise &rarr;
                 </Link>
               </div>
             </div>
@@ -136,7 +115,7 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="lg:col-span-2">
               {isSubmitted ? (
-                <div className="bg-card border rounded-2xl p-12 text-center">
+                <div className="bg-background border rounded-2xl p-12 text-center">
                   <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 className="h-8 w-8 text-emerald-600" />
                   </div>
@@ -155,7 +134,7 @@ export default function ContactPage() {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="bg-card border rounded-2xl p-8">
+                <form onSubmit={handleSubmit} className="bg-background border rounded-2xl p-8">
                   <div className="grid md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">Name *</label>
@@ -200,11 +179,12 @@ export default function ContactPage() {
                           key={reason.id}
                           type="button"
                           onClick={() => setFormData({ ...formData, reason: reason.id })}
-                          className={`p-3 rounded-lg border text-center transition-colors ${
+                          className={cn(
+                            'p-3 rounded-lg border text-center transition-colors',
                             formData.reason === reason.id
-                              ? 'border-primary bg-primary/5 text-primary'
+                              ? 'border-primary bg-primary-light text-primary'
                               : 'hover:bg-muted'
-                          }`}
+                          )}
                         >
                           <reason.icon className="h-5 w-5 mx-auto mb-1" />
                           <span className="text-xs font-medium">{reason.label}</span>
@@ -248,13 +228,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import {
-  GraduationCap,
   Award,
   Shield,
   CheckCircle2,
@@ -8,9 +7,7 @@ import {
   Building2,
   ArrowRight,
   BadgeCheck,
-  Lock,
-  FileCheck,
-  Star
+  FileCheck
 } from 'lucide-react'
 
 const certifications = [
@@ -119,32 +116,11 @@ const features = [
 
 export default function CertificationsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors">Courses</Link>
-            <Link href="/tracks" className="text-sm font-medium hover:text-primary transition-colors">Learning Paths</Link>
-            <Link href="/certifications" className="text-sm font-medium text-primary">Certifications</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium hover:text-primary">Sign In</Link>
-            <Link href="/auth/register" className="h-10 px-4 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 flex items-center">
-              Start Free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <>
       {/* Hero */}
       <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-light text-primary text-sm font-medium mb-6">
             <Award className="h-4 w-4" />
             Industry-Recognized Credentials
           </div>
@@ -170,7 +146,7 @@ export default function CertificationsPage() {
           <div className="grid md:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="text-center">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold mb-2">{feature.title}</h3>
@@ -189,7 +165,7 @@ export default function CertificationsPage() {
             {certifications.map((cert) => (
               <div
                 key={cert.id}
-                className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-background border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {/* Header */}
                 <div className={`bg-gradient-to-r ${cert.color} p-6 text-white`}>
@@ -234,7 +210,7 @@ export default function CertificationsPage() {
                   </div>
 
                   {/* Exam Details */}
-                  <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg mb-6">
+                  <div className="grid grid-cols-3 gap-4 p-4 bg-surface-secondary rounded-lg mb-6">
                     <div className="text-center">
                       <div className="text-lg font-bold">{cert.examDuration}</div>
                       <div className="text-xs text-muted-foreground">Duration</div>
@@ -257,7 +233,7 @@ export default function CertificationsPage() {
                     </div>
                     <Link
                       href={`/certifications/${cert.id}`}
-                      className="inline-flex items-center h-10 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90"
+                      className="inline-flex items-center h-10 px-6 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"
                     >
                       Learn More
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -271,7 +247,7 @@ export default function CertificationsPage() {
       </section>
 
       {/* Enterprise CTA */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-surface-secondary">
         <div className="container mx-auto px-4 text-center">
           <Building2 className="h-12 w-12 text-primary mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Enterprise Certification Programs</h2>
@@ -280,20 +256,13 @@ export default function CertificationsPage() {
           </p>
           <Link
             href="/enterprise"
-            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90"
+            className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
           >
             Contact Sales
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }

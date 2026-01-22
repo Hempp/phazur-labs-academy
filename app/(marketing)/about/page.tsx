@@ -1,17 +1,13 @@
 import Link from 'next/link'
 import {
-  GraduationCap,
   Target,
   Heart,
-  Globe,
-  Users,
-  Award,
-  ArrowRight,
+  Lightbulb,
+  Shield,
   Linkedin,
   Twitter,
   Rocket,
-  Lightbulb,
-  Shield
+  ArrowRight
 } from 'lucide-react'
 
 const values = [
@@ -81,28 +77,7 @@ const milestones = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors">Courses</Link>
-            <Link href="/about" className="text-sm font-medium text-primary">About</Link>
-            <Link href="/careers" className="text-sm font-medium hover:text-primary transition-colors">Careers</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium hover:text-primary">Sign In</Link>
-            <Link href="/auth/register" className="h-10 px-4 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 flex items-center">
-              Start Free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <>
       {/* Hero */}
       <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4 text-center">
@@ -150,13 +125,13 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-surface-secondary">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-12 text-center">Our Values</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary-light flex items-center justify-center mx-auto mb-4">
                   <value.icon className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{value.title}</h3>
@@ -193,7 +168,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="py-20 bg-muted/30">
+      <section id="team" className="py-20 bg-surface-secondary">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-center">Leadership Team</h2>
           <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
@@ -201,7 +176,7 @@ export default function AboutPage() {
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, index) => (
-              <div key={index} className="bg-card border rounded-xl p-6 text-center">
+              <div key={index} className="bg-background border rounded-xl p-6 text-center">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl font-bold text-primary">
                     {member.name.charAt(0)}
@@ -235,27 +210,20 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/careers"
-              className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90"
+              className="inline-flex items-center h-12 px-8 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
             >
               View Open Positions
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center h-12 px-8 border rounded-full font-medium hover:bg-muted"
+              className="inline-flex items-center h-12 px-8 border rounded-md font-medium hover:bg-muted"
             >
               Contact Us
             </Link>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }
