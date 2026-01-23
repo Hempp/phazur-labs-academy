@@ -33,7 +33,7 @@ export default function CartSidebar() {
     if (!user) {
       toast.error('Please sign in to checkout')
       closeCart()
-      window.location.href = '/auth/signin?redirect=/checkout'
+      window.location.href = '/auth/login?redirect=/checkout'
       return
     }
 

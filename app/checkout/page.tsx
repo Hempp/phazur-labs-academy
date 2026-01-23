@@ -41,7 +41,7 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     if (!user) {
       toast.error('Please sign in to checkout')
-      router.push('/auth/signin?redirect=/checkout')
+      router.push('/auth/login?redirect=/checkout')
       return
     }
 
@@ -143,14 +143,14 @@ export default function CheckoutPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/auth/signin?redirect=/checkout"
+                href="/auth/login?redirect=/checkout"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all"
               >
                 <LogIn className="h-5 w-5" />
                 Sign In
               </Link>
               <Link
-                href="/auth/signup?redirect=/checkout"
+                href="/auth/register?redirect=/checkout"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-gray-300 dark:border-gray-600 rounded-xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
               >
                 Create Account
