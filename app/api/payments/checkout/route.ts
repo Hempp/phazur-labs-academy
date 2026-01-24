@@ -8,10 +8,6 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 interface CheckoutRequestBody {
   items: {
     courseId: string
-    title: string
-    description?: string
-    price: number // in dollars
-    image?: string
   }[]
 }
 
@@ -44,6 +40,29 @@ export async function POST(request: NextRequest) {
     // Validate items and check if user already owns any courses
     const courseIds = body.items.map((item) => item.courseId)
 
+    // SECURITY: Fetch course details from database - never trust client prices
+    const { data: courses, error: coursesError } = await supabase
+      .from('courses')
+      .select('id, title, description, price, thumbnail_url')
+      .in('id', courseIds)
+
+    if (coursesError || !courses || courses.length === 0) {
+      return NextResponse.json(
+        { error: 'One or more courses not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify all requested courses exist
+    if (courses.length !== courseIds.length) {
+      const foundIds = courses.map(c => c.id)
+      const missingIds = courseIds.filter(id => !foundIds.includes(id))
+      return NextResponse.json(
+        { error: 'Courses not found', missingIds },
+        { status: 404 }
+      )
+    }
+
     // Check for existing enrollments
     const { data: existingEnrollments } = await supabase
       .from('enrollments')
@@ -62,13 +81,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Prepare checkout items (convert dollars to cents)
-    const checkoutItems: CheckoutItem[] = body.items.map((item) => ({
-      courseId: item.courseId,
-      name: item.title,
-      description: item.description,
-      price: toCents(item.price), // Convert to cents for Stripe
-      image: item.image,
+    // Prepare checkout items using DATABASE prices (not client input)
+    const checkoutItems: CheckoutItem[] = courses.map((course) => ({
+      courseId: course.id,
+      name: course.title,
+      description: course.description || undefined,
+      price: toCents(course.price || 0), // Use database price
+      image: course.thumbnail_url || undefined,
     }))
 
     // Get base URL for redirect
@@ -86,12 +105,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Create pending payment records in database
-    for (const item of body.items) {
+    // Create pending payment records in database using DATABASE prices
+    for (const course of courses) {
       await supabase.from('payments').insert({
         user_id: user.id,
-        course_id: item.courseId,
-        amount: item.price,
+        course_id: course.id,
+        amount: course.price || 0,
         currency: 'USD',
         status: 'pending',
         payment_method: 'stripe',
@@ -114,12 +133,14 @@ export async function POST(request: NextRequest) {
 
 // Preflight request handler
 export async function OPTIONS() {
+  const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true',
     },
   })
 }

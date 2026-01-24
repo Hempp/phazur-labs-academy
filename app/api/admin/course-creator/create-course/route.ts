@@ -31,6 +31,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // SECURITY: Verify user has admin or instructor role
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'instructor'].includes(profile.role)) {
+      return NextResponse.json(
+        { error: 'Forbidden - Admin or instructor access required' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json() as CreateCourseRequest
     const { outline, scripts, quizzes, assignments, settings } = body
 

@@ -11,6 +11,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // SECURITY: Verify user has admin or instructor role
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'instructor'].includes(profile.role)) {
+      return NextResponse.json(
+        { error: 'Forbidden - Admin or instructor access required' },
+        { status: 403 }
+      )
+    }
+
     // Dynamic import to avoid client-side issues
     const { talkingHeadService } = await import('@/lib/services/talking-head')
 

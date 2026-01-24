@@ -12,6 +12,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // SECURITY: Verify user has admin or instructor role
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'instructor'].includes(profile.role)) {
+      return NextResponse.json(
+        { error: 'Forbidden - Admin or instructor access required' },
+        { status: 403 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const courseId = searchParams.get('courseId')
     const lessonId = searchParams.get('lessonId')
