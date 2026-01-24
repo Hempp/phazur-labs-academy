@@ -84,7 +84,7 @@ class HeyGenService {
     const response = await fetch(`${HEYGEN_API_BASE}${endpoint}`, {
       ...options,
       headers: {
-        'X-Api-Key': this.apiKey,
+        'X-API-KEY': this.apiKey,
         'Content-Type': 'application/json',
         ...options.headers,
       },
