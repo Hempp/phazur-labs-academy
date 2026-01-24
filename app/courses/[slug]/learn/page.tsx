@@ -31,6 +31,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { VideoPlayer } from '@/components/video-player'
+import { AudioPlayer } from '@/components/audio-player'
 import { AssignmentSubmission, Assignment, Submission, SubmissionType } from '@/components/assignment/assignment-submission'
 import { LessonNotes } from '@/components/lesson/lesson-notes'
 import { BookmarkToggle } from '@/components/lesson/bookmark-toggle'
@@ -77,7 +78,7 @@ const mockLessonData = {
     instructor: {
       id: 'inst-1',
       name: 'Sarah Johnson',
-      avatar: '/images/instructors/sarah.jpg',
+      avatar: null, // Uses initials fallback in UserAvatar
     },
     progress: 42,
   },
@@ -775,15 +776,27 @@ export default function CourseLearnPage() {
         ) : (
           <div className="bg-black">
             <div className="max-w-5xl mx-auto">
-              <VideoPlayer
-                src={lesson.videoUrl}
-                title={lesson.title}
-                chapters={lesson.chapters}
-                initialProgress={videoProgress}
-                onProgress={handleProgress}
-                onComplete={handleVideoComplete}
-                className="aspect-video"
-              />
+              {/* Check if the media URL is an audio file */}
+              {lesson.videoUrl?.toLowerCase().endsWith('.mp3') ? (
+                <AudioPlayer
+                  src={lesson.videoUrl}
+                  title={lesson.title}
+                  initialProgress={videoProgress}
+                  onProgress={handleProgress}
+                  onComplete={handleVideoComplete}
+                  className="aspect-video"
+                />
+              ) : (
+                <VideoPlayer
+                  src={lesson.videoUrl}
+                  title={lesson.title}
+                  chapters={lesson.chapters}
+                  initialProgress={videoProgress}
+                  onProgress={handleProgress}
+                  onComplete={handleVideoComplete}
+                  className="aspect-video"
+                />
+              )}
             </div>
           </div>
         )}
