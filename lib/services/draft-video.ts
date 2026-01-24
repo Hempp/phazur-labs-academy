@@ -73,6 +73,35 @@ class DraftVideoService {
   }
 
   /**
+   * Find FFmpeg binary - checks common locations
+   */
+  private async findFFmpeg(): Promise<string> {
+    const { access } = await import('fs/promises')
+    const { homedir } = await import('os')
+    const { join } = await import('path')
+
+    const locations = [
+      join(homedir(), 'bin', 'ffmpeg'),
+      '/usr/local/bin/ffmpeg',
+      '/opt/homebrew/bin/ffmpeg',
+      'ffmpeg', // Fallback to PATH
+    ]
+
+    for (const location of locations) {
+      try {
+        if (location !== 'ffmpeg') {
+          await access(location)
+        }
+        return location
+      } catch {
+        // Try next location
+      }
+    }
+
+    return 'ffmpeg' // Default to PATH
+  }
+
+  /**
    * Generate simple video with colored background using FFmpeg
    */
   private async generateVideoWithFFmpeg(params: {
@@ -86,6 +115,9 @@ class DraftVideoService {
     const { join } = await import('path')
     const { tmpdir } = await import('os')
     const execAsync = promisify(exec)
+
+    // Find FFmpeg binary
+    const ffmpegPath = await this.findFFmpeg()
 
     const tempId = Date.now().toString()
     const audioFile = join(tmpdir(), `draft-${tempId}.mp3`)
@@ -102,7 +134,7 @@ class DraftVideoService {
       // Generate video with colored background + audio
       // Creates a simple video with the background color and audio
       await execAsync(
-        `ffmpeg -f lavfi -i color=c=${color}:s=1920x1080:d=${params.durationSeconds} ` +
+        `"${ffmpegPath}" -f lavfi -i color=c=${color}:s=1920x1080:d=${params.durationSeconds} ` +
         `-i "${audioFile}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k ` +
         `-pix_fmt yuv420p -shortest -y "${videoFile}"`,
         { timeout: 180000 }
