@@ -85,7 +85,7 @@ export async function updateSession(request: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ['/dashboard', '/courses/create', '/api/protected']
-  const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password']
+  const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/callback', '/auth/reset-password']
 
   // Check if accessing protected route without session
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))

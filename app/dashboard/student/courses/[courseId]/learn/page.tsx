@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp,
   Play,
   CheckCircle2,
   Circle,
@@ -18,7 +17,6 @@ import {
   BookOpen,
   MessageSquare,
   Download,
-  Share2,
   Flag,
   Bookmark,
   BookmarkCheck,
@@ -27,127 +25,128 @@ import {
   Menu,
   X,
   Shield,
-  Award,
-  Flame,
   ListChecks,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import ProtectedVideoPlayer from '@/components/protected-video-player';
 import { useContentProtection, useVideoProgress } from '@/hooks/use-content-protection';
 
-// Mock user data
-const mockUser = {
-  id: 'user-123',
-  email: 'alex.johnson@example.com',
-  name: 'Alex Johnson',
-};
+interface Lesson {
+  id: string;
+  title: string;
+  type: string;
+  duration: number;
+  completed: boolean;
+  current: boolean;
+  isFreePreview: boolean;
+}
 
-// Mock course data
-const mockCourse = {
-  id: 'course-1',
-  title: 'Advanced React Patterns & Best Practices',
-  instructor: {
-    name: 'Sarah Johnson',
-    avatar: null,
-    title: 'Senior React Developer',
-  },
-  totalDuration: '12h 45m',
-  totalLessons: 48,
-  completedLessons: 21,
-  sections: [
-    {
-      id: 'section-1',
-      title: 'Introduction to Advanced Patterns',
-      lessons: [
-        { id: 'lesson-1', title: 'Course Overview', type: 'video', duration: '8:24', completed: true, locked: false },
-        { id: 'lesson-2', title: 'Setting Up the Development Environment', type: 'video', duration: '15:30', completed: true, locked: false },
-        { id: 'lesson-3', title: 'React Fundamentals Refresher', type: 'video', duration: '22:15', completed: true, locked: false },
-      ],
-    },
-    {
-      id: 'section-2',
-      title: 'Compound Components Pattern',
-      lessons: [
-        { id: 'lesson-4', title: 'Understanding Compound Components', type: 'video', duration: '18:45', completed: true, locked: false },
-        { id: 'lesson-5', title: 'Building a Flexible Tab Component', type: 'video', duration: '25:10', completed: true, locked: false },
-        { id: 'lesson-6', title: 'Compound Components Quiz', type: 'quiz', duration: '10 questions', completed: true, locked: false },
-        { id: 'lesson-7', title: 'Practice: Build an Accordion', type: 'assignment', duration: 'Assignment', completed: false, locked: false },
-      ],
-    },
-    {
-      id: 'section-3',
-      title: 'Render Props Pattern',
-      lessons: [
-        { id: 'lesson-8', title: 'What are Render Props?', type: 'video', duration: '16:20', completed: true, locked: false },
-        { id: 'lesson-9', title: 'Building Reusable Data Fetchers', type: 'video', duration: '28:45', completed: false, locked: false, current: true },
-        { id: 'lesson-10', title: 'Render Props vs Hooks', type: 'video', duration: '19:30', completed: false, locked: false },
-        { id: 'lesson-11', title: 'Render Props Quiz', type: 'quiz', duration: '8 questions', completed: false, locked: false },
-      ],
-    },
-    {
-      id: 'section-4',
-      title: 'Custom Hooks Pattern',
-      lessons: [
-        { id: 'lesson-12', title: 'Creating Powerful Custom Hooks', type: 'video', duration: '24:15', completed: false, locked: true },
-        { id: 'lesson-13', title: 'Hook Composition Strategies', type: 'video', duration: '21:40', completed: false, locked: true },
-        { id: 'lesson-14', title: 'Testing Custom Hooks', type: 'video', duration: '18:55', completed: false, locked: true },
-        { id: 'lesson-15', title: 'Custom Hooks Project', type: 'assignment', duration: 'Project', completed: false, locked: true },
-      ],
-    },
-  ],
-};
+interface Module {
+  id: string;
+  title: string;
+  lessons: Lesson[];
+}
 
-// Current lesson mock
-const mockCurrentLesson = {
-  id: 'lesson-9',
-  title: 'Building Reusable Data Fetchers',
-  type: 'video' as const,
-  videoUrl: '/videos/sample-lecture.mp4',
-  duration: '28:45',
-  description: `In this lesson, you'll learn how to build powerful, reusable data fetching components using the render props pattern. We'll cover:
+interface CurrentLesson {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  videoUrl: string | null;
+  duration: number | null;
+  articleContent: string | null;
+  moduleId: string;
+  resources: Array<{ id: string; title: string; type: string; url: string; file_size: string }>;
+  chapters: Array<{ id: string; title: string; start_time_seconds: number }>;
+  quiz: unknown;
+  progress: { completed: boolean; progress_percent: number; last_position_seconds: number } | null;
+}
 
-• Creating a flexible data fetcher component
-• Handling loading, error, and success states
-• Implementing caching strategies
-• Composing multiple data fetchers
-• Real-world examples and best practices`,
-  resources: [
-    { name: 'Lesson Slides', type: 'pdf', size: '2.4 MB' },
-    { name: 'Code Examples', type: 'zip', size: '156 KB' },
-    { name: 'Cheat Sheet', type: 'pdf', size: '890 KB' },
-  ],
-  transcript: `[00:00] Welcome back to the course. In this lesson, we're going to dive deep into building reusable data fetchers using the render props pattern.
+interface Course {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  thumbnail: string | null;
+  instructor: { id: string; name: string; avatar: string | null } | null;
+  totalLessons: number;
+  completedLessons: number;
+  totalDuration: number;
+  progress: number;
+}
 
-[00:15] First, let's understand why we might want to create a reusable data fetching component. In most React applications, you'll find yourself writing similar data fetching logic over and over again...
-
-[02:30] Now let's look at the basic structure of our DataFetcher component. We'll start with a simple implementation and then enhance it with more features...`,
-  notes: [
-    { time: 120, text: 'Key concept: Inversion of control' },
-    { time: 450, text: 'Remember to handle the error boundary' },
-  ],
-};
+interface LearningData {
+  course: Course;
+  modules: Module[];
+  currentLesson: CurrentLesson | null;
+  enrollment: { id: string; status: string; progress: number };
+  user: { id: string; email: string };
+}
 
 export default function CourseLearnPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const courseId = params.courseId as string;
+  const lessonIdParam = searchParams.get('lesson');
+
+  const [data, setData] = useState<LearningData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['section-3']);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'resources' | 'notes' | 'discussions'>('overview');
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
+
+  // Fetch course data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const url = lessonIdParam
+          ? `/api/learn/${courseId}?lessonId=${lessonIdParam}`
+          : `/api/learn/${courseId}`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load course');
+        }
+
+        const result = await response.json();
+        setData(result);
+
+        // Expand the section containing the current lesson
+        if (result.currentLesson) {
+          const currentModuleId = result.currentLesson.moduleId;
+          setExpandedSections([currentModuleId]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load course');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [courseId, lessonIdParam]);
 
   // Content protection
-  const { isProtected, session, reportViolation } = useContentProtection({
-    userId: mockUser.id,
-    contentId: mockCurrentLesson.id,
+  useContentProtection({
+    userId: data?.user?.id || '',
+    contentId: data?.currentLesson?.id || '',
     onSecurityViolation: (type, details) => {
       console.warn('Security violation:', type, details);
     },
   });
 
   // Video progress
-  const { progress, updateProgress, getProgressPercentage, isComplete } = useVideoProgress(
-    mockCurrentLesson.id,
-    mockUser.id
+  const { progress, updateProgress } = useVideoProgress(
+    data?.currentLesson?.id || '',
+    data?.user?.id || ''
   );
 
   const toggleSection = (sectionId: string) => {
@@ -156,6 +155,11 @@ export default function CourseLearnPage() {
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     );
+  };
+
+  const navigateToLesson = (lessonId: string) => {
+    router.push(`/dashboard/student/courses/${courseId}/learn?lesson=${lessonId}`);
+    setMobileSidebarOpen(false);
   };
 
   const getLessonIcon = (type: string, completed: boolean, locked: boolean) => {
@@ -167,7 +171,54 @@ export default function CourseLearnPage() {
     return <Circle className="w-4 h-4 text-gray-400" />;
   };
 
-  const courseProgress = Math.round((mockCourse.completedLessons / mockCourse.totalLessons) * 100);
+  // Find next/previous lessons
+  const allLessons = data?.modules?.flatMap(m => m.lessons) || [];
+  const currentIndex = allLessons.findIndex(l => l.current);
+  const previousLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
+  const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
+
+  // Format duration
+  const formatDuration = (seconds: number | null) => {
+    if (!seconds) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading course...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Unable to Load Course</h2>
+          <p className="text-gray-400 mb-6">{error || 'Something went wrong'}</p>
+          <Link
+            href="/dashboard/student/courses"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Courses
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { course, modules, currentLesson, user } = data;
+  const courseProgress = course.progress || Math.round((course.completedLessons / course.totalLessons) * 100);
 
   return (
     <div className="min-h-screen bg-gray-950 protected-content">
@@ -184,7 +235,7 @@ export default function CourseLearnPage() {
             </Link>
             <div className="hidden md:block h-6 w-px bg-gray-700" />
             <h1 className="hidden md:block text-sm font-medium text-white truncate max-w-md">
-              {mockCourse.title}
+              {course.title}
             </h1>
           </div>
 
@@ -229,22 +280,45 @@ export default function CourseLearnPage() {
       <div className="flex">
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'lg:mr-80' : ''}`}>
-          {/* Video Player */}
+          {/* Video/Content Player */}
           <div className="bg-black">
             <div className="max-w-6xl mx-auto">
-              <ProtectedVideoPlayer
-                src={mockCurrentLesson.videoUrl}
-                title={mockCurrentLesson.title}
-                userId={mockUser.id}
-                userEmail={mockUser.email}
-                contentId={mockCurrentLesson.id}
-                onProgress={(time, duration) => updateProgress(time, duration)}
-                onComplete={() => {
-                  console.log('Lesson completed!');
-                }}
-                initialProgress={progress}
-                watermarkEnabled={true}
-              />
+              {currentLesson?.type === 'video' && currentLesson?.videoUrl ? (
+                <ProtectedVideoPlayer
+                  src={currentLesson.videoUrl}
+                  title={currentLesson.title}
+                  userId={user.id}
+                  userEmail={user.email || ''}
+                  contentId={currentLesson.id}
+                  onProgress={(time, duration) => updateProgress(time, duration)}
+                  onComplete={() => {
+                    console.log('Lesson completed!');
+                  }}
+                  initialProgress={progress}
+                  watermarkEnabled={true}
+                />
+              ) : currentLesson?.type === 'video' ? (
+                <div className="aspect-video bg-gray-900 flex items-center justify-center">
+                  <div className="text-center">
+                    <Play className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">Video content not available</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="aspect-video bg-gray-900 flex items-center justify-center">
+                  <div className="text-center">
+                    {currentLesson?.type === 'quiz' ? (
+                      <HelpCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+                    ) : (
+                      <FileText className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                    )}
+                    <p className="text-xl font-semibold text-white mb-2">
+                      {currentLesson?.type === 'quiz' ? 'Quiz' : 'Assignment'}
+                    </p>
+                    <p className="text-gray-400">{currentLesson?.title}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -254,23 +328,25 @@ export default function CourseLearnPage() {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
               <div>
                 <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                  <span>Section 3</span>
-                  <span>•</span>
-                  <span>Lesson 9</span>
+                  <span>Lesson {currentIndex + 1} of {allLessons.length}</span>
                   <span>•</span>
                   <Clock className="w-4 h-4" />
-                  <span>{mockCurrentLesson.duration}</span>
+                  <span>{formatDuration(currentLesson?.duration || 0)}</span>
                 </div>
-                <h2 className="text-2xl font-bold text-white">{mockCurrentLesson.title}</h2>
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">SJ</span>
+                <h2 className="text-2xl font-bold text-white">{currentLesson?.title}</h2>
+                {course.instructor && (
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">
+                        {course.instructor.name?.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">{course.instructor.name}</p>
+                      <p className="text-xs text-gray-400">Instructor</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{mockCourse.instructor.name}</p>
-                    <p className="text-xs text-gray-400">{mockCourse.instructor.title}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
@@ -328,86 +404,80 @@ export default function CourseLearnPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-3">About this lesson</h3>
-                  <p className="text-gray-300 whitespace-pre-line">{mockCurrentLesson.description}</p>
+                  <p className="text-gray-300 whitespace-pre-line">
+                    {currentLesson?.description || 'No description available for this lesson.'}
+                  </p>
                 </div>
 
-                {/* Transcript Toggle */}
-                <div>
-                  <button
-                    onClick={() => setShowTranscript(!showTranscript)}
-                    className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 transition-colors"
-                  >
-                    {showTranscript ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-medium">
-                      {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                    </span>
-                  </button>
-                  {showTranscript && (
-                    <div className="mt-4 p-4 bg-gray-800/50 rounded-lg">
-                      <p className="text-sm text-gray-300 whitespace-pre-line">
-                        {mockCurrentLesson.transcript}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                {/* Article content displayed as text */}
+                {currentLesson?.articleContent && (
+                  <div className="p-4 bg-gray-800/50 rounded-lg">
+                    <h4 className="text-md font-semibold text-white mb-2">Lesson Content</h4>
+                    <p className="text-gray-300 whitespace-pre-line">
+                      {currentLesson.articleContent}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {activeTab === 'resources' && (
               <div className="space-y-4">
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-400">Protected Resources</p>
-                    <p className="text-xs text-amber-400/70 mt-1">
-                      Resources are for personal educational use only. Downloading and redistribution is prohibited.
-                    </p>
-                  </div>
-                </div>
-
-                {mockCurrentLesson.resources.map((resource, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-indigo-400" />
-                      </div>
+                {currentLesson?.resources && currentLesson.resources.length > 0 ? (
+                  <>
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-3">
+                      <Shield className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-white">{resource.name}</p>
-                        <p className="text-xs text-gray-400">{resource.type.toUpperCase()} • {resource.size}</p>
+                        <p className="text-sm font-medium text-amber-400">Protected Resources</p>
+                        <p className="text-xs text-amber-400/70 mt-1">
+                          Resources are for personal educational use only.
+                        </p>
                       </div>
                     </div>
-                    <button className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
-                      View
-                    </button>
+
+                    {currentLesson.resources.map((resource) => (
+                      <div
+                        key={resource.id}
+                        className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-indigo-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">{resource.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {resource.type.toUpperCase()} • {resource.file_size}
+                            </p>
+                          </div>
+                        </div>
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-400 hover:text-indigo-300 text-sm font-medium"
+                        >
+                          View
+                        </a>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <Download className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No resources for this lesson</p>
                   </div>
-                ))}
+                )}
               </div>
             )}
 
             {activeTab === 'notes' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-400">Your notes for this lesson</p>
-                  <button className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
-                    + Add Note
-                  </button>
-                </div>
-                {mockCurrentLesson.notes.map((note, index) => (
-                  <div key={index} className="p-4 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                      <Clock className="w-3 h-3" />
-                      <span>{Math.floor(note.time / 60)}:{(note.time % 60).toString().padStart(2, '0')}</span>
-                    </div>
-                    <p className="text-sm text-gray-300">{note.text}</p>
-                  </div>
-                ))}
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">Notes feature coming soon</p>
+                <button className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
+                  + Add Note
+                </button>
               </div>
             )}
 
@@ -423,11 +493,27 @@ export default function CourseLearnPage() {
 
             {/* Navigation */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-800">
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors">
+              <button
+                onClick={() => previousLesson && navigateToLesson(previousLesson.id)}
+                disabled={!previousLesson}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  previousLesson
+                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    : 'bg-gray-800/50 text-gray-500 cursor-not-allowed'
+                }`}
+              >
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Previous Lesson</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors">
+              <button
+                onClick={() => nextLesson && navigateToLesson(nextLesson.id)}
+                disabled={!nextLesson}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  nextLesson
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'bg-gray-800/50 text-gray-500 cursor-not-allowed'
+                }`}
+              >
                 <span className="hidden sm:inline">Next Lesson</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -445,7 +531,7 @@ export default function CourseLearnPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-white">Course Content</h3>
               <span className="text-xs text-gray-400">
-                {mockCourse.completedLessons}/{mockCourse.totalLessons} completed
+                {course.completedLessons}/{course.totalLessons} completed
               </span>
             </div>
             <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -457,43 +543,41 @@ export default function CourseLearnPage() {
           </div>
 
           <div className="py-2">
-            {mockCourse.sections.map((section) => (
-              <div key={section.id}>
+            {modules.map((module) => (
+              <div key={module.id}>
                 <button
-                  onClick={() => toggleSection(section.id)}
+                  onClick={() => toggleSection(module.id)}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-800/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    {expandedSections.includes(section.id) ? (
+                    {expandedSections.includes(module.id) ? (
                       <ChevronDown className="w-4 h-4 text-gray-400" />
                     ) : (
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     )}
                     <span className="text-sm font-medium text-white text-left">
-                      {section.title}
+                      {module.title}
                     </span>
                   </div>
                   <span className="text-xs text-gray-400">
-                    {section.lessons.filter(l => l.completed).length}/{section.lessons.length}
+                    {module.lessons.filter(l => l.completed).length}/{module.lessons.length}
                   </span>
                 </button>
 
-                {expandedSections.includes(section.id) && (
+                {expandedSections.includes(module.id) && (
                   <div className="pb-2">
-                    {section.lessons.map((lesson) => (
+                    {module.lessons.map((lesson) => (
                       <button
                         key={lesson.id}
+                        onClick={() => navigateToLesson(lesson.id)}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                           lesson.current
                             ? 'bg-indigo-600/20 border-l-2 border-indigo-500'
-                            : lesson.locked
-                            ? 'opacity-50 cursor-not-allowed'
                             : 'hover:bg-gray-800/50'
                         }`}
-                        disabled={lesson.locked}
                       >
                         <div className="ml-4">
-                          {getLessonIcon(lesson.type, lesson.completed, lesson.locked)}
+                          {getLessonIcon(lesson.type, lesson.completed, false)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm truncate ${
@@ -501,7 +585,9 @@ export default function CourseLearnPage() {
                           }`}>
                             {lesson.title}
                           </p>
-                          <p className="text-xs text-gray-500">{lesson.duration}</p>
+                          <p className="text-xs text-gray-500">
+                            {lesson.duration ? `${lesson.duration} min` : lesson.type}
+                          </p>
                         </div>
                         {lesson.current && (
                           <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
@@ -536,7 +622,7 @@ export default function CourseLearnPage() {
               <div className="p-4 border-b border-gray-800">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-400">
-                    {mockCourse.completedLessons}/{mockCourse.totalLessons} completed
+                    {course.completedLessons}/{course.totalLessons} completed
                   </span>
                   <span className="text-xs font-medium text-indigo-400">{courseProgress}%</span>
                 </div>
@@ -549,40 +635,38 @@ export default function CourseLearnPage() {
               </div>
 
               <div className="py-2">
-                {mockCourse.sections.map((section) => (
-                  <div key={section.id}>
+                {modules.map((module) => (
+                  <div key={module.id}>
                     <button
-                      onClick={() => toggleSection(section.id)}
+                      onClick={() => toggleSection(module.id)}
                       className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-800/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        {expandedSections.includes(section.id) ? (
+                        {expandedSections.includes(module.id) ? (
                           <ChevronDown className="w-4 h-4 text-gray-400" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-gray-400" />
                         )}
                         <span className="text-sm font-medium text-white text-left">
-                          {section.title}
+                          {module.title}
                         </span>
                       </div>
                     </button>
 
-                    {expandedSections.includes(section.id) && (
+                    {expandedSections.includes(module.id) && (
                       <div className="pb-2">
-                        {section.lessons.map((lesson) => (
+                        {module.lessons.map((lesson) => (
                           <button
                             key={lesson.id}
-                            onClick={() => !lesson.locked && setMobileSidebarOpen(false)}
+                            onClick={() => navigateToLesson(lesson.id)}
                             className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                               lesson.current
                                 ? 'bg-indigo-600/20 border-l-2 border-indigo-500'
-                                : lesson.locked
-                                ? 'opacity-50'
                                 : 'hover:bg-gray-800/50'
                             }`}
                           >
                             <div className="ml-4">
-                              {getLessonIcon(lesson.type, lesson.completed, lesson.locked)}
+                              {getLessonIcon(lesson.type, lesson.completed, false)}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={`text-sm truncate ${

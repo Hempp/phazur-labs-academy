@@ -9,7 +9,8 @@ import {
   ArrowRight,
   Clock,
   User,
-  Tag
+  Tag,
+  Star
 } from 'lucide-react'
 
 const categories = [
@@ -295,7 +296,8 @@ export default function TechBlogPage() {
                 <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">
-                    ⭐ {project.stars}
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    {project.stars}
                   </span>
                   <span className="text-muted-foreground">{project.language}</span>
                 </div>

@@ -4,101 +4,101 @@
 
 @layer base {
   :root {
-    /* Coursera-inspired palette */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 12%;              /* #1F1F1F */
+    /* Phasor Labs Brand Palette - Red, Yellow, Black, White */
+    --background: 0 0% 100%;             /* White */
+    --foreground: 0 0% 8%;               /* Near Black #141414 */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 0 0% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 0 0% 8%;
 
-    /* Primary: Coursera Blue #0056D2 */
-    --primary: 213 100% 41%;
+    /* Primary: Phasor Red */
+    --primary: 0 85% 50%;                /* #E61919 - Vibrant Red */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 213 100% 35%;       /* #004BB5 */
-    --primary-light: 213 72% 95%;        /* #E8F0FE */
+    --primary-hover: 0 85% 42%;          /* Darker red on hover */
+    --primary-light: 0 85% 96%;          /* Light red bg */
 
-    /* Secondary/Muted */
-    --secondary: 210 20% 98%;            /* #F8F9FA */
-    --secondary-foreground: 0 0% 12%;
-    --muted: 210 20% 98%;
-    --muted-foreground: 0 0% 39%;        /* #636363 */
-    --muted-light: 0 0% 55%;             /* #8C8C8C */
+    /* Secondary: Phasor Yellow */
+    --secondary: 45 100% 50%;            /* #FFD000 - Golden Yellow */
+    --secondary-foreground: 0 0% 8%;
+    --muted: 0 0% 96%;                   /* Light gray */
+    --muted-foreground: 0 0% 40%;        /* #666666 */
+    --muted-light: 0 0% 55%;
 
-    /* Accent */
-    --accent: 210 20% 96%;               /* #F0F2F5 */
-    --accent-foreground: 0 0% 12%;
+    /* Accent: Yellow highlight */
+    --accent: 45 100% 95%;               /* Light yellow bg */
+    --accent-foreground: 0 0% 8%;
 
     /* Semantic Colors */
-    --success: 162 90% 26%;              /* #067D62 - completion green */
+    --success: 142 76% 36%;              /* Green for completion */
     --success-foreground: 0 0% 100%;
-    --warning: 26 82% 53%;               /* #E87722 - badges orange */
-    --warning-foreground: 0 0% 100%;
-    --info: 213 100% 41%;                /* same as primary */
+    --warning: 45 100% 50%;              /* Yellow (brand color) */
+    --warning-foreground: 0 0% 8%;
+    --info: 0 85% 50%;                   /* Red (brand color) */
     --info-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders */
-    --border: 0 0% 90%;                  /* #E5E5E5 */
-    --border-light: 0 0% 96%;            /* #F5F5F5 */
-    --input: 0 0% 90%;
-    --ring: 213 100% 41%;
+    --border: 0 0% 88%;                  /* #E0E0E0 */
+    --border-light: 0 0% 94%;            /* #F0F0F0 */
+    --input: 0 0% 88%;
+    --ring: 0 85% 50%;                   /* Red ring */
 
     /* Surfaces */
     --surface: 0 0% 100%;
-    --surface-secondary: 210 20% 98%;    /* #F8F9FA */
-    --surface-tertiary: 210 20% 95%;     /* #F0F2F5 */
+    --surface-secondary: 0 0% 98%;       /* #FAFAFA */
+    --surface-tertiary: 0 0% 96%;        /* #F5F5F5 */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    /* Dark mode - professional dark theme */
-    --background: 220 20% 7%;            /* #0F1419 */
-    --foreground: 0 0% 95%;              /* #F2F2F2 */
-    --card: 220 20% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 220 20% 10%;
-    --popover-foreground: 0 0% 95%;
+    /* Phasor Labs Dark Mode - Emphasizes Red & Yellow on Black */
+    --background: 0 0% 6%;               /* #0F0F0F Near Black */
+    --foreground: 0 0% 96%;              /* #F5F5F5 */
+    --card: 0 0% 9%;                     /* #171717 */
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 96%;
 
-    /* Primary: Lighter blue for dark mode */
-    --primary: 213 100% 60%;             /* Brighter blue */
-    --primary-foreground: 220 20% 7%;
-    --primary-hover: 213 100% 50%;
-    --primary-light: 213 60% 20%;
+    /* Primary: Brighter Red for dark mode */
+    --primary: 0 80% 58%;                /* Brighter red */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 0 80% 50%;
+    --primary-light: 0 60% 15%;
 
-    /* Secondary/Muted */
-    --secondary: 220 20% 15%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 220 20% 15%;
+    /* Secondary: Golden Yellow */
+    --secondary: 45 100% 55%;            /* Brighter yellow */
+    --secondary-foreground: 0 0% 8%;
+    --muted: 0 0% 14%;                   /* Dark gray */
     --muted-foreground: 0 0% 65%;
     --muted-light: 0 0% 50%;
 
-    /* Accent */
-    --accent: 220 20% 18%;
-    --accent-foreground: 0 0% 95%;
+    /* Accent: Subtle yellow highlight */
+    --accent: 45 50% 12%;
+    --accent-foreground: 0 0% 96%;
 
     /* Semantic Colors */
-    --success: 162 70% 45%;
+    --success: 142 70% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 26 80% 55%;
-    --warning-foreground: 0 0% 100%;
-    --info: 213 100% 60%;
+    --warning: 45 100% 55%;
+    --warning-foreground: 0 0% 8%;
+    --info: 0 80% 58%;
     --info-foreground: 0 0% 100%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders */
-    --border: 220 20% 18%;
-    --border-light: 220 20% 15%;
-    --input: 220 20% 18%;
-    --ring: 213 100% 60%;
+    --border: 0 0% 18%;
+    --border-light: 0 0% 14%;
+    --input: 0 0% 18%;
+    --ring: 0 80% 58%;
 
     /* Surfaces */
-    --surface: 220 20% 10%;
-    --surface-secondary: 220 20% 12%;
-    --surface-tertiary: 220 20% 15%;
+    --surface: 0 0% 9%;
+    --surface-secondary: 0 0% 12%;
+    --surface-tertiary: 0 0% 14%;
   }
 }
 
@@ -157,9 +157,9 @@
     @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl;
   }
 
-  /* Gradient text */
+  /* Gradient text - Phasor Red to Yellow */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-yellow-500;
   }
 
   /* Card hover effect */
@@ -174,7 +174,7 @@
 
   .btn-glow::after {
     content: '';
-    @apply absolute inset-0 -z-10 bg-gradient-to-r from-primary-400 to-primary-600 opacity-0 blur-xl transition-opacity duration-300;
+    @apply absolute inset-0 -z-10 bg-gradient-to-r from-red-500 to-yellow-500 opacity-0 blur-xl transition-opacity duration-300;
   }
 
   .btn-glow:hover::after {
@@ -275,17 +275,17 @@
     @apply bg-primary/10 text-primary font-medium;
   }
 
-  /* Badge variants */
+  /* Badge variants - Phasor Brand */
   .badge-new {
-    @apply bg-gradient-to-r from-amber-500 to-orange-500 text-white;
+    @apply bg-gradient-to-r from-yellow-500 to-yellow-400 text-black;
   }
 
   .badge-popular {
-    @apply bg-gradient-to-r from-pink-500 to-rose-500 text-white;
+    @apply bg-gradient-to-r from-red-600 to-red-500 text-white;
   }
 
   .badge-featured {
-    @apply bg-gradient-to-r from-violet-500 to-purple-500 text-white;
+    @apply bg-gradient-to-r from-red-500 to-yellow-500 text-white;
   }
 
   /* Lesson list */

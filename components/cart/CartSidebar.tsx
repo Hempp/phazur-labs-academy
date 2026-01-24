@@ -3,10 +3,10 @@
 // Cart Sidebar Component
 // VAULT Agent - Payment Systems Integration
 
-import { Fragment, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { X, ShoppingCart, Trash2, Loader2, Tag } from 'lucide-react'
+import { X, ShoppingCart, Trash2, Loader2, Tag, Lock, CreditCard } from 'lucide-react'
 import { useCartStore } from '@/lib/stores/cart-store'
 import { formatPrice } from '@/lib/stripe-client'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -24,10 +24,20 @@ export default function CartSidebar() {
     getSavings,
   } = useCartStore()
 
+  // Prevent hydration mismatch by not rendering cart content until mounted
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const [isLoading, setIsLoading] = useState(false)
 
-  const subtotal = getSubtotal()
-  const savings = getSavings()
+  // Only calculate after mount to prevent hydration mismatch
+  const subtotal = isMounted ? getSubtotal() : 0
+  const savings = isMounted ? getSavings() : 0
+  const cartItems = isMounted ? items : []
+  const cartItemCount = isMounted ? items.length : 0
 
   const handleCheckout = async () => {
     if (!user) {
@@ -103,7 +113,7 @@ export default function CartSidebar() {
             <ShoppingCart className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Shopping Cart</h2>
             <span className="bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-              {items.length}
+              {cartItemCount}
             </span>
           </div>
           <button
@@ -116,7 +126,7 @@ export default function CartSidebar() {
 
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ height: 'calc(100vh - 280px)' }}>
-          {items.length === 0 ? (
+          {cartItems.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingCart className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -131,7 +141,7 @@ export default function CartSidebar() {
               </Link>
             </div>
           ) : (
-            items.map((item) => (
+            cartItems.map((item) => (
               <div
                 key={item.courseId}
                 className="flex gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -179,7 +189,7 @@ export default function CartSidebar() {
         </div>
 
         {/* Footer */}
-        {items.length > 0 && (
+        {cartItems.length > 0 && (
           <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-4">
             {/* Savings */}
             {savings > 0 && (
@@ -229,8 +239,14 @@ export default function CartSidebar() {
 
             {/* Trust badges */}
             <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
-              <span>🔒 Secure Checkout</span>
-              <span>💳 Powered by Stripe</span>
+              <span className="flex items-center gap-1">
+                <Lock className="h-3 w-3" />
+                Secure Checkout
+              </span>
+              <span className="flex items-center gap-1">
+                <CreditCard className="h-3 w-3" />
+                Powered by Stripe
+              </span>
             </div>
           </div>
         )}

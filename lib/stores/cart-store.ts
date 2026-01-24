@@ -100,9 +100,15 @@ export const useCartStore = create<CartState>()(
       name: 'phazur-cart',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }), // Only persist items, not UI state
+      skipHydration: true, // Prevent hydration mismatch - hydrate manually on client
     }
   )
 )
+
+// Hydrate the store on client-side only
+if (typeof window !== 'undefined') {
+  useCartStore.persist.rehydrate()
+}
 
 // Selector hooks for performance optimization
 export const useCartItems = () => useCartStore((state) => state.items)

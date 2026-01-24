@@ -3,6 +3,15 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import {
+  BookOpen,
+  Film,
+  FileText,
+  ClipboardList,
+  FileType,
+  Radio,
+  Sparkles
+} from 'lucide-react'
+import {
   courses,
   instructors,
   type Course,
@@ -415,21 +424,21 @@ export default function AdminContentPage() {
               <div className="border-b">
                 <nav className="flex -mb-px">
                   {[
-                    { id: 'lessons', label: 'Lessons', icon: '📚' },
-                    { id: 'videos', label: 'Videos', icon: '🎬' },
-                    { id: 'quizzes', label: 'Quizzes', icon: '📝' },
-                    { id: 'assignments', label: 'Assignments', icon: '📋' },
+                    { id: 'lessons', label: 'Lessons', Icon: BookOpen },
+                    { id: 'videos', label: 'Videos', Icon: Film },
+                    { id: 'quizzes', label: 'Quizzes', Icon: FileText },
+                    { id: 'assignments', label: 'Assignments', Icon: ClipboardList },
                   ].map(tab => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as TabType)}
-                      className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                         activeTab === tab.id
                           ? 'border-indigo-500 text-indigo-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                       }`}
                     >
-                      <span className="mr-2">{tab.icon}</span>
+                      <tab.Icon className="h-4 w-4" />
                       {tab.label}
                     </button>
                   ))}
@@ -487,12 +496,12 @@ export default function AdminContentPage() {
                                   >
                                     <div className="flex items-center gap-3">
                                       <span className="text-sm text-gray-400 w-6">{lessonIndex + 1}.</span>
-                                      <span className="text-lg">
-                                        {lesson.type === 'video' && '🎬'}
-                                        {lesson.type === 'quiz' && '📝'}
-                                        {lesson.type === 'assignment' && '📋'}
-                                        {lesson.type === 'text' && '📄'}
-                                        {lesson.type === 'live' && '🔴'}
+                                      <span className="text-primary">
+                                        {lesson.type === 'video' && <Film className="h-5 w-5" />}
+                                        {lesson.type === 'quiz' && <FileText className="h-5 w-5" />}
+                                        {lesson.type === 'assignment' && <ClipboardList className="h-5 w-5" />}
+                                        {lesson.type === 'text' && <FileType className="h-5 w-5" />}
+                                        {lesson.type === 'live' && <Radio className="h-5 w-5 text-red-500" />}
                                       </span>
                                       <div>
                                         <p className="font-medium text-gray-900">{lesson.title}</p>
@@ -812,7 +821,7 @@ export default function AdminContentPage() {
               <div className="bg-purple-50 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-purple-600">✨</span>
+                    <Sparkles className="h-4 w-4 text-purple-600" />
                   </div>
                   <div>
                     <p className="font-medium text-purple-900">AI Script Assistant</p>

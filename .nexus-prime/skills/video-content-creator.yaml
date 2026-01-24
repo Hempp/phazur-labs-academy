@@ -1,0 +1,130 @@
+# Video Content Creator - NEXUS-PRIME Skill Definition
+# Phazur Labs Academy - Professional Video Production Specialist
+
+name: VIDEO-CREATOR
+version: 1.0.0
+type: skill
+category: content-creation
+
+metadata:
+  title: "Video Content Creator & Course Producer"
+  description: "Expert AI video production specialist for creating professional educational content"
+  author: "Phazur Labs"
+  tags:
+    - video-production
+    - ai-video
+    - heygen
+    - veo3
+    - lip-sync
+    - course-content
+    - e-learning
+
+# Skill activation triggers
+triggers:
+  commands:
+    - /video-create
+    - /video-course
+    - /video-avatar
+    - /video-script
+    - /video-render
+    - /video-audit
+  keywords:
+    - create video
+    - course video
+    - heygen
+    - veo3
+    - lip sync
+    - avatar video
+    - educational video
+
+# Core capabilities
+capabilities:
+  primary:
+    - AI avatar video generation
+    - Script-to-video production
+    - Lip sync optimization
+    - Multi-language dubbing
+    - Course module creation
+    - Video quality assurance
+
+  tools:
+    heygen:
+      - Avatar creation and customization
+      - Script upload and timing
+      - Voice cloning and selection
+      - Background customization
+      - Batch video generation
+      - API integration
+
+    google_veo3:
+      - Text-to-video generation
+      - Scene composition
+      - Motion synthesis
+      - Style transfer
+      - High-fidelity output
+
+    additional_tools:
+      - Runway ML (Gen-3)
+      - Pika Labs
+      - Synthesia
+      - D-ID
+      - ElevenLabs (voice)
+      - Murf AI (voice)
+      - Descript (editing)
+      - CapCut (editing)
+
+# Quality standards
+quality_standards:
+  video:
+    resolution: "1080p minimum, 4K preferred"
+    frame_rate: "30fps standard, 60fps for demos"
+    aspect_ratio: "16:9 for courses, 9:16 for shorts"
+    bitrate: "10-20 Mbps for final export"
+
+  audio:
+    sample_rate: "48kHz"
+    bit_depth: "24-bit"
+    noise_floor: "-60dB or lower"
+    loudness: "-16 LUFS (streaming standard)"
+
+  lip_sync:
+    accuracy: "95%+ phoneme match"
+    latency: "<50ms audio-visual sync"
+    naturalness: "Human-like movement patterns"
+
+# Workflow stages
+workflow:
+  pre_production:
+    - Script development and review
+    - Storyboard creation
+    - Avatar/presenter selection
+    - Voice selection and testing
+    - Asset gathering (graphics, b-roll)
+
+  production:
+    - AI video generation
+    - Lip sync processing
+    - Voice synthesis/recording
+    - Scene assembly
+    - Graphics overlay
+
+  post_production:
+    - Quality review
+    - Audio mastering
+    - Color correction
+    - Caption generation
+    - Thumbnail creation
+    - Export and optimization
+
+# Output formats
+output_formats:
+  course_content:
+    - MP4 (H.264/H.265)
+    - WebM (VP9)
+    - HLS streaming segments
+
+  supplementary:
+    - SRT/VTT captions
+    - Transcript PDF
+    - Thumbnail PNG
+    - Chapter markers JSON

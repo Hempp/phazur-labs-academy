@@ -30,7 +30,8 @@ import {
   HelpCircle,
   UserCog,
   Building2,
-  Layers
+  Layers,
+  Brain
 } from 'lucide-react'
 
 const sidebarNavigation = [
@@ -54,6 +55,7 @@ const sidebarNavigation = [
     title: 'Content',
     items: [
       { name: 'Content Manager', href: '/admin/content', icon: Layers },
+      { name: 'Course Creator', href: '/admin/course-creator', icon: Brain },
       { name: 'Courses', href: '/admin/courses', icon: BookOpen },
       { name: 'Videos', href: '/admin/videos', icon: Video },
       { name: 'Quizzes', href: '/admin/quizzes', icon: FileQuestion },

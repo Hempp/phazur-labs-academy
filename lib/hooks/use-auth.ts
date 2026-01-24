@@ -30,11 +30,13 @@ interface UseAuthReturn extends AuthState {
 }
 
 export function useAuth(): UseAuthReturn {
+  // Always start with isLoading: true to prevent hydration mismatch
+  // The actual loading state is determined in useEffect after mount
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
     profile: null,
-    isLoading: !isSupabaseConfigured, // Don't show loading if not configured
+    isLoading: true,
     isAuthenticated: false,
   })
 

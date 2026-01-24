@@ -23,7 +23,8 @@ import {
   Target,
   Activity,
   Calendar,
-  Filter
+  Filter,
+  Star
 } from 'lucide-react'
 import {
   courses,
@@ -452,7 +453,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-sm">
-                    <span>⭐</span>
+                    <Star className="h-3.5 w-3.5 fill-current" />
                     <span className="font-medium">{course.rating}</span>
                   </div>
                 </div>

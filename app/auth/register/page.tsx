@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
-import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Loader2, Check } from 'lucide-react'
+import { Mail, Lock, User, Eye, EyeOff, Loader2, Check } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/use-auth'
 
 const registerSchema = z.object({
@@ -162,7 +163,13 @@ export default function RegisterPage() {
         <div className="mx-auto w-full max-w-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mb-8">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Image
+              src="/images/logo/phazur-logo-dark.png"
+              alt="Phazur Labs"
+              width={32}
+              height={32}
+              className="dark:invert"
+            />
             <span className="font-bold text-xl">Phazur Labs Academy</span>
           </Link>
 

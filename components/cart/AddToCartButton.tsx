@@ -4,7 +4,7 @@
 // VAULT Agent - Payment Systems Integration
 
 import { ShoppingCart, Check, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCartStore, CartItem } from '@/lib/stores/cart-store'
 import toast from 'react-hot-toast'
 
@@ -34,8 +34,14 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const { addItem, isInCart, openCart } = useCartStore()
   const [isAdding, setIsAdding] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
-  const inCart = isInCart(course.id)
+  // Prevent hydration mismatch by only reading store after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const inCart = mounted ? isInCart(course.id) : false
 
   const handleClick = async () => {
     if (inCart) {

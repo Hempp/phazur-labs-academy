@@ -1,6 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  GraduationCap,
   Target,
   BarChart3,
   Clock,
@@ -130,7 +130,13 @@ export default function SkillsPage() {
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Image
+              src="/images/logo/phazur-logo-dark.png"
+              alt="Phazur Labs"
+              width={32}
+              height={32}
+              className="dark:invert"
+            />
             <span className="font-bold text-xl">Phazur Labs Academy</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">

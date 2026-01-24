@@ -15,6 +15,20 @@ import {
   LiveTrainingStatus,
 } from '@/lib/types'
 
+// Import course content (sections, quizzes, assignments)
+import {
+  reactPatternsSections,
+  typescriptSections,
+  nodejsSections,
+  aimlSections,
+  uiuxSections,
+  awsSections,
+  nextjsSections,
+  pythonDataScienceSections,
+  quizzes,
+  assignments,
+} from './course-content'
+
 // Re-export types for convenience
 export type {
   Course,
@@ -135,7 +149,7 @@ export const courses: Course[] = [
       'Implement advanced state patterns',
       'Optimize React performance',
     ],
-    sections: [],
+    sections: reactPatternsSections,
     created_at: '2024-01-15T00:00:00Z',
     updated_at: '2024-01-17T00:00:00Z',
     published_at: '2024-01-15T00:00:00Z',
@@ -169,7 +183,7 @@ export const courses: Course[] = [
       'Build type-safe applications',
       'Create reusable generic types',
     ],
-    sections: [],
+    sections: typescriptSections,
     created_at: '2023-11-20T00:00:00Z',
     updated_at: '2024-01-10T00:00:00Z',
     published_at: '2023-11-20T00:00:00Z',
@@ -203,7 +217,7 @@ export const courses: Course[] = [
       'Work with databases',
       'Implement authentication',
     ],
-    sections: [],
+    sections: nodejsSections,
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-16T00:00:00Z',
     published_at: '2024-01-05T00:00:00Z',
@@ -237,7 +251,7 @@ export const courses: Course[] = [
       'Implement neural networks',
       'Deploy ML applications',
     ],
-    sections: [],
+    sections: aimlSections,
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-18T00:00:00Z',
     published_at: '2024-01-01T00:00:00Z',
@@ -271,7 +285,7 @@ export const courses: Course[] = [
       'Conduct user research',
       'Build design systems',
     ],
-    sections: [],
+    sections: uiuxSections,
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-18T00:00:00Z',
     published_at: '2024-01-05T00:00:00Z',
@@ -305,7 +319,7 @@ export const courses: Course[] = [
       'Pass AWS certification exam',
       'Implement cloud solutions',
     ],
-    sections: [],
+    sections: awsSections,
     created_at: '2023-12-10T00:00:00Z',
     updated_at: '2024-01-15T00:00:00Z',
     published_at: '2023-12-10T00:00:00Z',
@@ -339,7 +353,7 @@ export const courses: Course[] = [
       'Use App Router and Server Components',
       'Deploy to production',
     ],
-    sections: [],
+    sections: nextjsSections,
     created_at: '2024-01-10T00:00:00Z',
     updated_at: '2024-01-18T00:00:00Z',
     published_at: '2024-01-10T00:00:00Z',
@@ -373,7 +387,7 @@ export const courses: Course[] = [
       'Create visualizations',
       'Build data pipelines',
     ],
-    sections: [],
+    sections: pythonDataScienceSections,
     created_at: '2024-03-01T00:00:00Z',
     updated_at: '2024-01-17T00:00:00Z',
   },
@@ -775,3 +789,13 @@ export function getStudentAnalytics(studentId: string): StudentAnalytics {
     ],
   }
 }
+
+// Re-export course content for easy access
+export { quizzes, assignments }
+export {
+  getSectionsByCourseId,
+  getQuizByLessonId,
+  getAssignmentByLessonId,
+  getQuizzesByCourseId,
+  getAssignmentsByCourseId,
+} from './course-content'

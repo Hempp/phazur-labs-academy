@@ -12,7 +12,10 @@ import {
   CheckCircle2,
   ArrowRight,
   Building2,
-  Loader2
+  Loader2,
+  Code2,
+  Rocket,
+  TrendingUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -140,22 +143,22 @@ const useCases = [
   {
     title: 'Engineering Teams',
     description: 'Upskill developers with modern frameworks, cloud technologies, and best practices.',
-    icon: '💻'
+    Icon: Code2
   },
   {
     title: 'New Hire Onboarding',
     description: 'Accelerate time-to-productivity with structured onboarding programs.',
-    icon: '🚀'
+    Icon: Rocket
   },
   {
     title: 'Career Development',
     description: 'Support employee growth with clear learning paths and certifications.',
-    icon: '📈'
+    Icon: TrendingUp
   },
   {
     title: 'Compliance Training',
     description: 'Ensure team compliance with security and regulatory requirements.',
-    icon: '✅'
+    Icon: CheckCircle2
   }
 ]
 
@@ -367,7 +370,9 @@ export default function EnterprisePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {useCases.map((useCase, i) => (
               <div key={i} className="bg-background border rounded-xl p-6 text-center">
-                <span className="text-4xl mb-4 block">{useCase.icon}</span>
+                <div className="flex justify-center mb-4">
+                  <useCase.Icon className="h-10 w-10 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">{useCase.title}</h3>
                 <p className="text-sm text-muted-foreground">{useCase.description}</p>
               </div>

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  GraduationCap,
   LayoutDashboard,
   BookOpen,
   Award,
@@ -109,7 +109,13 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b">
           <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Image
+              src="/images/logo/phazur-logo-dark.png"
+              alt="Phazur Labs"
+              width={32}
+              height={32}
+              className="dark:invert"
+            />
             <span className="font-bold">Phazur Labs</span>
           </Link>
           <button

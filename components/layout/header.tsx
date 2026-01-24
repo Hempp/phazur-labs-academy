@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { CartButton } from '@/components/cart'
 import {
-  GraduationCap,
   Search,
   ChevronDown,
   Menu,
@@ -140,8 +140,14 @@ export function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center h-16 gap-6">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-              <GraduationCap className="h-8 w-8 text-primary" />
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+              <Image
+                src="/images/logo/phazur-logo-dark.png"
+                alt="Phazur Labs"
+                width={36}
+                height={36}
+                className="dark:invert"
+              />
               <span className="font-bold text-xl text-foreground hidden sm:block">
                 Phazur Labs
               </span>

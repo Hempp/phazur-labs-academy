@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  GraduationCap,
   LayoutDashboard,
   BookOpen,
   Users,
@@ -24,8 +24,10 @@ import {
   ChevronDown,
   X,
   Check,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from 'lucide-react'
+import { ReactNode } from 'react'
 import {
   liveTrainings,
   courses,
@@ -35,10 +37,17 @@ import {
   type LiveTrainingStatus
 } from '@/lib/data/store'
 
-const platformIcons: Record<LiveTrainingPlatform, string> = {
-  zoom: '📹',
-  google_meet: '🎥',
-  teams: '💬'
+const PlatformIcon = ({ platform, className = "h-6 w-6" }: { platform: LiveTrainingPlatform; className?: string }) => {
+  switch (platform) {
+    case 'zoom':
+      return <Video className={className} />
+    case 'google_meet':
+      return <Video className={className} />
+    case 'teams':
+      return <MessageSquare className={className} />
+    default:
+      return <Video className={className} />
+  }
 }
 
 const platformNames: Record<LiveTrainingPlatform, string> = {
@@ -183,7 +192,13 @@ export default function LiveTrainingPage() {
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white dark:bg-gray-800 dark:border-gray-700">
         <div className="flex h-16 items-center gap-2 border-b px-6 dark:border-gray-700">
-          <GraduationCap className="h-8 w-8 text-primary" />
+          <Image
+            src="/images/logo/phazur-logo-dark.png"
+            alt="Phazur Labs"
+            width={32}
+            height={32}
+            className="dark:invert"
+          />
           <span className="font-bold text-xl">Phazur Admin</span>
         </div>
         <nav className="p-4 space-y-2">
@@ -342,7 +357,7 @@ export default function LiveTrainingPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl">{platformIcons[training.platform]}</span>
+                            <PlatformIcon platform={training.platform} className="h-7 w-7 text-primary" />
                             <div>
                               <h3 className="font-semibold text-gray-900 dark:text-white">{training.title}</h3>
                               <p className="text-sm text-gray-500">{platformNames[training.platform]}</p>
@@ -625,7 +640,7 @@ export default function LiveTrainingPage() {
               {/* Meeting Details */}
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg dark:bg-gray-700/50">
                 <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                  <span className="text-xl">{platformIcons[formData.platform]}</span>
+                  <PlatformIcon platform={formData.platform} className="h-5 w-5 text-primary" />
                   {platformNames[formData.platform]} Details
                 </h3>
 

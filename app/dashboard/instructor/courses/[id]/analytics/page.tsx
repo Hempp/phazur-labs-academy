@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -19,6 +19,7 @@ import {
   Calendar,
   Download,
   Filter,
+  Loader2,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserAvatar } from '@/components/ui/avatar'
@@ -26,76 +27,33 @@ import { cn } from '@/lib/utils'
 
 type TimeRange = '7d' | '30d' | '90d' | '12m' | 'all'
 
-// Mock analytics data
-const mockCourse = {
-  id: '1',
-  title: 'Advanced React Patterns',
+// Types for analytics data
+interface AnalyticsData {
+  course: {
+    id: string
+    title: string
+  }
+  stats: {
+    totalStudents: number
+    studentsTrend: number
+    totalRevenue: number
+    revenueTrend: number
+    avgRating: number
+    ratingTrend: number
+    totalViews: number
+    viewsTrend: number
+    completionRate: number
+    avgWatchTime: string
+    totalReviews: number
+    engagementRate: number
+  }
+  enrollmentData: Array<{ date: string; enrollments: number; revenue: number }>
+  lessonPerformance: Array<{ title: string; views: number; completionRate: number; avgDuration: string }>
+  recentEnrollments: Array<{ id: string; user: { name: string; avatar: string | null }; date: string; source: string }>
+  recentReviews: Array<{ id: string; user: { name: string; avatar: string | null }; rating: number; comment: string; date: string }>
+  trafficSources: Array<{ source: string; percentage: number; color: string }>
+  geographicData: Array<{ country: string; students: number; percentage: number }>
 }
-
-const mockStats = {
-  totalStudents: 3420,
-  studentsTrend: 12,
-  totalRevenue: 12500,
-  revenueTrend: 8,
-  avgRating: 4.9,
-  ratingTrend: 2,
-  totalViews: 45200,
-  viewsTrend: 15,
-  completionRate: 68,
-  avgWatchTime: '4h 32m',
-  totalReviews: 892,
-  engagementRate: 78,
-}
-
-const enrollmentData = [
-  { date: 'Jan 1', enrollments: 45, revenue: 1350 },
-  { date: 'Jan 8', enrollments: 52, revenue: 1560 },
-  { date: 'Jan 15', enrollments: 38, revenue: 1140 },
-  { date: 'Jan 22', enrollments: 67, revenue: 2010 },
-  { date: 'Jan 29', enrollments: 72, revenue: 2160 },
-  { date: 'Feb 5', enrollments: 58, revenue: 1740 },
-  { date: 'Feb 12', enrollments: 84, revenue: 2520 },
-]
-
-const lessonPerformance = [
-  { title: 'Welcome & Course Overview', views: 3420, completionRate: 98, avgDuration: '5:12' },
-  { title: 'Setting Up Development Environment', views: 3280, completionRate: 94, avgDuration: '11:45' },
-  { title: 'Introduction to Compound Components', views: 3150, completionRate: 89, avgDuration: '14:22' },
-  { title: 'Building a Tabs Component', views: 2890, completionRate: 82, avgDuration: '23:45' },
-  { title: 'Accordion Pattern', views: 2650, completionRate: 76, avgDuration: '18:30' },
-  { title: 'Why Custom Hooks?', views: 2420, completionRate: 71, avgDuration: '9:15' },
-]
-
-const recentEnrollments = [
-  { id: 'e1', user: { name: 'John Doe', avatar: null }, date: '2 hours ago', source: 'Direct' },
-  { id: 'e2', user: { name: 'Jane Smith', avatar: null }, date: '3 hours ago', source: 'Search' },
-  { id: 'e3', user: { name: 'Mike Johnson', avatar: null }, date: '5 hours ago', source: 'Referral' },
-  { id: 'e4', user: { name: 'Sarah Williams', avatar: null }, date: '6 hours ago', source: 'Social' },
-  { id: 'e5', user: { name: 'Alex Thompson', avatar: null }, date: '8 hours ago', source: 'Direct' },
-]
-
-const recentReviews = [
-  { id: 'r1', user: { name: 'Alex Thompson', avatar: null }, rating: 5, comment: 'Best React course ever!', date: '1 day ago' },
-  { id: 'r2', user: { name: 'Maria Garcia', avatar: null }, rating: 5, comment: 'Finally understand compound components!', date: '2 days ago' },
-  { id: 'r3', user: { name: 'James Wilson', avatar: null }, rating: 4, comment: 'Great content, could use more examples.', date: '3 days ago' },
-]
-
-const trafficSources = [
-  { source: 'Direct', percentage: 35, color: 'bg-primary' },
-  { source: 'Search', percentage: 28, color: 'bg-blue-500' },
-  { source: 'Social', percentage: 20, color: 'bg-purple-500' },
-  { source: 'Referral', percentage: 12, color: 'bg-amber-500' },
-  { source: 'Other', percentage: 5, color: 'bg-gray-500' },
-]
-
-const geographicData = [
-  { country: 'United States', students: 1240, percentage: 36 },
-  { country: 'India', students: 620, percentage: 18 },
-  { country: 'United Kingdom', students: 380, percentage: 11 },
-  { country: 'Germany', students: 290, percentage: 8 },
-  { country: 'Canada', students: 250, percentage: 7 },
-  { country: 'Other', students: 640, percentage: 19 },
-]
 
 function StatCard({
   icon: Icon,
@@ -149,26 +107,34 @@ function StatCard({
   )
 }
 
-function EnrollmentChart() {
-  const maxValue = Math.max(...enrollmentData.map(d => d.enrollments))
+function EnrollmentChart({ data }: { data: Array<{ date: string; enrollments: number; revenue: number }> }) {
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-48 text-muted-foreground">
+        No enrollment data available
+      </div>
+    )
+  }
+
+  const maxValue = Math.max(...data.map(d => d.enrollments), 1)
 
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-2 h-48">
-        {enrollmentData.map((data, index) => (
-          <div key={data.date} className="flex-1 flex flex-col items-center gap-2">
+        {data.map((item, index) => (
+          <div key={item.date} className="flex-1 flex flex-col items-center gap-2">
             <div className="w-full relative">
               <div
                 className="w-full bg-primary/20 rounded-t transition-all duration-300 hover:bg-primary/30"
-                style={{ height: `${(data.enrollments / maxValue) * 150}px` }}
+                style={{ height: `${(item.enrollments / maxValue) * 150}px` }}
               >
                 <div
                   className="absolute bottom-0 left-0 right-0 bg-primary rounded-t transition-all duration-300"
-                  style={{ height: `${(data.enrollments / maxValue) * 150 * 0.7}px` }}
+                  style={{ height: `${(item.enrollments / maxValue) * 150 * 0.7}px` }}
                 />
               </div>
             </div>
-            <span className="text-xs text-muted-foreground">{data.date.split(' ')[0]}</span>
+            <span className="text-xs text-muted-foreground">{item.date.split(' ')[0]}</span>
           </div>
         ))}
       </div>
@@ -189,6 +155,9 @@ function EnrollmentChart() {
 export default function CourseAnalyticsPage() {
   const params = useParams()
   const [timeRange, setTimeRange] = useState<TimeRange>('30d')
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: '7d', label: '7 Days' },
@@ -197,6 +166,107 @@ export default function CourseAnalyticsPage() {
     { value: '12m', label: '12 Months' },
     { value: 'all', label: 'All Time' },
   ]
+
+  // Fetch analytics data when timeRange changes
+  useEffect(() => {
+    async function fetchAnalytics() {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(`/api/analytics/course/${params.id}?range=${timeRange}`)
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to fetch analytics')
+        }
+
+        const data = await response.json()
+        setAnalytics(data)
+      } catch (err) {
+        console.error('Error fetching analytics:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load analytics')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (params.id) {
+      fetchAnalytics()
+    }
+  }, [params.id, timeRange])
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/dashboard/instructor/courses/${params.id}`}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Course
+          </Link>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Loading analytics...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/dashboard/instructor/courses/${params.id}`}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Course
+          </Link>
+        </div>
+        <Card className="border-destructive">
+          <CardContent className="py-8 text-center">
+            <p className="text-destructive">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            >
+              Try Again
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Use analytics data or empty defaults
+  const course = analytics?.course || { id: params.id as string, title: 'Course Analytics' }
+  const stats = analytics?.stats || {
+    totalStudents: 0,
+    studentsTrend: 0,
+    totalRevenue: 0,
+    revenueTrend: 0,
+    avgRating: 0,
+    ratingTrend: 0,
+    totalViews: 0,
+    viewsTrend: 0,
+    completionRate: 0,
+    avgWatchTime: '0m',
+    totalReviews: 0,
+    engagementRate: 0,
+  }
+  const enrollmentData = analytics?.enrollmentData || []
+  const lessonPerformance = analytics?.lessonPerformance || []
+  const recentEnrollments = analytics?.recentEnrollments || []
+  const recentReviews = analytics?.recentReviews || []
+  const trafficSources = analytics?.trafficSources || []
+  const geographicData = analytics?.geographicData || []
 
   return (
     <div className="space-y-6">
@@ -220,7 +290,7 @@ export default function CourseAnalyticsPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">{mockCourse.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{course.title}</h1>
         <p className="text-muted-foreground mt-1">Course Analytics</p>
       </div>
 
@@ -247,27 +317,27 @@ export default function CourseAnalyticsPage() {
         <StatCard
           icon={Users}
           label="Total Students"
-          value={mockStats.totalStudents}
-          trend={mockStats.studentsTrend}
+          value={stats.totalStudents}
+          trend={stats.studentsTrend}
         />
         <StatCard
           icon={DollarSign}
           label="Total Revenue"
-          value={mockStats.totalRevenue}
+          value={stats.totalRevenue}
           prefix="$"
-          trend={mockStats.revenueTrend}
+          trend={stats.revenueTrend}
         />
         <StatCard
           icon={Star}
           label="Average Rating"
-          value={mockStats.avgRating}
-          trend={mockStats.ratingTrend}
+          value={stats.avgRating}
+          trend={stats.ratingTrend}
         />
         <StatCard
           icon={Eye}
           label="Total Views"
-          value={mockStats.totalViews}
-          trend={mockStats.viewsTrend}
+          value={stats.totalViews}
+          trend={stats.viewsTrend}
         />
       </div>
 
@@ -284,7 +354,7 @@ export default function CourseAnalyticsPage() {
               </button>
             </CardHeader>
             <CardContent>
-              <EnrollmentChart />
+              <EnrollmentChart data={enrollmentData} />
             </CardContent>
           </Card>
 
@@ -391,7 +461,7 @@ export default function CourseAnalyticsPage() {
                   </div>
                   <span className="text-sm">Completion Rate</span>
                 </div>
-                <span className="font-semibold">{mockStats.completionRate}%</span>
+                <span className="font-semibold">{stats.completionRate}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -400,7 +470,7 @@ export default function CourseAnalyticsPage() {
                   </div>
                   <span className="text-sm">Avg Watch Time</span>
                 </div>
-                <span className="font-semibold">{mockStats.avgWatchTime}</span>
+                <span className="font-semibold">{stats.avgWatchTime}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -409,7 +479,7 @@ export default function CourseAnalyticsPage() {
                   </div>
                   <span className="text-sm">Engagement Rate</span>
                 </div>
-                <span className="font-semibold">{mockStats.engagementRate}%</span>
+                <span className="font-semibold">{stats.engagementRate}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -418,7 +488,7 @@ export default function CourseAnalyticsPage() {
                   </div>
                   <span className="text-sm">Total Reviews</span>
                 </div>
-                <span className="font-semibold">{mockStats.totalReviews}</span>
+                <span className="font-semibold">{stats.totalReviews}</span>
               </div>
             </CardContent>
           </Card>

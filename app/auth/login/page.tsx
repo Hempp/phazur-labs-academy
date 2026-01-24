@@ -2,12 +2,13 @@
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
-import { GraduationCap, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/use-auth'
 
 const loginSchema = z.object({
@@ -88,7 +89,13 @@ function LoginForm() {
         <div className="mx-auto w-full max-w-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mb-8">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Image
+              src="/images/logo/phazur-logo-dark.png"
+              alt="Phazur Labs"
+              width={32}
+              height={32}
+              className="dark:invert"
+            />
             <span className="font-bold text-xl">Phazur Labs Academy</span>
           </Link>
 

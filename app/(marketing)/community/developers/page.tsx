@@ -11,7 +11,11 @@ import {
   Box,
   Webhook,
   Key,
-  Layers
+  Layers,
+  Building2,
+  GraduationCap,
+  BarChart3,
+  CheckCircle2
 } from 'lucide-react'
 
 const features = [
@@ -51,22 +55,22 @@ const useCases = [
   {
     title: 'Corporate LMS Integration',
     description: 'Integrate our courses directly into your company learning management system.',
-    icon: '🏢'
+    Icon: Building2
   },
   {
     title: 'Custom Learning Portals',
     description: 'Build white-labeled learning experiences for your organization or clients.',
-    icon: '🎓'
+    Icon: GraduationCap
   },
   {
     title: 'Progress Analytics',
     description: 'Pull learning data into your analytics platform for custom reporting.',
-    icon: '📊'
+    Icon: BarChart3
   },
   {
     title: 'Certification Verification',
     description: 'Verify credentials programmatically for hiring or credential checks.',
-    icon: '✅'
+    Icon: CheckCircle2
   }
 ]
 
@@ -197,7 +201,9 @@ const cert = await client.certificates.verify({
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {useCases.map((useCase, index) => (
               <div key={index} className="text-center p-6 border rounded-xl bg-background">
-                <div className="text-4xl mb-4">{useCase.icon}</div>
+                <div className="flex justify-center mb-4">
+                  <useCase.Icon className="h-10 w-10 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">{useCase.title}</h3>
                 <p className="text-muted-foreground text-sm">{useCase.description}</p>
               </div>

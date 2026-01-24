@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { UserAvatar } from '@/components/ui/avatar'
+import { BookOpen } from 'lucide-react'
 
 // Mock data
 const discussion = {
@@ -209,9 +210,10 @@ export default function DiscussionDetailPage() {
             {discussion.lesson && (
               <Link
                 href={`/courses/${params.slug}/learn?lesson=${discussion.lesson.id}`}
-                className="text-sm text-primary-600 hover:text-primary-700"
+                className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
               >
-                📚 {discussion.lesson.title}
+                <BookOpen className="h-4 w-4" />
+                {discussion.lesson.title}
               </Link>
             )}
           </div>

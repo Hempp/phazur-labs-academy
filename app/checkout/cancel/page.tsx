@@ -4,7 +4,7 @@
 // VAULT Agent - Payment Systems Integration
 
 import Link from 'next/link'
-import { XCircle, ArrowLeft, ShoppingCart, HelpCircle, MessageCircle } from 'lucide-react'
+import { XCircle, ArrowLeft, ShoppingCart, HelpCircle, MessageCircle, Lock, BadgeDollarSign, GraduationCap } from 'lucide-react'
 
 export default function CheckoutCancelPage() {
   return (
@@ -98,9 +98,18 @@ export default function CheckoutCancelPage() {
 
           {/* Trust badges */}
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400">
-            <span>🔒 Secure Payments</span>
-            <span>💰 30-Day Guarantee</span>
-            <span>🎓 Lifetime Access</span>
+            <span className="flex items-center gap-1.5">
+              <Lock className="h-4 w-4" />
+              Secure Payments
+            </span>
+            <span className="flex items-center gap-1.5">
+              <BadgeDollarSign className="h-4 w-4" />
+              30-Day Guarantee
+            </span>
+            <span className="flex items-center gap-1.5">
+              <GraduationCap className="h-4 w-4" />
+              Lifetime Access
+            </span>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { GraduationCap, Facebook, Twitter, Linkedin, Youtube, Instagram } from 'lucide-react'
+import Image from 'next/image'
+import { Facebook, Twitter, Linkedin, Youtube, Instagram } from 'lucide-react'
 
 const footerLinks = {
   coursera: {
@@ -54,8 +55,14 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <GraduationCap className="h-8 w-8 text-primary" />
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <Image
+                src="/images/logo/phazur-logo-dark.png"
+                alt="Phazur Labs"
+                width={32}
+                height={32}
+                className="dark:invert"
+              />
               <span className="font-bold text-lg text-foreground">
                 Phazur Labs
               </span>

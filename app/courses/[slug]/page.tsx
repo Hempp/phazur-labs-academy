@@ -30,8 +30,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
+import { courses } from '@/lib/data/store'
 
-// Mock course data
+// Fallback mock course data (used when course not found)
 const mockCourseData = {
   id: '1',
   slug: 'full-stack-web-development',
@@ -285,7 +286,61 @@ export default function CourseDetailPage() {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
-  const course = mockCourseData
+  // Find course by slug from the store
+  const slug = params?.slug as string
+  const storeCourseLookup = courses.find(c => c.slug === slug)
+
+  // Map store course to page format, or fallback to mock data
+  const course = storeCourseLookup ? {
+    id: storeCourseLookup.id,
+    slug: storeCourseLookup.slug,
+    title: storeCourseLookup.title,
+    subtitle: storeCourseLookup.description?.slice(0, 150) || '',
+    partner: 'Phazur Labs',
+    partnerLogo: null,
+    description: storeCourseLookup.description,
+    instructor: {
+      id: storeCourseLookup.instructor?.id || '',
+      name: storeCourseLookup.instructor?.full_name || 'Instructor',
+      avatar: storeCourseLookup.instructor?.avatar_url,
+      title: 'Senior Instructor',
+      company: 'Phazur Labs',
+      bio: storeCourseLookup.instructor?.bio || `Expert instructor teaching ${storeCourseLookup.title}`,
+      courses: storeCourseLookup.instructor?.courses_created?.length || 8,
+      students: storeCourseLookup.instructor?.total_students || 185000,
+      rating: storeCourseLookup.instructor?.rating || 4.9,
+    },
+    rating: storeCourseLookup.rating,
+    reviewCount: storeCourseLookup.reviews_count || 1000,
+    enrolledCount: storeCourseLookup.enrolled_students || 50000,
+    duration: `${Math.floor(storeCourseLookup.total_duration_minutes / 60)} hours`,
+    hoursPerWeek: '10 hours/week',
+    level: storeCourseLookup.level,
+    language: 'English',
+    lastUpdated: storeCourseLookup.updated_at,
+    price: storeCourseLookup.price,
+    originalPrice: storeCourseLookup.discount_price ? storeCourseLookup.price : null,
+    category: storeCourseLookup.category,
+    subcategory: storeCourseLookup.category,
+    badge: 'Professional Certificate',
+    skills: storeCourseLookup.tags || [],
+    outcomes: [
+      { metric: '87%', label: 'of learners started a new career after completing' },
+      { metric: '45%', label: 'got a pay increase or promotion' },
+      { metric: '$85,000', label: 'median salary for entry-level developers' },
+    ],
+    whatYouWillLearn: storeCourseLookup.learning_outcomes || [],
+    modules: storeCourseLookup.sections?.map((section: { id: string; title: string; description?: string; lessons?: { id: string }[] }, index: number) => ({
+      id: section.id,
+      title: section.title,
+      subtitle: `Course ${index + 1}`,
+      duration: `${Math.ceil((section.lessons?.length || 1) / 2)} weeks`,
+      lessons: section.lessons?.length || 0,
+      description: section.description || `Learn ${section.title}`,
+    })) || mockCourseData.modules,
+    requirements: storeCourseLookup.prerequisites || mockCourseData.requirements,
+    targetAudience: mockCourseData.targetAudience,
+  } : mockCourseData
 
   // Handle scroll for sticky nav
   useEffect(() => {
@@ -423,20 +478,22 @@ export default function CourseDetailPage() {
               </div>
 
               {/* Instructor */}
-              <div className="flex items-center gap-3 mt-6 pt-6 border-t">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                  {course.instructor.name.charAt(0)}
+              {course.instructor && (
+                <div className="flex items-center gap-3 mt-6 pt-6 border-t">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                    {course.instructor.name?.charAt(0) || 'I'}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Taught by</p>
+                    <Link
+                      href={`/instructors/${course.instructor.id}`}
+                      className="font-medium text-foreground hover:text-primary transition-colors"
+                    >
+                      {course.instructor.name || 'Instructor'}
+                    </Link>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Taught by</p>
-                  <Link
-                    href={`/instructors/${course.instructor.id}`}
-                    className="font-medium text-foreground hover:text-primary transition-colors"
-                  >
-                    {course.instructor.name}
-                  </Link>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Right Column - CTA Card */}

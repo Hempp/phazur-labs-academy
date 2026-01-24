@@ -3,7 +3,7 @@
 // Checkout Page
 // VAULT Agent - Payment Systems Integration
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -28,7 +28,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const { user, isLoading: authLoading, isAuthenticated } = useAuth()
   const {
-    items,
+    items: storeItems,
     removeItem,
     clearCart,
     getSubtotal,
@@ -37,6 +37,15 @@ export default function CheckoutPage() {
   } = useCartStore()
 
   const [isProcessing, setIsProcessing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch by only reading store after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Use empty values until mounted to prevent hydration mismatch
+  const items = mounted ? storeItems : []
 
   const handleCheckout = async () => {
     if (!user) {
@@ -88,12 +97,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const subtotal = getSubtotal()
-  const savings = getSavings()
-  const total = getTotal()
+  const subtotal = mounted ? getSubtotal() : 0
+  const savings = mounted ? getSavings() : 0
+  const total = mounted ? getTotal() : 0
 
-  // Loading state
-  if (authLoading) {
+  // Loading state - also show while not mounted
+  if (authLoading || !mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
