@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/hooks/use-auth'
 import {
   LayoutDashboard,
   Users,
@@ -89,6 +90,62 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { profile, isLoading, isAuthenticated, signOut } = useAuth()
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/auth/login?redirect=' + encodeURIComponent(pathname))
+    }
+  }, [isLoading, isAuthenticated, router, pathname])
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verifying access...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Check for admin role
+  if (profile?.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md p-8">
+          <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">
+            You don&apos;t have permission to access the admin portal. This area is restricted to administrators only.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={() => signOut()}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -219,11 +276,13 @@ export default function AdminLayout({
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center">
-                    <span className="text-sm font-semibold text-white">A</span>
+                    <span className="text-sm font-semibold text-white">
+                      {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'A'}
+                    </span>
                   </div>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium">Admin User</p>
-                    <p className="text-xs text-muted-foreground">Super Admin</p>
+                    <p className="text-sm font-medium">{profile?.full_name || 'Admin'}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{profile?.role || 'Admin'}</p>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-400 hidden md:block" />
                 </button>
@@ -246,7 +305,10 @@ export default function AdminLayout({
                       Admin Settings
                     </Link>
                     <hr className="my-2 border-gray-200 dark:border-gray-700" />
-                    <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full">
+                    <button
+                      onClick={() => signOut()}
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                    >
                       <LogOut className="h-4 w-4" />
                       Sign Out
                     </button>
