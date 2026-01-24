@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 // Check if Supabase is configured
 const isSupabaseConfigured = () => {
@@ -120,7 +120,7 @@ export async function GET(
       })
     }
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = await createServerSupabaseAdmin()
 
     // Get the course by slug
     const { data: course, error: courseError } = await supabase
