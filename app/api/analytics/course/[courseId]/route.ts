@@ -52,10 +52,17 @@ export async function GET(
     const { courseId } = await params
     const range = (request.nextUrl.searchParams.get('range') || '30d') as TimeRange
 
-    // Verify authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    // Verify authentication (skip in dev bypass mode)
+    let userId: string | null = null
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userId = user.id
     }
 
     // Verify instructor owns this course
@@ -69,12 +76,13 @@ export async function GET(
       return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
-    if (course.instructor_id !== user.id) {
+    // Skip ownership check in dev bypass mode
+    if (!isDevBypass && course.instructor_id !== userId) {
       // Check if user is admin
       const { data: profile } = await supabase
         .from('users')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', userId!)
         .single()
 
       if (!profile || profile.role !== 'admin') {
