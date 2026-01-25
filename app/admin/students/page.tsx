@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Search,
   Filter,
@@ -24,150 +24,69 @@ import {
   ArrowUpDown,
   SlidersHorizontal,
   X,
-  Loader2
+  Loader2,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-// Available courses for enrollment
-const availableCourses = [
-  { id: 'c1', name: 'AI Fundamentals' },
-  { id: 'c2', name: 'Machine Learning Basics' },
-  { id: 'c3', name: 'Python Mastery' },
-  { id: 'c4', name: 'Web Development Bootcamp' },
-  { id: 'c5', name: 'Data Science Essentials' },
-  { id: 'c6', name: 'Deep Learning Advanced' },
-]
+// Student type from API
+interface Student {
+  id: string
+  name: string
+  email: string
+  avatar: string | null
+  enrolledCourses: number
+  completedCourses?: number
+  progress?: number
+  totalSpent?: number
+  status: string
+  joinDate: string
+  lastActive: string
+  plan: string
+  enrollments?: Array<{
+    id: string
+    course_id: string
+    progress_percentage: number
+    courses: { id: string; title: string; slug: string }
+  }>
+}
 
-// Mock student data
-const students = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@email.com',
-    avatar: null,
-    enrolledCourses: 5,
-    completedCourses: 3,
-    progress: 78,
-    totalSpent: 499,
-    status: 'active',
-    joinDate: '2024-01-15',
-    lastActive: '2 hours ago',
-    plan: 'Premium'
-  },
-  {
-    id: '2',
-    name: 'Michael Chen',
-    email: 'michael.chen@email.com',
-    avatar: null,
-    enrolledCourses: 3,
-    completedCourses: 2,
-    progress: 92,
-    totalSpent: 299,
-    status: 'active',
-    joinDate: '2024-02-20',
-    lastActive: '1 day ago',
-    plan: 'Basic'
-  },
-  {
-    id: '3',
-    name: 'Emily Rodriguez',
-    email: 'emily.r@email.com',
-    avatar: null,
-    enrolledCourses: 8,
-    completedCourses: 8,
-    progress: 100,
-    totalSpent: 899,
-    status: 'active',
-    joinDate: '2023-11-10',
-    lastActive: '5 minutes ago',
-    plan: 'Enterprise'
-  },
-  {
-    id: '4',
-    name: 'David Kim',
-    email: 'david.kim@email.com',
-    avatar: null,
-    enrolledCourses: 2,
-    completedCourses: 0,
-    progress: 15,
-    totalSpent: 99,
-    status: 'inactive',
-    joinDate: '2024-03-01',
-    lastActive: '2 weeks ago',
-    plan: 'Basic'
-  },
-  {
-    id: '5',
-    name: 'Amanda Foster',
-    email: 'amanda.f@email.com',
-    avatar: null,
-    enrolledCourses: 4,
-    completedCourses: 1,
-    progress: 45,
-    totalSpent: 349,
-    status: 'active',
-    joinDate: '2024-01-28',
-    lastActive: '3 hours ago',
-    plan: 'Premium'
-  },
-  {
-    id: '6',
-    name: 'James Wilson',
-    email: 'james.w@email.com',
-    avatar: null,
-    enrolledCourses: 1,
-    completedCourses: 0,
-    progress: 5,
-    totalSpent: 0,
-    status: 'suspended',
-    joinDate: '2024-03-10',
-    lastActive: '1 month ago',
-    plan: 'Free Trial'
-  },
-  {
-    id: '7',
-    name: 'Lisa Thompson',
-    email: 'lisa.t@email.com',
-    avatar: null,
-    enrolledCourses: 6,
-    completedCourses: 4,
-    progress: 82,
-    totalSpent: 649,
-    status: 'active',
-    joinDate: '2023-12-05',
-    lastActive: '30 minutes ago',
-    plan: 'Premium'
-  },
-  {
-    id: '8',
-    name: 'Robert Martinez',
-    email: 'robert.m@email.com',
-    avatar: null,
-    enrolledCourses: 2,
-    completedCourses: 2,
-    progress: 100,
-    totalSpent: 199,
-    status: 'active',
-    joinDate: '2024-02-14',
-    lastActive: '1 hour ago',
-    plan: 'Basic'
-  },
-]
+// Course type for enrollment
+interface Course {
+  id: string
+  title: string
+  slug: string
+}
 
-const statusColors = {
+// Available courses will be fetched from API
+
+const statusColors: Record<string, string> = {
+  Active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  Inactive: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   inactive: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  Suspended: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   suspended: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
-const planColors = {
+const planColors: Record<string, string> = {
   'Free Trial': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
   'Basic': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  'Pro': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   'Premium': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   'Enterprise': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
 }
 
 export default function StudentsPage() {
+  // Data state
+  const [students, setStudents] = useState<Student[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [totalCount, setTotalCount] = useState(0)
+
+  // Filter state
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [planFilter, setPlanFilter] = useState('all')
@@ -186,6 +105,74 @@ export default function StudentsPage() {
     sendWelcomeEmail: true,
   })
 
+  // Edit Student Modal state
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    status: 'Active',
+    selectedCourses: [] as string[],
+  })
+
+  // Delete Confirmation Modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletingStudent, setDeletingStudent] = useState<Student | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Fetch students from API
+  const fetchStudents = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const params = new URLSearchParams()
+      if (searchQuery) params.append('search', searchQuery)
+      if (statusFilter !== 'all') params.append('status', statusFilter)
+      if (planFilter !== 'all') params.append('plan', planFilter)
+
+      const response = await fetch(`/api/admin/students?${params.toString()}`)
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('You must be logged in as an admin to view students')
+        }
+        if (response.status === 403) {
+          throw new Error('You do not have permission to view students')
+        }
+        throw new Error('Failed to fetch students')
+      }
+
+      const data = await response.json()
+      setStudents(data.students || [])
+      setTotalCount(data.total || 0)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch students')
+      console.error('Error fetching students:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [searchQuery, statusFilter, planFilter])
+
+  // Fetch courses for enrollment selection
+  const fetchCourses = useCallback(async () => {
+    try {
+      const response = await fetch('/api/courses')
+      if (response.ok) {
+        const data = await response.json()
+        setCourses(data.courses || data || [])
+      }
+    } catch (err) {
+      console.error('Error fetching courses:', err)
+    }
+  }, [])
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchStudents()
+    fetchCourses()
+  }, [fetchStudents, fetchCourses])
+
   // Handle add student form submission
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -202,24 +189,144 @@ export default function StudentsPage() {
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch('/api/admin/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newStudent.name,
+          email: newStudent.email,
+          courseIds: newStudent.selectedCourses,
+        }),
+      })
 
-    toast.success(`Student "${newStudent.name}" added successfully!`)
+      const data = await response.json()
 
-    // Reset form and close modal
-    setNewStudent({
-      name: '',
-      email: '',
-      plan: 'Basic',
-      selectedCourses: [],
-      sendWelcomeEmail: true,
-    })
-    setShowAddModal(false)
-    setIsSubmitting(false)
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create student')
+      }
+
+      toast.success(`Student "${newStudent.name}" added successfully!`)
+
+      // Reset form and close modal
+      setNewStudent({
+        name: '',
+        email: '',
+        plan: 'Basic',
+        selectedCourses: [],
+        sendWelcomeEmail: true,
+      })
+      setShowAddModal(false)
+
+      // Refresh the student list
+      fetchStudents()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create student')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  // Toggle course selection
+  // Handle edit student
+  const handleEditStudent = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!editingStudent) return
+
+    // Validation
+    if (!editForm.name.trim()) {
+      toast.error('Please enter a student name')
+      return
+    }
+    if (!editForm.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`/api/admin/students/${editingStudent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editForm.name,
+          email: editForm.email,
+          status: editForm.status,
+          courseIds: editForm.selectedCourses,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update student')
+      }
+
+      toast.success(`Student "${editForm.name}" updated successfully!`)
+
+      // Close modal and refresh list
+      setShowEditModal(false)
+      setEditingStudent(null)
+      fetchStudents()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update student')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle delete student
+  const handleDeleteStudent = async () => {
+    if (!deletingStudent) return
+
+    setIsDeleting(true)
+
+    try {
+      const response = await fetch(`/api/admin/students/${deletingStudent.id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete student')
+      }
+
+      toast.success(`Student "${deletingStudent.name}" has been deleted`)
+
+      // Close modal and refresh list
+      setShowDeleteModal(false)
+      setDeletingStudent(null)
+      fetchStudents()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete student')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Open edit modal for a student
+  const openEditModal = (student: Student) => {
+    setEditingStudent(student)
+    setEditForm({
+      name: student.name,
+      email: student.email,
+      status: student.status,
+      selectedCourses: student.enrollments?.map(e => e.course_id) || [],
+    })
+    setShowEditModal(true)
+    setActionMenuOpen(null)
+  }
+
+  // Open delete modal for a student
+  const openDeleteModal = (student: Student) => {
+    setDeletingStudent(student)
+    setShowDeleteModal(true)
+    setActionMenuOpen(null)
+  }
+
+  // Toggle course selection for add form
   const toggleCourseSelection = (courseId: string) => {
     setNewStudent(prev => ({
       ...prev,
@@ -229,12 +336,20 @@ export default function StudentsPage() {
     }))
   }
 
+  // Toggle course selection for edit form
+  const toggleEditCourseSelection = (courseId: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      selectedCourses: prev.selectedCourses.includes(courseId)
+        ? prev.selectedCourses.filter(id => id !== courseId)
+        : [...prev.selectedCourses, courseId]
+    }))
+  }
+
+  // Client-side filtering (already filtered server-side, but keep for plan filter)
   const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || student.status === statusFilter
     const matchesPlan = planFilter === 'all' || student.plan === planFilter
-    return matchesSearch && matchesStatus && matchesPlan
+    return matchesPlan
   })
 
   const toggleSelectAll = () => {
@@ -252,10 +367,12 @@ export default function StudentsPage() {
   }
 
   // Stats calculations
-  const totalStudents = students.length
-  const activeStudents = students.filter(s => s.status === 'active').length
-  const avgProgress = Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length)
-  const totalRevenue = students.reduce((acc, s) => acc + s.totalSpent, 0)
+  const totalStudents = totalCount || students.length
+  const activeStudents = students.filter(s => s.status === 'Active' || s.status === 'active').length
+  const avgProgress = students.length > 0
+    ? Math.round(students.reduce((acc, s) => acc + (s.progress || 0), 0) / students.length)
+    : 0
+  const totalRevenue = students.reduce((acc, s) => acc + (s.totalSpent || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -501,7 +618,62 @@ export default function StudentsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((student) => (
+              {/* Loading State */}
+              {isLoading && (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-muted-foreground">Loading students...</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Error State */}
+              {error && !isLoading && (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                      </div>
+                      <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+                      <button
+                        onClick={fetchStudents}
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        Try Again
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Empty State */}
+              {!isLoading && !error && filteredStudents.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <Users className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <p className="text-muted-foreground">No students found</p>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Add First Student
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Student Rows */}
+              {!isLoading && !error && filteredStudents.map((student) => (
                 <tr
                   key={student.id}
                   className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
@@ -535,16 +707,16 @@ export default function StudentsPage() {
                       <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
                           className={`h-2 rounded-full ${
-                            student.progress === 100
+                            (student.progress ?? 0) === 100
                               ? 'bg-green-500'
-                              : student.progress >= 50
+                              : (student.progress ?? 0) >= 50
                               ? 'bg-primary'
                               : 'bg-amber-500'
                           }`}
-                          style={{ width: `${student.progress}%` }}
+                          style={{ width: `${student.progress ?? 0}%` }}
                         />
                       </div>
-                      <span className="text-sm font-medium w-10">{student.progress}%</span>
+                      <span className="text-sm font-medium w-10">{student.progress ?? 0}%</span>
                     </div>
                   </td>
                   <td className="p-4">
@@ -581,7 +753,10 @@ export default function StudentsPage() {
                             <Eye className="h-4 w-4" />
                             View Profile
                           </button>
-                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <button
+                            onClick={() => openEditModal(student)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
                             <Edit className="h-4 w-4" />
                             Edit Details
                           </button>
@@ -605,7 +780,10 @@ export default function StudentsPage() {
                               Reactivate
                             </button>
                           )}
-                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <button
+                            onClick={() => openDeleteModal(student)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
                             <Trash2 className="h-4 w-4" />
                             Delete Account
                           </button>
@@ -715,25 +893,29 @@ export default function StudentsPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">Enroll in Courses (Optional)</label>
                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  {availableCourses.map((course) => (
-                    <label
-                      key={course.id}
-                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                        newStudent.selectedCourses.includes(course.id)
-                          ? 'bg-primary/10 text-primary'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={newStudent.selectedCourses.includes(course.id)}
-                        onChange={() => toggleCourseSelection(course.id)}
-                        className="w-4 h-4 rounded border-gray-300"
-                        disabled={isSubmitting}
-                      />
-                      <span className="text-sm">{course.name}</span>
-                    </label>
-                  ))}
+                  {courses.length === 0 ? (
+                    <p className="col-span-2 text-sm text-muted-foreground text-center py-2">No courses available</p>
+                  ) : (
+                    courses.map((course) => (
+                      <label
+                        key={course.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          newStudent.selectedCourses.includes(course.id)
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={newStudent.selectedCourses.includes(course.id)}
+                          onChange={() => toggleCourseSelection(course.id)}
+                          className="w-4 h-4 rounded border-gray-300"
+                          disabled={isSubmitting}
+                        />
+                        <span className="text-sm">{course.title}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
                 {newStudent.selectedCourses.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-2">
@@ -786,6 +968,202 @@ export default function StudentsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Student Modal */}
+      {showEditModal && editingStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => !isSubmitting && setShowEditModal(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-xl font-semibold">Edit Student</h2>
+                <p className="text-sm text-muted-foreground mt-1">Update student information</p>
+              </div>
+              <button
+                onClick={() => !isSubmitting && setShowEditModal(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                disabled={isSubmitting}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleEditStudent} className="p-6 space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Full Name *</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter student name"
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Email Address *</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="student@email.com"
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Status</label>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+
+              {/* Course Enrollment */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Course Enrollment</label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  {courses.length === 0 ? (
+                    <p className="col-span-2 text-sm text-muted-foreground text-center py-2">No courses available</p>
+                  ) : (
+                    courses.map((course) => (
+                      <label
+                        key={course.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          editForm.selectedCourses.includes(course.id)
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={editForm.selectedCourses.includes(course.id)}
+                          onChange={() => toggleEditCourseSelection(course.id)}
+                          className="w-4 h-4 rounded border-gray-300"
+                          disabled={isSubmitting}
+                        />
+                        <span className="text-sm">{course.title}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {editForm.selectedCourses.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {editForm.selectedCourses.length} course(s) enrolled
+                  </p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && deletingStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div className="p-6">
+              {/* Warning Icon */}
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+
+              {/* Title */}
+              <h2 className="text-xl font-semibold text-center mb-2">Delete Student</h2>
+
+              {/* Message */}
+              <p className="text-center text-muted-foreground mb-6">
+                Are you sure you want to delete <span className="font-medium text-foreground">{deletingStudent.name}</span>?
+                This action cannot be undone. All their enrollments and progress data will be permanently removed.
+              </p>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteStudent}
+                  disabled={isDeleting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Delete Student
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
