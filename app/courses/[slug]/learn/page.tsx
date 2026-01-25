@@ -583,7 +583,7 @@ export default function CourseLearnPage() {
   const handleComplete = useCallback(async () => {
     if (!isAuthenticated) {
       // Redirect to login with return URL
-      router.push(`/auth/signin?redirect=/courses/${course.slug}/learn?lesson=${lessonId}`)
+      router.push(`/auth/login?redirect=/courses/${course.slug}/learn?lesson=${lessonId}`)
       return
     }
 
