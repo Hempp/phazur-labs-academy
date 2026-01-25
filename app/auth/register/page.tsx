@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -31,8 +31,10 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard/student'
   const { signUp, signInWithGoogle, signInWithGithub } = useAuth()
 
   const [showPassword, setShowPassword] = useState(false)
@@ -82,7 +84,7 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true)
     try {
-      const { error } = await signInWithGoogle()
+      const { error } = await signInWithGoogle(redirectTo)
       if (error) {
         toast.error(error.message || 'Failed to sign in with Google')
       }
@@ -96,7 +98,7 @@ export default function RegisterPage() {
   const handleGithubSignIn = async () => {
     setIsGithubLoading(true)
     try {
-      const { error } = await signInWithGithub()
+      const { error } = await signInWithGithub(redirectTo)
       if (error) {
         toast.error(error.message || 'Failed to sign in with GitHub')
       }
@@ -400,5 +402,21 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function RegisterLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterLoading />}>
+      <RegisterForm />
+    </Suspense>
   )
 }

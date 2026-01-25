@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, Suspense } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Header, Footer } from '@/components/layout'
 import {
@@ -19,6 +20,35 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
+
+// Course type from API
+interface CourseFromApi {
+  id: string
+  slug: string
+  title: string
+  description: string | null
+  thumbnailUrl: string | null
+  price: number
+  discountPrice: number | null
+  level: string
+  category: string
+  tags: string[]
+  totalLessons: number
+  totalDurationMinutes: number
+  instructor: {
+    id: string
+    name: string
+    avatar: string | null
+  } | null
+  stats: {
+    enrolledCount: number
+    reviewCount: number
+    rating: number
+  }
+  durationCategory: string
+  badge: string
+  hasTrial: boolean
+}
 
 // Filter data
 const subjects = [
@@ -239,7 +269,10 @@ function FilterSection({
 }
 
 // Course Card Component (Coursera-style)
-function CourseCard({ course }: { course: typeof mockCourses[0] }) {
+function CourseCard({ course }: { course: CourseFromApi }) {
+  const partnerName = course.instructor?.name || 'Phazur Labs'
+  const tags = course.tags || []
+
   return (
     <Link
       href={`/courses/${course.slug}`}
@@ -253,10 +286,19 @@ function CourseCard({ course }: { course: typeof mockCourses[0] }) {
           <div className="w-5 h-5 bg-primary rounded flex items-center justify-center">
             <GraduationCap className="w-3 h-3 text-white" />
           </div>
-          <span className="text-xs font-medium text-foreground">{course.partner}</span>
+          <span className="text-xs font-medium text-foreground">{partnerName}</span>
         </div>
-        {/* Placeholder for course image */}
-        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-300" />
+        {/* Course image or placeholder */}
+        {course.thumbnailUrl ? (
+          <Image
+            src={course.thumbnailUrl}
+            alt={course.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-300" />
+        )}
       </div>
 
       {/* Content */}
@@ -278,24 +320,26 @@ function CourseCard({ course }: { course: typeof mockCourses[0] }) {
           {course.title}
         </h3>
 
-        {/* Skills */}
-        <p className="text-sm text-muted-foreground line-clamp-1">
-          Skills: {course.skills.slice(0, 3).join(', ')}
-          {course.skills.length > 3 && `, +${course.skills.length - 3} more`}
-        </p>
+        {/* Skills/Tags */}
+        {tags.length > 0 && (
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            Skills: {tags.slice(0, 3).join(', ')}
+            {tags.length > 3 && `, +${tags.length - 3} more`}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-1.5">
           <Star className="w-4 h-4 fill-warning text-warning" />
-          <span className="text-sm font-medium">{course.rating}</span>
+          <span className="text-sm font-medium">{course.stats.rating}</span>
           <span className="text-sm text-muted-foreground">
-            ({course.reviewCount.toLocaleString()} reviews)
+            ({course.stats.reviewCount.toLocaleString()} reviews)
           </span>
         </div>
 
         {/* Meta */}
         <p className="text-xs text-muted-foreground">
-          {course.level} · Course · {course.duration}
+          {course.level} · Course · {course.durationCategory}
         </p>
       </div>
     </Link>
@@ -312,15 +356,66 @@ function CoursesContent() {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
+  // API state
+  const [courses, setCourses] = useState<CourseFromApi[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch courses from API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch('/api/courses')
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses')
+        }
+        const data = await response.json()
+        setCourses(data.courses || [])
+      } catch (err) {
+        console.error('Error fetching courses:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load courses')
+        // Fall back to mockCourses if API fails
+        setCourses(mockCourses.map(c => ({
+          id: c.id,
+          slug: c.slug,
+          title: c.title,
+          description: null,
+          thumbnailUrl: null,
+          price: 0,
+          discountPrice: null,
+          level: c.level,
+          category: c.category,
+          tags: c.skills,
+          totalLessons: 0,
+          totalDurationMinutes: 0,
+          instructor: null,
+          stats: {
+            enrolledCount: 0,
+            reviewCount: c.reviewCount,
+            rating: c.rating,
+          },
+          durationCategory: c.duration,
+          badge: c.badge,
+          hasTrial: c.hasTrial,
+        })))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchCourses()
+  }, [])
+
   // Filter courses
   const filteredCourses = useMemo(() => {
-    return mockCourses.filter((course) => {
+    return courses.filter((course) => {
       // Search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
+        const tags = course.tags || []
         if (
           !course.title.toLowerCase().includes(query) &&
-          !course.skills.some((s) => s.toLowerCase().includes(query))
+          !tags.some((s) => s.toLowerCase().includes(query))
         ) {
           return false
         }
@@ -338,7 +433,7 @@ function CoursesContent() {
 
       return true
     })
-  }, [searchQuery, selectedSubjects, selectedLevels])
+  }, [courses, searchQuery, selectedSubjects, selectedLevels])
 
   const toggleFilter = (list: string[], setList: (l: string[]) => void, id: string) => {
     if (list.includes(id)) {
@@ -381,9 +476,15 @@ function CoursesContent() {
               />
             </form>
             <p className="mt-3 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{filteredCourses.length}</span> results
-              {searchQuery && (
-                <span> for &quot;{searchQuery}&quot;</span>
+              {isLoading ? (
+                <span>Loading courses...</span>
+              ) : (
+                <>
+                  <span className="font-medium text-foreground">{filteredCourses.length}</span> results
+                  {searchQuery && (
+                    <span> for &quot;{searchQuery}&quot;</span>
+                  )}
+                </>
               )}
             </p>
           </div>
@@ -491,7 +592,12 @@ function CoursesContent() {
             )}
 
             {/* Course Grid */}
-            {filteredCourses.length > 0 ? (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+                <p className="text-muted-foreground">Loading courses...</p>
+              </div>
+            ) : filteredCourses.length > 0 ? (
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredCourses.map((course) => (
                   <CourseCard key={course.id} course={course} />
@@ -502,7 +608,7 @@ function CoursesContent() {
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-foreground mb-2">No courses found</h3>
                 <p className="text-muted-foreground mb-4">
-                  Try adjusting your filters or search query
+                  {error ? error : 'Try adjusting your filters or search query'}
                 </p>
                 <button
                   onClick={clearAllFilters}

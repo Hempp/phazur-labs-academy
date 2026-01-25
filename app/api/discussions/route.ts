@@ -97,43 +97,81 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createServerSupabaseClient()
 
-    // Build query
-    let query = supabase
-      .from('discussions')
-      .select(`
-        id,
-        title,
-        content,
-        is_pinned,
-        is_resolved,
-        view_count,
-        created_at,
-        updated_at,
-        user:users!discussions_user_id_fkey (
+    // Helper to build the query with or without view_count
+    const buildQuery = (includeViewCount: boolean) => {
+      const selectFields = includeViewCount
+        ? `
           id,
-          full_name,
-          avatar_url
-        ),
-        replies:discussion_replies (count)
-      `, { count: 'exact' })
-      .eq('course_id', courseId)
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1)
+          title,
+          content,
+          is_pinned,
+          is_resolved,
+          view_count,
+          created_at,
+          updated_at,
+          user:users!discussions_user_id_fkey (
+            id,
+            full_name,
+            avatar_url
+          ),
+          replies:discussion_replies (count)
+        `
+        : `
+          id,
+          title,
+          content,
+          is_pinned,
+          is_resolved,
+          created_at,
+          updated_at,
+          user:users!discussions_user_id_fkey (
+            id,
+            full_name,
+            avatar_url
+          ),
+          replies:discussion_replies (count)
+        `
 
-    // Filter by lesson if specified
-    if (lessonId) {
-      query = query.eq('lesson_id', lessonId)
+      let query = supabase
+        .from('discussions')
+        .select(selectFields, { count: 'exact' })
+        .eq('course_id', courseId)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1)
+
+      // Filter by lesson if specified
+      if (lessonId) {
+        query = query.eq('lesson_id', lessonId)
+      }
+
+      return query
     }
 
-    const { data: discussions, error, count } = await query
+    // Try with view_count first, fallback without it
+    let { data: discussions, error, count } = await buildQuery(true)
+
+    // If view_count column doesn't exist, retry without it
+    if (error?.message?.includes('view_count')) {
+      console.warn('view_count column missing, falling back to query without it')
+      const result = await buildQuery(false)
+      discussions = result.data
+      error = result.error
+      count = result.count
+    }
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Add default view_count if missing
+    const discussionsWithViewCount = (discussions || []).map((d: Record<string, unknown>) => ({
+      ...d,
+      view_count: d.view_count ?? 0
+    }))
+
     return NextResponse.json({
-      discussions,
+      discussions: discussionsWithViewCount,
       pagination: {
         page,
         limit,
@@ -199,8 +237,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create discussion
-    const { data: discussion, error: insertError } = await supabase
+    // Create discussion (try with view_count, fallback without)
+    const selectWithViewCount = `
+      id,
+      title,
+      content,
+      is_pinned,
+      is_resolved,
+      view_count,
+      created_at,
+      user:users!discussions_user_id_fkey (
+        id,
+        full_name,
+        avatar_url
+      )
+    `
+    const selectWithoutViewCount = `
+      id,
+      title,
+      content,
+      is_pinned,
+      is_resolved,
+      created_at,
+      user:users!discussions_user_id_fkey (
+        id,
+        full_name,
+        avatar_url
+      )
+    `
+
+    let { data: discussion, error: insertError } = await supabase
       .from('discussions')
       .insert({
         course_id: courseId,
@@ -209,21 +275,25 @@ export async function POST(request: NextRequest) {
         title,
         content,
       })
-      .select(`
-        id,
-        title,
-        content,
-        is_pinned,
-        is_resolved,
-        view_count,
-        created_at,
-        user:users!discussions_user_id_fkey (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select(selectWithViewCount)
       .single()
+
+    // If view_count column doesn't exist, retry without it
+    if (insertError?.message?.includes('view_count')) {
+      const result = await supabase
+        .from('discussions')
+        .insert({
+          course_id: courseId,
+          lesson_id: lessonId || null,
+          user_id: user.id,
+          title,
+          content,
+        })
+        .select(selectWithoutViewCount)
+        .single()
+      discussion = result.data
+      insertError = result.error
+    }
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
@@ -231,7 +301,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Discussion created successfully',
-      discussion,
+      discussion: {
+        ...discussion,
+        view_count: (discussion as Record<string, unknown>)?.view_count ?? 0
+      },
     })
   } catch (error) {
     console.error('Discussions POST error:', error)

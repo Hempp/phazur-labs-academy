@@ -13,39 +13,81 @@ export async function GET(
     const { discussionId } = await params
     const supabase = await createServerSupabaseClient()
 
-    // Get discussion
-    const { data: discussion, error: discussionError } = await supabase
-      .from('discussions')
-      .select(`
+    // Try to get discussion with view_count, fallback without it
+    const selectWithViewCount = `
+      id,
+      course_id,
+      lesson_id,
+      title,
+      content,
+      is_pinned,
+      is_resolved,
+      view_count,
+      created_at,
+      updated_at,
+      user:users!discussions_user_id_fkey (
         id,
-        course_id,
-        lesson_id,
+        full_name,
+        avatar_url
+      ),
+      course:courses (
+        id,
         title,
-        content,
-        is_pinned,
-        is_resolved,
-        view_count,
-        created_at,
-        updated_at,
-        user:users!discussions_user_id_fkey (
-          id,
-          full_name,
-          avatar_url
-        ),
-        course:courses (
-          id,
-          title,
-          instructor_id
-        )
-      `)
+        instructor_id
+      )
+    `
+    const selectWithoutViewCount = `
+      id,
+      course_id,
+      lesson_id,
+      title,
+      content,
+      is_pinned,
+      is_resolved,
+      created_at,
+      updated_at,
+      user:users!discussions_user_id_fkey (
+        id,
+        full_name,
+        avatar_url
+      ),
+      course:courses (
+        id,
+        title,
+        instructor_id
+      )
+    `
+
+    let { data: discussion, error: discussionError } = await supabase
+      .from('discussions')
+      .select(selectWithViewCount)
       .eq('id', discussionId)
       .single()
+
+    // Retry without view_count if column doesn't exist
+    let hasViewCountColumn = true
+    if (discussionError?.message?.includes('view_count')) {
+      hasViewCountColumn = false
+      const result = await supabase
+        .from('discussions')
+        .select(selectWithoutViewCount)
+        .eq('id', discussionId)
+        .single()
+      discussion = result.data
+      discussionError = result.error
+    }
 
     if (discussionError || !discussion) {
       return NextResponse.json(
         { error: 'Discussion not found' },
         { status: 404 }
       )
+    }
+
+    // Ensure view_count exists
+    const discussionData = discussion as Record<string, unknown>
+    if (!('view_count' in discussionData)) {
+      discussionData.view_count = 0
     }
 
     // Get replies
@@ -73,15 +115,17 @@ export async function GET(
       return NextResponse.json({ error: repliesError.message }, { status: 500 })
     }
 
-    // Increment view count (fire and forget)
-    supabase
-      .from('discussions')
-      .update({ view_count: (discussion.view_count || 0) + 1 })
-      .eq('id', discussionId)
-      .then(() => {})
+    // Increment view count (fire and forget) - only if column exists
+    if (hasViewCountColumn) {
+      supabase
+        .from('discussions')
+        .update({ view_count: ((discussionData.view_count as number) || 0) + 1 })
+        .eq('id', discussionId)
+        .then(() => {})
+    }
 
     return NextResponse.json({
-      discussion,
+      discussion: discussionData,
       replies: replies || [],
     })
   } catch (error) {

@@ -27,10 +27,65 @@ import {
   GraduationCap,
   ChevronRight,
   Info,
+  Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
-import { courses } from '@/lib/data/store'
+
+// API response type
+interface CourseApiResponse {
+  id: string
+  slug: string
+  title: string
+  subtitle: string
+  description: string
+  thumbnailUrl: string | null
+  previewVideoUrl: string | null
+  price: number
+  discountPrice: number | null
+  level: string
+  category: string
+  tags: string[]
+  language: string
+  totalLessons: number
+  totalDurationMinutes: number
+  learningOutcomes: string[]
+  prerequisites: string[]
+  updatedAt: string
+  instructor: {
+    id: string
+    name: string
+    avatar: string | null
+    bio: string
+  } | null
+  modules: {
+    id: string
+    title: string
+    description: string
+    subtitle: string
+    lessonsCount: number
+    duration: string
+    lessons: {
+      id: string
+      title: string
+      type: string
+      durationMinutes: number
+      isFreePreview: boolean
+    }[]
+  }[]
+  stats: {
+    enrolledCount: number
+    reviewCount: number
+    rating: number
+  }
+  reviews: {
+    id: string
+    rating: number
+    content: string
+    createdAt: string
+    user: { name: string; avatar: string | null } | null
+  }[]
+}
 
 // Fallback mock course data (used when course not found)
 const mockCourseData = {
@@ -71,6 +126,8 @@ const mockCourseData = {
   category: 'Development',
   subcategory: 'Web Development',
   badge: 'Professional Certificate',
+  previewVideoUrl: null,
+  thumbnailUrl: null,
   skills: [
     'React',
     'Node.js',
@@ -284,62 +341,90 @@ export default function CourseDetailPage() {
   const [activeSection, setActiveSection] = useState('about')
   const [showStickyNav, setShowStickyNav] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [apiData, setApiData] = useState<CourseApiResponse | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
 
-  // Find course by slug from the store
   const slug = params?.slug as string
-  const storeCourseLookup = courses.find(c => c.slug === slug)
 
-  // Map store course to page format, or fallback to mock data
-  const course = storeCourseLookup ? {
-    id: storeCourseLookup.id,
-    slug: storeCourseLookup.slug,
-    title: storeCourseLookup.title,
-    subtitle: storeCourseLookup.description?.slice(0, 150) || '',
+  // Fetch course data from API
+  useEffect(() => {
+    if (!slug) return
+
+    const fetchCourse = async () => {
+      setIsLoading(true)
+      try {
+        const response = await fetch(`/api/courses/${slug}`)
+        if (response.ok) {
+          const data = await response.json()
+          setApiData(data)
+        } else {
+          console.error('Course fetch failed:', response.status)
+          setApiData(null)
+        }
+      } catch (error) {
+        console.error('Course fetch error:', error)
+        setApiData(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCourse()
+  }, [slug])
+
+  // Map API data to page format, or fallback to mock data
+  const course = apiData ? {
+    id: apiData.id,
+    slug: apiData.slug,
+    title: apiData.title,
+    subtitle: apiData.subtitle || apiData.description?.slice(0, 150) || '',
     partner: 'Phazur Labs',
     partnerLogo: null,
-    description: storeCourseLookup.description,
+    description: apiData.description,
     instructor: {
-      id: storeCourseLookup.instructor?.id || '',
-      name: storeCourseLookup.instructor?.full_name || 'Instructor',
-      avatar: storeCourseLookup.instructor?.avatar_url,
+      id: apiData.instructor?.id || '',
+      name: apiData.instructor?.name || 'Instructor',
+      avatar: apiData.instructor?.avatar,
       title: 'Senior Instructor',
       company: 'Phazur Labs',
-      bio: storeCourseLookup.instructor?.bio || `Expert instructor teaching ${storeCourseLookup.title}`,
-      courses: storeCourseLookup.instructor?.courses_created?.length || 8,
-      students: storeCourseLookup.instructor?.total_students || 185000,
-      rating: storeCourseLookup.instructor?.rating || 4.9,
+      bio: apiData.instructor?.bio || `Expert instructor teaching ${apiData.title}`,
+      courses: 8,
+      students: 185000,
+      rating: 4.9,
     },
-    rating: storeCourseLookup.rating,
-    reviewCount: storeCourseLookup.reviews_count || 1000,
-    enrolledCount: storeCourseLookup.enrolled_students || 50000,
-    duration: `${Math.floor(storeCourseLookup.total_duration_minutes / 60)} hours`,
+    rating: apiData.stats.rating,
+    reviewCount: apiData.stats.reviewCount || 1000,
+    enrolledCount: apiData.stats.enrolledCount || 50000,
+    duration: `${Math.floor(apiData.totalDurationMinutes / 60)} hours`,
     hoursPerWeek: '10 hours/week',
-    level: storeCourseLookup.level,
-    language: 'English',
-    lastUpdated: storeCourseLookup.updated_at,
-    price: storeCourseLookup.price,
-    originalPrice: storeCourseLookup.discount_price ? storeCourseLookup.price : null,
-    category: storeCourseLookup.category,
-    subcategory: storeCourseLookup.category,
+    level: apiData.level,
+    language: apiData.language || 'English',
+    lastUpdated: apiData.updatedAt,
+    price: apiData.price,
+    originalPrice: apiData.discountPrice ? apiData.price : null,
+    category: apiData.category,
+    subcategory: apiData.category,
     badge: 'Professional Certificate',
-    skills: storeCourseLookup.tags || [],
+    skills: apiData.tags || [],
     outcomes: [
       { metric: '87%', label: 'of learners started a new career after completing' },
       { metric: '45%', label: 'got a pay increase or promotion' },
       { metric: '$85,000', label: 'median salary for entry-level developers' },
     ],
-    whatYouWillLearn: storeCourseLookup.learning_outcomes || [],
-    modules: storeCourseLookup.sections?.map((section: { id: string; title: string; description?: string; lessons?: { id: string }[] }, index: number) => ({
-      id: section.id,
-      title: section.title,
-      subtitle: `Course ${index + 1}`,
-      duration: `${Math.ceil((section.lessons?.length || 1) / 2)} weeks`,
-      lessons: section.lessons?.length || 0,
-      description: section.description || `Learn ${section.title}`,
+    whatYouWillLearn: apiData.learningOutcomes || [],
+    modules: apiData.modules?.map((module, index) => ({
+      id: module.id,
+      title: module.title,
+      subtitle: module.subtitle || `Course ${index + 1}`,
+      duration: module.duration || `${Math.ceil(module.lessonsCount / 2)} weeks`,
+      lessons: module.lessonsCount,
+      description: module.description || `Learn ${module.title}`,
     })) || mockCourseData.modules,
-    requirements: storeCourseLookup.prerequisites || mockCourseData.requirements,
+    requirements: apiData.prerequisites || mockCourseData.requirements,
     targetAudience: mockCourseData.targetAudience,
+    previewVideoUrl: apiData.previewVideoUrl,
+    thumbnailUrl: apiData.thumbnailUrl,
   } : mockCourseData
 
   // Handle scroll for sticky nav
@@ -374,6 +459,22 @@ export default function CourseDetailPage() {
   ]
 
   const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons, 0)
+
+  // Show loading state while fetching
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <p className="mt-4 text-muted-foreground">Loading course...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

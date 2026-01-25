@@ -10,6 +10,7 @@ import {
   SkipForward,
   Loader2,
   CheckCircle2,
+  AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -48,6 +49,7 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [hasCompleted, setHasCompleted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Initialize audio progress
   useEffect(() => {
@@ -141,6 +143,10 @@ export function AudioPlayer({
         onComplete?.()
       }
     }
+    const handleError = () => {
+      setIsLoading(false)
+      setError('Failed to load audio. Please check the audio URL or try again later.')
+    }
 
     audio.addEventListener('play', handlePlay)
     audio.addEventListener('pause', handlePause)
@@ -149,6 +155,7 @@ export function AudioPlayer({
     audio.addEventListener('waiting', handleWaiting)
     audio.addEventListener('canplay', handleCanPlay)
     audio.addEventListener('ended', handleEnded)
+    audio.addEventListener('error', handleError)
 
     return () => {
       audio.removeEventListener('play', handlePlay)
@@ -158,6 +165,7 @@ export function AudioPlayer({
       audio.removeEventListener('waiting', handleWaiting)
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('ended', handleEnded)
+      audio.removeEventListener('error', handleError)
     }
   }, [hasCompleted, onComplete, onProgress])
 
@@ -214,15 +222,41 @@ export function AudioPlayer({
         )}
 
         {/* Loading Spinner */}
-        {isLoading && (
+        {isLoading && !error && (
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
             <Loader2 className="h-5 w-5 animate-spin" />
             Loading...
           </div>
         )}
 
+        {/* Error State */}
+        {error && (
+          <div className="flex flex-col items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-6 w-6" />
+              <span className="text-sm font-medium">Error</span>
+            </div>
+            <p className="text-sm text-muted-foreground text-center max-w-xs">
+              {error}
+            </p>
+            <button
+              onClick={() => {
+                setError(null)
+                setIsLoading(true)
+                const audio = audioRef.current
+                if (audio) {
+                  audio.load()
+                }
+              }}
+              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
         {/* Play Button */}
-        {!isLoading && (
+        {!isLoading && !error && (
           <button
             onClick={togglePlay}
             className="p-5 rounded-full bg-primary text-primary-foreground hover:scale-110 transition-transform mb-6"

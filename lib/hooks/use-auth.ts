@@ -21,8 +21,8 @@ interface UseAuthReturn extends AuthState {
     fullName: string
   ) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
-  signInWithGoogle: () => Promise<{ error: Error | null }>
-  signInWithGithub: () => Promise<{ error: Error | null }>
+  signInWithGoogle: (redirectTo?: string) => Promise<{ error: Error | null }>
+  signInWithGithub: (redirectTo?: string) => Promise<{ error: Error | null }>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
   updatePassword: (password: string) => Promise<{ error: Error | null }>
   updateProfile: (data: Partial<AppUser>) => Promise<{ error: Error | null }>
@@ -194,24 +194,32 @@ export function useAuth(): UseAuthReturn {
   }
 
   // Sign in with Google
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (redirectTo?: string) => {
     if (!supabase) return { error: new Error('Supabase not configured') }
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (redirectTo) {
+      callbackUrl.searchParams.set('next', redirectTo)
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     })
     return { error: error as Error | null }
   }
 
   // Sign in with GitHub
-  const signInWithGithub = async () => {
+  const signInWithGithub = async (redirectTo?: string) => {
     if (!supabase) return { error: new Error('Supabase not configured') }
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (redirectTo) {
+      callbackUrl.searchParams.set('next', redirectTo)
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     })
     return { error: error as Error | null }

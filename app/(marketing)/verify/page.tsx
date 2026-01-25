@@ -14,7 +14,6 @@ import {
   ArrowRight,
   BadgeCheck,
   Calendar,
-  Clock,
   GraduationCap,
   User
 } from 'lucide-react'
@@ -22,16 +21,12 @@ import {
 interface VerificationResult {
   valid: boolean
   certificate?: {
-    id: string
-    recipientName: string
-    courseName: string
-    completionDate: string
-    instructorName: string
-    courseHours: number
-    grade: string
-    skills: string[]
+    certificateNumber: string
+    courseTitle: string
+    studentName: string
     issueDate: string
-    organizationVerified: boolean
+    verificationUrl: string
+    grade: string
   }
   error?: string
 }
@@ -48,30 +43,26 @@ export default function VerifyPage() {
     setIsLoading(true)
     setResult(null)
 
-    // Simulate API call - in production, this would verify against the database
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    try {
+      const response = await fetch(`/api/certificates?verify=${encodeURIComponent(certificateId.trim())}`)
+      const data = await response.json()
 
-    // Mock verification result
-    if (certificateId.toUpperCase().startsWith('CERT-')) {
-      setResult({
-        valid: true,
-        certificate: {
-          id: certificateId.toUpperCase(),
-          recipientName: 'John Anderson',
-          courseName: 'Advanced React & Next.js Masterclass',
-          completionDate: 'January 15, 2024',
-          instructorName: 'Sarah Chen',
-          courseHours: 42,
-          grade: 'A',
-          skills: ['React 18', 'Next.js 14', 'TypeScript', 'Server Components', 'App Router'],
-          issueDate: '2024-01-15',
-          organizationVerified: true,
-        },
-      })
-    } else {
+      if (data.valid && data.certificate) {
+        setResult({
+          valid: true,
+          certificate: data.certificate,
+        })
+      } else {
+        setResult({
+          valid: false,
+          error: data.error || 'Certificate not found. Please check the ID and try again.',
+        })
+      }
+    } catch (error) {
+      console.error('Verification error:', error)
       setResult({
         valid: false,
-        error: 'Certificate not found. Please check the ID and try again.',
+        error: 'An error occurred while verifying. Please try again.',
       })
     }
 
@@ -105,7 +96,7 @@ export default function VerifyPage() {
                   type="text"
                   value={certificateId}
                   onChange={(e) => setCertificateId(e.target.value)}
-                  placeholder="e.g., CERT-2024-ABC123"
+                  placeholder="e.g., PHZR-1234567890-ABC123"
                   className="flex-1 h-12 px-4 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary text-lg font-mono"
                 />
                 <button
@@ -160,70 +151,48 @@ export default function VerifyPage() {
                           <User className="h-4 w-4" />
                           Certificate Holder
                         </div>
-                        <p className="text-lg font-semibold">{result.certificate.recipientName}</p>
+                        <p className="text-lg font-semibold">{result.certificate.studentName}</p>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                           <Award className="h-4 w-4" />
                           Certificate ID
                         </div>
-                        <p className="text-lg font-mono">{result.certificate.id}</p>
+                        <p className="text-lg font-mono">{result.certificate.certificateNumber}</p>
                       </div>
                       <div className="md:col-span-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                           <GraduationCap className="h-4 w-4" />
                           Course Completed
                         </div>
-                        <p className="text-lg font-semibold">{result.certificate.courseName}</p>
+                        <p className="text-lg font-semibold">{result.certificate.courseTitle}</p>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                           <Calendar className="h-4 w-4" />
-                          Completion Date
+                          Issue Date
                         </div>
-                        <p>{result.certificate.completionDate}</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <Clock className="h-4 w-4" />
-                          Course Duration
-                        </div>
-                        <p>{result.certificate.courseHours} hours</p>
+                        <p>{new Date(result.certificate.issueDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</p>
                       </div>
                       <div>
                         <label className="text-sm text-muted-foreground block mb-1">Final Grade</label>
                         <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-semibold">
-                          {result.certificate.grade}
+                          {result.certificate.grade || 'Pass'}
                         </span>
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground block mb-1">Instructor</label>
-                        <p>{result.certificate.instructorName}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="text-sm text-muted-foreground block mb-2">Skills Verified</label>
-                        <div className="flex flex-wrap gap-2">
-                          {result.certificate.skills.map((skill, i) => (
-                            <span
-                              key={i}
-                              className="px-3 py-1 bg-primary-light text-primary text-sm font-medium rounded-full"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
 
                     {/* Verification Badge */}
                     <div className="mt-6 pt-6 border-t flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {result.certificate.organizationVerified && (
-                          <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
-                            <BadgeCheck className="h-4 w-4" />
-                            Accredited Organization
-                          </span>
-                        )}
+                        <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
+                          <BadgeCheck className="h-4 w-4" />
+                          Phazur Labs Academy
+                        </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Verified on {new Date().toLocaleDateString()}

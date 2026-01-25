@@ -57,7 +57,7 @@ function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true)
     try {
-      const { error } = await signInWithGoogle()
+      const { error } = await signInWithGoogle(redirectTo)
       if (error) {
         toast.error(error.message || 'Failed to sign in with Google')
       }
@@ -71,7 +71,7 @@ function LoginForm() {
   const handleGithubSignIn = async () => {
     setIsGithubLoading(true)
     try {
-      const { error } = await signInWithGithub()
+      const { error } = await signInWithGithub(redirectTo)
       if (error) {
         toast.error(error.message || 'Failed to sign in with GitHub')
       }

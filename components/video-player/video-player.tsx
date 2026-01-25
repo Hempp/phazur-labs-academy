@@ -79,6 +79,7 @@ export function VideoPlayer({
   const [showSettings, setShowSettings] = useState(false)
   const [hasCompleted, setHasCompleted] = useState(false)
   const [currentChapter, setCurrentChapter] = useState<VideoChapter | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Initialize video progress
   useEffect(() => {
@@ -222,6 +223,10 @@ export function VideoPlayer({
         onComplete?.()
       }
     }
+    const handleError = () => {
+      setIsLoading(false)
+      setError('Failed to load video. Please check the video URL or try again later.')
+    }
 
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
@@ -230,6 +235,7 @@ export function VideoPlayer({
     video.addEventListener('waiting', handleWaiting)
     video.addEventListener('canplay', handleCanPlay)
     video.addEventListener('ended', handleEnded)
+    video.addEventListener('error', handleError)
 
     return () => {
       video.removeEventListener('play', handlePlay)
@@ -239,6 +245,7 @@ export function VideoPlayer({
       video.removeEventListener('waiting', handleWaiting)
       video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('ended', handleEnded)
+      video.removeEventListener('error', handleError)
     }
   }, [chapters, hasCompleted, onComplete, onProgress])
 
@@ -331,9 +338,35 @@ export function VideoPlayer({
       />
 
       {/* Loading Spinner */}
-      {isLoading && (
+      {isLoading && !error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <Loader2 className="h-12 w-12 text-white animate-spin" />
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white p-6">
+          <svg
+            className="h-12 w-12 text-red-500 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-center text-sm">{error}</p>
+          <button
+            onClick={() => {
+              setError(null)
+              setIsLoading(true)
+              videoRef.current?.load()
+            }}
+            className="mt-4 px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-sm font-medium transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       )}
 

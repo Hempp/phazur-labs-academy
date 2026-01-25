@@ -18,14 +18,24 @@ const config: Config = {
     },
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
+        border: {
+          DEFAULT: 'hsl(var(--border))',
+          light: 'hsl(var(--border-light))',
+        },
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        surface: {
+          DEFAULT: 'hsl(var(--surface))',
+          secondary: 'hsl(var(--surface-secondary))',
+          tertiary: 'hsl(var(--surface-tertiary))',
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          hover: 'hsl(var(--primary-hover))',
+          light: 'hsl(var(--primary-light))',
           50: '#fff5f5',
           100: '#ffe0e0',
           200: '#ffbdbd',
@@ -63,6 +73,7 @@ const config: Config = {
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
+          light: 'hsl(var(--muted-light))',
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',

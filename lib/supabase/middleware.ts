@@ -98,8 +98,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
+  // Use /dashboard to leverage role-based redirect
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/dashboard/student', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse

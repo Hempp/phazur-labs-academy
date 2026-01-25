@@ -1,10 +1,21 @@
 // Custom 404 Page
 // Branded error page with helpful navigation
 
+'use client'
+
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { Home, Search, BookOpen, ArrowLeft, HelpCircle } from 'lucide-react'
+import { useCartStore } from '@/lib/stores/cart-store'
 
 export default function NotFound() {
+  const { closeCart } = useCartStore()
+
+  // Close cart sidebar on 404 pages
+  useEffect(() => {
+    closeCart()
+  }, [closeCart])
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center px-4">
       <div className="max-w-2xl mx-auto text-center">
