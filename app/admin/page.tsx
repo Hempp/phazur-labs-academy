@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Users,
@@ -24,7 +24,11 @@ import {
   Activity,
   Calendar,
   Filter,
-  Star
+  Star,
+  FileText,
+  RefreshCw,
+  FileJson,
+  BarChart2
 } from 'lucide-react'
 import {
   courses,
@@ -50,6 +54,24 @@ const activityIcons = {
 
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState('7d')
+  const [chartMenuOpen, setChartMenuOpen] = useState(false)
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const chartMenuRef = useRef<HTMLDivElement>(null)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (chartMenuRef.current && !chartMenuRef.current.contains(e.target as Node)) {
+        setChartMenuOpen(false)
+      }
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Get stats from shared store
   const dashboardStats = useMemo(() => getAdminDashboardStats(), [])
@@ -182,6 +204,87 @@ export default function AdminDashboard() {
     { day: 'Sun', students: 2300 },
   ]
 
+  // Export report functionality
+  const exportReport = (format: 'csv' | 'json') => {
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      timeRange,
+      stats: {
+        totalStudents: dashboardStats.total_students,
+        activeStudents: dashboardStats.active_students,
+        publishedCourses: dashboardStats.published_courses,
+        totalCompletions: dashboardStats.total_completions,
+        monthlyRevenue: dashboardStats.monthly_revenue,
+        completionRate: dashboardStats.average_completion_rate,
+      },
+      topCourses: topCourses.map(c => ({
+        name: c.name,
+        students: c.students,
+        completionRate: c.completionRate,
+        revenue: c.revenue,
+        rating: c.rating,
+      })),
+      engagementData,
+    }
+
+    let content: string
+    let mimeType: string
+    let filename: string
+
+    if (format === 'csv') {
+      // Generate CSV
+      const statsCSV = `Metric,Value
+Total Students,${dashboardStats.total_students}
+Active Students,${dashboardStats.active_students}
+Published Courses,${dashboardStats.published_courses}
+Total Completions,${dashboardStats.total_completions}
+Monthly Revenue,$${dashboardStats.monthly_revenue}
+Completion Rate,${dashboardStats.average_completion_rate}%
+
+Top Courses
+Name,Students,Completion Rate,Revenue,Rating
+${topCourses.map(c => `"${c.name}",${c.students},${c.completionRate}%,${c.revenue},${c.rating}`).join('\n')}
+
+Daily Engagement
+Day,Active Students
+${engagementData.map(d => `${d.day},${d.students}`).join('\n')}`
+
+      content = statsCSV
+      mimeType = 'text/csv'
+      filename = `dashboard-report-${new Date().toISOString().split('T')[0]}.csv`
+    } else {
+      content = JSON.stringify(reportData, null, 2)
+      mimeType = 'application/json'
+      filename = `dashboard-report-${new Date().toISOString().split('T')[0]}.json`
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setExportMenuOpen(false)
+  }
+
+  // Export chart data
+  const exportChartData = () => {
+    const csvContent = `Day,Active Students\n${engagementData.map(d => `${d.day},${d.students}`).join('\n')}`
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `engagement-data-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setChartMenuOpen(false)
+  }
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -203,10 +306,34 @@ export default function AdminDashboard() {
             <option value="30d">Last 30 Days</option>
             <option value="90d">Last 90 Days</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90">
-            <Download className="h-4 w-4" />
-            Export Report
-          </button>
+          <div ref={exportMenuRef} className="relative">
+            <button
+              onClick={() => setExportMenuOpen(!exportMenuOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
+            >
+              <Download className="h-4 w-4" />
+              Export Report
+            </button>
+
+            {exportMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                <button
+                  onClick={() => exportReport('csv')}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  <FileText className="h-4 w-4 text-green-600" />
+                  Export as CSV
+                </button>
+                <button
+                  onClick={() => exportReport('json')}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  <FileJson className="h-4 w-4 text-blue-600" />
+                  Export as JSON
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -284,9 +411,44 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-lg">Student Engagement</h3>
               <p className="text-sm text-muted-foreground">Daily active students this week</p>
             </div>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <MoreVertical className="h-5 w-5 text-gray-400" />
-            </button>
+            <div ref={chartMenuRef} className="relative">
+              <button
+                onClick={() => setChartMenuOpen(!chartMenuOpen)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <MoreVertical className="h-5 w-5 text-gray-400" />
+              </button>
+
+              {chartMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                  <button
+                    onClick={exportChartData}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                  >
+                    <Download className="h-4 w-4 text-gray-500" />
+                    Download CSV
+                  </button>
+                  <Link
+                    href="/admin/analytics"
+                    onClick={() => setChartMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <BarChart2 className="h-4 w-4 text-primary" />
+                    View Full Report
+                  </Link>
+                  <button
+                    onClick={() => {
+                      window.location.reload()
+                      setChartMenuOpen(false)
+                    }}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                  >
+                    <RefreshCw className="h-4 w-4 text-gray-500" />
+                    Refresh Data
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Simple Bar Chart */}

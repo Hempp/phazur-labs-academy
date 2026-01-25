@@ -103,15 +103,15 @@ export async function POST(request: NextRequest) {
     let totalDuration = 0
 
     // Create sections (modules) and lessons
-    for (const module of outline.modules) {
+    for (const courseModule of outline.modules) {
       // Create section
       const { data: section, error: sectionError } = await supabase
         .from('course_sections')
         .insert({
           course_id: course.id,
-          title: module.title,
-          description: module.description,
-          order: module.orderIndex,
+          title: courseModule.title,
+          description: courseModule.description,
+          order: courseModule.orderIndex,
         })
         .select()
         .single()
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Create lessons for this section
-      for (const lesson of module.lessons) {
+      for (const lesson of courseModule.lessons) {
         const script = scripts[lesson.title]
         const quiz = quizzes[lesson.title]
         const assignment = assignments[lesson.title]
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 
         // Store script metadata for video generation later
         if (script && (lesson.contentType === 'video' || lesson.contentType === 'article')) {
-          await supabase
+          const { error: scriptError } = await supabase
             .from('lesson_scripts')
             .insert({
               lesson_id: createdLesson.id,
@@ -181,7 +181,9 @@ export async function POST(request: NextRequest) {
               plain_text: formatScriptAsPlainText(script),
               status: 'pending_video',
             })
-            .catch(err => console.log('Script storage (optional table):', err))
+          if (scriptError) {
+            console.log('Script storage (optional table):', scriptError)
+          }
         }
       }
     }

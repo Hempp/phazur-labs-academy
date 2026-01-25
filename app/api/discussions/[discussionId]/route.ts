@@ -73,7 +73,8 @@ export async function GET(
         .select(selectWithoutViewCount)
         .eq('id', discussionId)
         .single()
-      discussion = result.data
+      // Use type assertion since the result has the same shape minus view_count
+      discussion = result.data as typeof discussion
       discussionError = result.error
     }
 

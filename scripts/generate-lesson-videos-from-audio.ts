@@ -41,7 +41,14 @@ interface Lesson {
   title: string
   video_url: string | null
   course_id: string
-  courses: { title: string; slug: string } | null
+  // Supabase can return nested relations as arrays or objects
+  courses: { title: string; slug: string }[] | { title: string; slug: string } | null
+}
+
+// Helper to extract course data from Supabase response
+function getCourseData(courses: Lesson['courses']): { title: string; slug: string } | null {
+  if (!courses) return null
+  return Array.isArray(courses) ? courses[0] : courses
 }
 
 function findBinary(paths: string[]): string | null {
@@ -237,7 +244,7 @@ async function main() {
   // Filter by argument if provided
   const courseFilter = process.argv[2]
   const lessonsToProcess = courseFilter
-    ? lessons.filter(l => l.courses?.slug?.includes(courseFilter))
+    ? lessons.filter(l => getCourseData(l.courses)?.slug?.includes(courseFilter))
     : lessons
 
   if (lessonsToProcess.length === 0) {
@@ -255,8 +262,9 @@ async function main() {
 
   for (let i = 0; i < lessonsToProcess.length; i++) {
     const lesson = lessonsToProcess[i] as Lesson
-    const courseName = lesson.courses?.title || 'Unknown Course'
-    const courseSlug = lesson.courses?.slug || 'default'
+    const courseData = getCourseData(lesson.courses)
+    const courseName = courseData?.title || 'Unknown Course'
+    const courseSlug = courseData?.slug || 'default'
 
     // Print course header when it changes
     if (courseName !== currentCourse) {

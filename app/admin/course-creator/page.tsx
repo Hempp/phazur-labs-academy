@@ -218,8 +218,8 @@ export default function CourseCreatorPage() {
     let total = 0
     let generated = 0
 
-    for (const module of outline.modules) {
-      for (const lesson of module.lessons) {
+    for (const courseModule of outline.modules) {
+      for (const lesson of courseModule.lessons) {
         total++
         if (
           scripts[lesson.title] ||
@@ -747,7 +747,7 @@ export default function CourseCreatorPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Ready to Create!</h2>
                 <p className="text-gray-600 mb-6">
-                  Your course "{outline.courseTitle}" is ready to be created with all generated content.
+                  Your course &ldquo;{outline.courseTitle}&rdquo; is ready to be created with all generated content.
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
@@ -806,7 +806,7 @@ export default function CourseCreatorPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Course Created!</h2>
                 <p className="text-gray-600 mb-6">
-                  "{createdCourse.title}" has been created successfully.
+                  &ldquo;{createdCourse.title}&rdquo; has been created successfully.
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">

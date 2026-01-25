@@ -154,12 +154,14 @@ export default function QuizPage() {
         setSavedAttempt(completedAttempt)
 
         // Update previous attempts
+        const score = completedAttempt.score ?? 0
+        const passed = completedAttempt.passed ?? false
         setPreviousAttempts((prev) => ({
-          bestScore: prev.bestScore
-            ? Math.max(prev.bestScore, completedAttempt.score)
-            : completedAttempt.score,
+          bestScore: prev.bestScore !== null
+            ? Math.max(prev.bestScore, score)
+            : score,
           attemptCount: prev.attemptCount + 1,
-          hasPassed: prev.hasPassed || completedAttempt.passed,
+          hasPassed: prev.hasPassed || passed,
         }))
       } else {
         console.error('Failed to save quiz attempt')

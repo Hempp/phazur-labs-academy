@@ -65,15 +65,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ scripts: [] })
     }
 
-    // Format response
-    const scripts = lessons?.map(lesson => ({
-      lessonId: lesson.id,
-      lessonTitle: lesson.title,
-      sectionTitle: (lesson.section as { title: string })?.title,
-      courseId: ((lesson.section as { course: { id: string } })?.course as { id: string })?.id,
-      courseTitle: ((lesson.section as { course: { title: string } })?.course as { title: string })?.title,
-      status: 'pending_video',
-    })) || []
+    // Format response - handle Supabase nested relations which can be arrays or objects
+    const scripts = lessons?.map(lesson => {
+      const section = lesson.section as unknown as {
+        title?: string
+        course?: { id?: string; title?: string } | { id?: string; title?: string }[]
+      } | {
+        title?: string
+        course?: { id?: string; title?: string } | { id?: string; title?: string }[]
+      }[] | null
+
+      // Extract section (could be array or object)
+      const sectionData = Array.isArray(section) ? section[0] : section
+      // Extract course (could be array or object)
+      const courseData = sectionData?.course
+      const course = Array.isArray(courseData) ? courseData[0] : courseData
+
+      return {
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        sectionTitle: sectionData?.title,
+        courseId: course?.id,
+        courseTitle: course?.title,
+        status: 'pending_video',
+      }
+    }) || []
 
     return NextResponse.json({ scripts })
   } catch (error) {

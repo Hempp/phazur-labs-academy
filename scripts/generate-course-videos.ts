@@ -16,7 +16,7 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import * as path from 'path'
-import { edgeTTSService } from '../lib/services/edge-tts.ts'
+import { edgeTTSService } from '../lib/services/edge-tts'
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })

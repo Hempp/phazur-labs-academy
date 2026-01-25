@@ -167,7 +167,11 @@ export async function GET(
       price: course.price,
       discountPrice: course.sale_price,
       level: course.level,
-      category: course.categories?.slug || 'development',
+      category: (() => {
+        // Handle Supabase returning categories as array or object
+        const cat = Array.isArray(course.categories) ? course.categories[0] : course.categories
+        return cat?.slug || 'development'
+      })(),
       tags: course.tags || [],
       language: course.language || 'English',
       status: course.status,
@@ -177,12 +181,16 @@ export async function GET(
       prerequisites: course.requirements || [],
       createdAt: course.created_at,
       updatedAt: course.updated_at,
-      instructor: course.users ? {
-        id: course.users.id,
-        name: course.users.full_name,
-        avatar: course.users.avatar_url,
-        bio: course.users.bio,
-      } : null,
+      instructor: (() => {
+        // Handle Supabase returning users as array or object
+        const instructor = Array.isArray(course.users) ? course.users[0] : course.users
+        return instructor ? {
+          id: instructor.id,
+          name: instructor.full_name,
+          avatar: instructor.avatar_url,
+          bio: instructor.bio,
+        } : null
+      })(),
       modules: sortedModules.map((m, index) => ({
         id: m.id,
         title: m.title,
@@ -214,10 +222,14 @@ export async function GET(
         rating: r.rating,
         content: r.content,
         createdAt: r.created_at,
-        user: r.users ? {
-          name: r.users.full_name,
-          avatar: r.users.avatar_url,
-        } : null,
+        user: (() => {
+          // Handle Supabase returning users as array or object
+          const reviewer = Array.isArray(r.users) ? r.users[0] : r.users
+          return reviewer ? {
+            name: reviewer.full_name,
+            avatar: reviewer.avatar_url,
+          } : null
+        })(),
       })),
     }
 

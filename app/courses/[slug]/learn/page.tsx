@@ -51,7 +51,7 @@ const mockLessonData = {
   lesson: {
     id: 'l5',
     title: 'What are Compound Components?',
-    type: 'video' as const,
+    type: 'video' as 'video' | 'exercise' | 'quiz' | 'assignment',
     duration: 18,
     videoUrl: '/videos/compound-components.mp4',
     description: `

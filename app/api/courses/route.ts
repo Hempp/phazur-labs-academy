@@ -123,15 +123,23 @@ export async function GET(request: NextRequest) {
           price: course.price,
           discountPrice: course.sale_price,
           level: course.level,
-          category: course.categories?.slug || 'development',
+          category: (() => {
+            // Handle Supabase returning categories as array or object
+            const cat = Array.isArray(course.categories) ? course.categories[0] : course.categories
+            return cat?.slug || 'development'
+          })(),
           tags: course.tags || [],
           totalLessons: course.total_lessons || 0,
           totalDurationMinutes: course.total_duration_minutes || 0,
-          instructor: course.users ? {
-            id: course.users.id,
-            name: course.users.full_name,
-            avatar: course.users.avatar_url,
-          } : null,
+          instructor: (() => {
+            // Handle Supabase returning users as array or object
+            const instructor = Array.isArray(course.users) ? course.users[0] : course.users
+            return instructor ? {
+              id: instructor.id,
+              name: instructor.full_name,
+              avatar: instructor.avatar_url,
+            } : null
+          })(),
           stats: {
             enrolledCount: enrollmentCount || 0,
             reviewCount,

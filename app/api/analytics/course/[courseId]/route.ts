@@ -301,16 +301,25 @@ export async function GET(
         full_name: string | null
         email: string
         avatar_url: string | null
-      } | null
-    }) => ({
-      id: enrollment.id,
-      user: {
-        name: enrollment.users?.full_name || enrollment.users?.email || 'Unknown',
-        avatar: enrollment.users?.avatar_url || null,
-      },
-      date: formatRelativeDate(new Date(enrollment.enrolled_at)),
-      source: 'Direct', // We don't track source yet, defaulting to Direct
-    }))
+      } | {
+        id: string
+        full_name: string | null
+        email: string
+        avatar_url: string | null
+      }[] | null
+    }) => {
+      // Handle Supabase returning users as array or object
+      const user = Array.isArray(enrollment.users) ? enrollment.users[0] : enrollment.users
+      return {
+        id: enrollment.id,
+        user: {
+          name: user?.full_name || user?.email || 'Unknown',
+          avatar: user?.avatar_url || null,
+        },
+        date: formatRelativeDate(new Date(enrollment.enrolled_at)),
+        source: 'Direct', // We don't track source yet, defaulting to Direct
+      }
+    })
 
     // Get weekly enrollment data for chart
     const enrollmentData = generateWeeklyData(allEnrollments || [], price, range)

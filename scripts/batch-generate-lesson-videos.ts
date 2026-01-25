@@ -29,7 +29,8 @@ interface Lesson {
   course_id: string
   module_id: string
   display_order: number
-  courses: { title: string } | null
+  // Supabase can return nested relations as arrays or objects
+  courses: { title: string }[] | { title: string } | null
 }
 
 async function generateAudioForLesson(lesson: Lesson, voiceIndex: number): Promise<string | null> {
@@ -183,7 +184,9 @@ async function main() {
 
   for (let i = 0; i < lessonsToProcess.length; i++) {
     const lesson = lessonsToProcess[i] as Lesson
-    const courseName = lesson.courses?.title || 'Unknown Course'
+    // Handle Supabase returning courses as array or object
+    const courseData = Array.isArray(lesson.courses) ? lesson.courses[0] : lesson.courses
+    const courseName = courseData?.title || 'Unknown Course'
 
     // Print course header when it changes
     if (courseName !== currentCourse) {

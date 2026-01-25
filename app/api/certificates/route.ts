@@ -44,12 +44,16 @@ export async function GET(request: NextRequest) {
         )
       }
 
+      // Handle Supabase returning relations as arrays or objects
+      const course = Array.isArray(certificate.courses) ? certificate.courses[0] : certificate.courses
+      const user = Array.isArray(certificate.users) ? certificate.users[0] : certificate.users
+
       return NextResponse.json({
         valid: true,
         certificate: {
           certificateNumber: certificate.certificate_number,
-          courseTitle: certificate.courses?.title || 'Unknown Course',
-          studentName: certificate.users?.full_name || certificate.users?.email || 'Student',
+          courseTitle: course?.title || 'Unknown Course',
+          studentName: user?.full_name || user?.email || 'Student',
           issueDate: certificate.issued_at,
           verificationUrl: certificate.verification_url,
           grade: certificate.grade

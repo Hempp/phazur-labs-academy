@@ -229,11 +229,15 @@ export async function GET(
         title: course.title,
         description: course.description,
         thumbnail: course.thumbnail_url,
-        instructor: course.users ? {
-          id: course.users.id,
-          name: course.users.full_name,
-          avatar: course.users.avatar_url,
-        } : null,
+        instructor: (() => {
+          // Handle Supabase returning users as array or object
+          const instructor = Array.isArray(course.users) ? course.users[0] : course.users
+          return instructor ? {
+            id: instructor.id,
+            name: instructor.full_name,
+            avatar: instructor.avatar_url,
+          } : null
+        })(),
         totalLessons,
         completedLessons: completedCount,
         totalDuration: Math.ceil(totalDuration / 60), // minutes

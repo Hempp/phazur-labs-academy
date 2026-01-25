@@ -35,7 +35,9 @@ async function main() {
   if (lessons) {
     let currentCourse = ''
     lessons.forEach((lesson) => {
-      const course = lesson.courses as { id: string; title: string } | null
+      // Handle Supabase returning courses as array or object
+      const courseData = Array.isArray(lesson.courses) ? lesson.courses[0] : lesson.courses
+      const course = courseData as { id: string; title: string } | null
       const courseName = course?.title || 'Unknown'
 
       if (courseName !== currentCourse) {

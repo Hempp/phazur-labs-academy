@@ -358,8 +358,8 @@ class CourseCreatorService {
     let totalQuizzes = 0
     let totalAssignments = 0
 
-    for (const module of outline.modules) {
-      for (const lesson of module.lessons) {
+    for (const courseModule of outline.modules) {
+      for (const lesson of courseModule.lessons) {
         totalMinutes += lesson.durationMinutes
         if (lesson.contentType === 'video' || lesson.contentType === 'article') {
           totalLessons++

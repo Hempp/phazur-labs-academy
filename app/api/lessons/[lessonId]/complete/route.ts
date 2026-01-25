@@ -49,12 +49,14 @@ export async function POST(
     }
 
     // Get course_id either from lesson directly or from module
-    const courseId = lesson.course_id || (lesson.modules as { course_id: string })?.course_id
+    // Handle Supabase returning modules as array or object
+    const moduleData = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules
+    const courseId = lesson.course_id || (moduleData as { course_id: string })?.course_id
 
     console.log('Lesson completion debug:', {
       lessonId,
       lessonCourseId: lesson.course_id,
-      moduleCourseId: (lesson.modules as { course_id: string })?.course_id,
+      moduleCourseId: (moduleData as { course_id: string })?.course_id,
       resolvedCourseId: courseId,
       userId: user.id
     })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Search,
   Filter,
@@ -22,8 +22,21 @@ import {
   GraduationCap,
   Calendar,
   ArrowUpDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  X,
+  Loader2
 } from 'lucide-react'
+import toast from 'react-hot-toast'
+
+// Available courses for enrollment
+const availableCourses = [
+  { id: 'c1', name: 'AI Fundamentals' },
+  { id: 'c2', name: 'Machine Learning Basics' },
+  { id: 'c3', name: 'Python Mastery' },
+  { id: 'c4', name: 'Web Development Bootcamp' },
+  { id: 'c5', name: 'Data Science Essentials' },
+  { id: 'c6', name: 'Deep Learning Advanced' },
+]
 
 // Mock student data
 const students = [
@@ -162,6 +175,60 @@ export default function StudentsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null)
 
+  // Add Student Modal state
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    email: '',
+    plan: 'Basic',
+    selectedCourses: [] as string[],
+    sendWelcomeEmail: true,
+  })
+
+  // Handle add student form submission
+  const handleAddStudent = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Validation
+    if (!newStudent.name.trim()) {
+      toast.error('Please enter a student name')
+      return
+    }
+    if (!newStudent.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudent.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    toast.success(`Student "${newStudent.name}" added successfully!`)
+
+    // Reset form and close modal
+    setNewStudent({
+      name: '',
+      email: '',
+      plan: 'Basic',
+      selectedCourses: [],
+      sendWelcomeEmail: true,
+    })
+    setShowAddModal(false)
+    setIsSubmitting(false)
+  }
+
+  // Toggle course selection
+  const toggleCourseSelection = (courseId: string) => {
+    setNewStudent(prev => ({
+      ...prev,
+      selectedCourses: prev.selectedCourses.includes(courseId)
+        ? prev.selectedCourses.filter(id => id !== courseId)
+        : [...prev.selectedCourses, courseId]
+    }))
+  }
+
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -203,7 +270,10 @@ export default function StudentsPage() {
             <Download className="h-4 w-4" />
             Export
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
             <UserPlus className="h-4 w-4" />
             Add Student
           </button>
@@ -570,6 +640,155 @@ export default function StudentsPage() {
           </div>
         </div>
       </div>
+
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => !isSubmitting && setShowAddModal(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-xl font-semibold">Add New Student</h2>
+                <p className="text-sm text-muted-foreground mt-1">Create a new student account</p>
+              </div>
+              <button
+                onClick={() => !isSubmitting && setShowAddModal(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                disabled={isSubmitting}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleAddStudent} className="p-6 space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Full Name *</label>
+                <input
+                  type="text"
+                  value={newStudent.name}
+                  onChange={(e) => setNewStudent(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter student name"
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Email Address *</label>
+                <input
+                  type="email"
+                  value={newStudent.email}
+                  onChange={(e) => setNewStudent(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="student@email.com"
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Plan Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Subscription Plan</label>
+                <select
+                  value={newStudent.plan}
+                  onChange={(e) => setNewStudent(prev => ({ ...prev, plan: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                  disabled={isSubmitting}
+                >
+                  <option value="Free Trial">Free Trial</option>
+                  <option value="Basic">Basic</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Enterprise">Enterprise</option>
+                </select>
+              </div>
+
+              {/* Course Enrollment */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Enroll in Courses (Optional)</label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  {availableCourses.map((course) => (
+                    <label
+                      key={course.id}
+                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                        newStudent.selectedCourses.includes(course.id)
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={newStudent.selectedCourses.includes(course.id)}
+                        onChange={() => toggleCourseSelection(course.id)}
+                        className="w-4 h-4 rounded border-gray-300"
+                        disabled={isSubmitting}
+                      />
+                      <span className="text-sm">{course.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {newStudent.selectedCourses.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {newStudent.selectedCourses.length} course(s) selected
+                  </p>
+                )}
+              </div>
+
+              {/* Welcome Email */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="sendWelcomeEmail"
+                  checked={newStudent.sendWelcomeEmail}
+                  onChange={(e) => setNewStudent(prev => ({ ...prev, sendWelcomeEmail: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300"
+                  disabled={isSubmitting}
+                />
+                <label htmlFor="sendWelcomeEmail" className="text-sm">
+                  Send welcome email with login instructions
+                </label>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-4 w-4" />
+                      Add Student
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

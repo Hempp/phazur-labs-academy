@@ -87,8 +87,8 @@ We'll look at real-world examples like Reach UI's Tabs component and understand 
 
 // Helper to find mock lesson by ID
 function getMockLesson(lessonId: string) {
-  for (const module of mockLessonData.modules) {
-    const lesson = module.lessons.find(l => l.id === lessonId)
+  for (const courseModule of mockLessonData.modules) {
+    const lesson = courseModule.lessons.find(l => l.id === lessonId)
     if (lesson) {
       return {
         ...mockLessonData.lesson,
@@ -334,11 +334,15 @@ export async function GET(
         id: course.id,
         slug: course.slug,
         title: course.title,
-        instructor: course.users ? {
-          id: course.users.id,
-          name: course.users.full_name,
-          avatar: course.users.avatar_url,
-        } : null,
+        instructor: (() => {
+          // Handle Supabase returning users as array or object
+          const instructor = Array.isArray(course.users) ? course.users[0] : course.users
+          return instructor ? {
+            id: instructor.id,
+            name: instructor.full_name,
+            avatar: instructor.avatar_url,
+          } : null
+        })(),
       },
       modules: sortedModules.map(m => ({
         id: m.id,

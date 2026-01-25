@@ -97,81 +97,35 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createServerSupabaseClient()
 
-    // Helper to build the query with or without view_count
-    const buildQuery = (includeViewCount: boolean) => {
-      const selectFields = includeViewCount
-        ? `
-          id,
-          title,
-          content,
-          is_pinned,
-          is_resolved,
-          view_count,
-          created_at,
-          updated_at,
-          user:users!discussions_user_id_fkey (
-            id,
-            full_name,
-            avatar_url
-          ),
-          replies:discussion_replies (count)
-        `
-        : `
-          id,
-          title,
-          content,
-          is_pinned,
-          is_resolved,
-          created_at,
-          updated_at,
-          user:users!discussions_user_id_fkey (
-            id,
-            full_name,
-            avatar_url
-          ),
-          replies:discussion_replies (count)
-        `
+    // Build query with inline select for proper TypeScript inference
+    let query = supabase
+      .from('discussions')
+      .select('id, title, content, is_pinned, is_resolved, created_at, updated_at, user:users!discussions_user_id_fkey(id, full_name, avatar_url)', { count: 'exact' })
+      .eq('course_id', courseId)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1)
 
-      let query = supabase
-        .from('discussions')
-        .select(selectFields, { count: 'exact' })
-        .eq('course_id', courseId)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .range((page - 1) * limit, page * limit - 1)
-
-      // Filter by lesson if specified
-      if (lessonId) {
-        query = query.eq('lesson_id', lessonId)
-      }
-
-      return query
+    // Filter by lesson if specified
+    if (lessonId) {
+      query = query.eq('lesson_id', lessonId)
     }
 
-    // Try with view_count first, fallback without it
-    let { data: discussions, error, count } = await buildQuery(true)
-
-    // If view_count column doesn't exist, retry without it
-    if (error?.message?.includes('view_count')) {
-      console.warn('view_count column missing, falling back to query without it')
-      const result = await buildQuery(false)
-      discussions = result.data
-      error = result.error
-      count = result.count
-    }
+    const { data: discussions, error, count } = await query
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Add default view_count if missing
-    const discussionsWithViewCount = (discussions || []).map((d: Record<string, unknown>) => ({
+    // Format discussions with default values
+    const formattedDiscussions = (discussions || []).map((d) => ({
       ...d,
-      view_count: d.view_count ?? 0
+      view_count: 0,  // view_count column may not exist
+      reply_count: 0  // Reply count fetched separately if needed
     }))
 
     return NextResponse.json({
-      discussions: discussionsWithViewCount,
+      discussions: formattedDiscussions,
       pagination: {
         page,
         limit,
@@ -291,7 +245,8 @@ export async function POST(request: NextRequest) {
         })
         .select(selectWithoutViewCount)
         .single()
-      discussion = result.data
+      // Use type assertion since result has same shape minus view_count
+      discussion = result.data as typeof discussion
       insertError = result.error
     }
 

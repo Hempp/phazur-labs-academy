@@ -65,6 +65,8 @@ export interface QuizAttempt {
   completedAt?: Date
   score?: number
   passed?: boolean
+  correctCount?: number
+  totalQuestions?: number
 }
 
 interface QuizEngineProps {
@@ -505,6 +507,34 @@ export function QuizEngine({ quiz, onComplete, onExit }: QuizEngineProps) {
     const score = calculateScore()
     const passed = score >= quiz.passingScore
 
+    // Calculate correct count
+    let correctCount = 0
+    questions.forEach((question) => {
+      const answer = answers[question.id]
+      switch (question.type) {
+        case 'multiple_choice':
+        case 'true_false': {
+          const correctAnswer = question.answers?.find((a) => a.isCorrect)?.id || question.correctAnswer
+          if (answer === correctAnswer) correctCount++
+          break
+        }
+        case 'multiple_answer': {
+          const selectedAnswers = (answer as string[]) || []
+          const correctAnswers = question.answers?.filter((a) => a.isCorrect).map((a) => a.id) || []
+          if (selectedAnswers.length === correctAnswers.length &&
+              selectedAnswers.every((a) => correctAnswers.includes(a))) {
+            correctCount++
+          }
+          break
+        }
+        case 'fill_blank': {
+          const correctAnswer = (question.correctAnswer as string).toLowerCase().trim()
+          if ((answer as string)?.toLowerCase().trim() === correctAnswer) correctCount++
+          break
+        }
+      }
+    })
+
     const newAttempt: QuizAttempt = {
       quizId: quiz.id,
       answers,
@@ -512,12 +542,14 @@ export function QuizEngine({ quiz, onComplete, onExit }: QuizEngineProps) {
       completedAt: new Date(),
       score,
       passed,
+      correctCount,
+      totalQuestions: questions.length,
     }
 
     setAttempt(newAttempt)
     setShowResults(true)
     onComplete?.(newAttempt)
-  }, [answers, calculateScore, onComplete, quiz.id, quiz.passingScore, startTime])
+  }, [answers, calculateScore, onComplete, questions, quiz.id, quiz.passingScore, startTime])
 
   const handleRetry = useCallback(() => {
     setAnswers({})
