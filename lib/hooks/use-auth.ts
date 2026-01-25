@@ -29,6 +29,37 @@ interface UseAuthReturn extends AuthState {
   refreshProfile: () => Promise<void>
 }
 
+// Dev bypass for testing - check for NEXT_PUBLIC_DEV_AUTH_BYPASS
+const isDevBypass = typeof window !== 'undefined' &&
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === 'true'
+
+// Mock admin profile for dev bypass
+const devBypassProfile: AppUser = {
+  id: 'dev-admin-user',
+  email: 'admin@dev.local',
+  full_name: 'Dev Admin',
+  role: 'admin',
+  avatar_url: null,
+  bio: null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  is_active: true,
+  email_verified: true,
+  profile_completed: true,
+  preferences: {
+    theme: 'system',
+    email_notifications: false,
+    course_reminders: false,
+    marketing_emails: false,
+    language: 'en',
+    timezone: 'America/Los_Angeles',
+    playback_speed: 1,
+    autoplay_videos: true,
+    show_captions: false,
+  },
+}
+
 export function useAuth(): UseAuthReturn {
   // Always start with isLoading: true to prevent hydration mismatch
   // The actual loading state is determined in useEffect after mount
@@ -62,6 +93,19 @@ export function useAuth(): UseAuthReturn {
 
   // Initialize auth state
   useEffect(() => {
+    // Dev bypass - skip Supabase auth and use mock admin
+    if (isDevBypass) {
+      console.log('DEV_AUTH_BYPASS: Using mock admin profile')
+      setState({
+        user: { id: 'dev-admin-user', email: 'admin@dev.local' } as User,
+        session: null,
+        profile: devBypassProfile,
+        isLoading: false,
+        isAuthenticated: true,
+      })
+      return
+    }
+
     if (!supabase) {
       setState(prev => ({ ...prev, isLoading: false }))
       return
