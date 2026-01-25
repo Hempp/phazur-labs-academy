@@ -40,6 +40,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Dev auth bypass for testing protected routes
+  if (process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true') {
+    console.log('DEV_AUTH_BYPASS enabled - allowing access to:', pathname)
+    return NextResponse.next()
+  }
+
   // Check if Supabase is configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
