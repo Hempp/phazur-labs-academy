@@ -31,6 +31,18 @@ export default function CartSidebar() {
     setIsMounted(true)
   }, [])
 
+  // Lock body scroll when cart is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   const [isLoading, setIsLoading] = useState(false)
 
   // Only calculate after mount to prevent hydration mismatch

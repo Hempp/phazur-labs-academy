@@ -81,6 +81,14 @@ export function VideoPlayer({
   const [currentChapter, setCurrentChapter] = useState<VideoChapter | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Check for empty/invalid src on mount
+  useEffect(() => {
+    if (!src || src.trim() === '') {
+      setIsLoading(false)
+      setError('No video source available. The video may not have been uploaded yet.')
+    }
+  }, [src])
+
   // Initialize video progress
   useEffect(() => {
     const video = videoRef.current
