@@ -1,142 +1,46 @@
-// Course Analytics API
-// Provides instructor analytics data for a specific course
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
-// Check if Supabase is configured
-const isSupabaseConfigured = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  return !!(
-    url && key &&
-    !url.includes('placeholder') &&
-    !url.includes('your-project') &&
-    !key.includes('your-') &&
-    key !== 'your-anon-key'
-  )
-}
+// Time range configurations
+const TIME_RANGES = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+  '12m': 365,
+  'all': null
+} as const
 
-// Mock data for development without Supabase
-const getMockAnalytics = (courseId: string, range: string) => ({
-  course: {
-    id: courseId,
-    title: 'Advanced React Patterns',
-  },
-  stats: {
-    totalStudents: 3420,
-    studentsTrend: 12,
-    totalRevenue: 12500,
-    revenueTrend: 8,
-    avgRating: 4.9,
-    ratingTrend: 2,
-    totalViews: 45200,
-    viewsTrend: 15,
-    completionRate: 68,
-    avgWatchTime: '4h 32m',
-    totalReviews: 892,
-    engagementRate: 78,
-  },
-  enrollmentData: [
-    { date: 'Jan 1', enrollments: 45, revenue: 1350 },
-    { date: 'Jan 8', enrollments: 52, revenue: 1560 },
-    { date: 'Jan 15', enrollments: 38, revenue: 1140 },
-    { date: 'Jan 22', enrollments: 67, revenue: 2010 },
-    { date: 'Jan 29', enrollments: 72, revenue: 2160 },
-    { date: 'Feb 5', enrollments: 58, revenue: 1740 },
-    { date: 'Feb 12', enrollments: 84, revenue: 2520 },
-  ],
-  lessonPerformance: [
-    { title: 'Welcome & Course Overview', views: 3420, completionRate: 98, avgDuration: '5:12' },
-    { title: 'Setting Up Development Environment', views: 3280, completionRate: 94, avgDuration: '11:45' },
-    { title: 'Introduction to Compound Components', views: 3150, completionRate: 89, avgDuration: '14:22' },
-    { title: 'Building a Tabs Component', views: 2890, completionRate: 82, avgDuration: '23:45' },
-    { title: 'Accordion Pattern', views: 2650, completionRate: 76, avgDuration: '18:30' },
-    { title: 'Why Custom Hooks?', views: 2420, completionRate: 71, avgDuration: '9:15' },
-  ],
-  recentEnrollments: [
-    { id: 'e1', user: { name: 'John Doe', avatar: null }, date: '2 hours ago', source: 'Direct' },
-    { id: 'e2', user: { name: 'Jane Smith', avatar: null }, date: '3 hours ago', source: 'Search' },
-    { id: 'e3', user: { name: 'Mike Johnson', avatar: null }, date: '5 hours ago', source: 'Referral' },
-    { id: 'e4', user: { name: 'Sarah Williams', avatar: null }, date: '6 hours ago', source: 'Social' },
-    { id: 'e5', user: { name: 'Alex Thompson', avatar: null }, date: '8 hours ago', source: 'Direct' },
-  ],
-  recentReviews: [
-    { id: 'r1', user: { name: 'Alex Thompson', avatar: null }, rating: 5, comment: 'Best React course ever!', date: '1 day ago' },
-    { id: 'r2', user: { name: 'Maria Garcia', avatar: null }, rating: 5, comment: 'Finally understand compound components!', date: '2 days ago' },
-    { id: 'r3', user: { name: 'James Wilson', avatar: null }, rating: 4, comment: 'Great content, could use more examples.', date: '3 days ago' },
-  ],
-  trafficSources: [
-    { source: 'Direct', percentage: 35, color: 'bg-primary' },
-    { source: 'Search', percentage: 28, color: 'bg-blue-500' },
-    { source: 'Social', percentage: 20, color: 'bg-purple-500' },
-    { source: 'Referral', percentage: 12, color: 'bg-amber-500' },
-    { source: 'Other', percentage: 5, color: 'bg-gray-500' },
-  ],
-  geographicData: [
-    { country: 'United States', students: 1240, percentage: 36 },
-    { country: 'India', students: 620, percentage: 18 },
-    { country: 'United Kingdom', students: 380, percentage: 11 },
-    { country: 'Germany', students: 290, percentage: 8 },
-    { country: 'Canada', students: 250, percentage: 7 },
-    { country: 'Other', students: 640, percentage: 19 },
-  ],
-})
+type TimeRange = keyof typeof TIME_RANGES
 
-// Calculate date range boundaries
-function getDateRange(range: string): { start: Date; previous: Date } {
-  const now = new Date()
-  const start = new Date()
-  const previous = new Date()
-
-  switch (range) {
-    case '7d':
-      start.setDate(now.getDate() - 7)
-      previous.setDate(now.getDate() - 14)
-      break
-    case '30d':
-      start.setDate(now.getDate() - 30)
-      previous.setDate(now.getDate() - 60)
-      break
-    case '90d':
-      start.setDate(now.getDate() - 90)
-      previous.setDate(now.getDate() - 180)
-      break
-    case '12m':
-      start.setFullYear(now.getFullYear() - 1)
-      previous.setFullYear(now.getFullYear() - 2)
-      break
-    case 'all':
-    default:
-      start.setFullYear(2020) // Far in the past
-      previous.setFullYear(2019)
-      break
+function getDateRange(range: TimeRange): { start: Date | null; previousStart: Date | null } {
+  const days = TIME_RANGES[range]
+  if (!days) {
+    return { start: null, previousStart: null }
   }
 
-  return { start, previous }
-}
-
-// Format watch time in hours and minutes
-function formatWatchTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`
-  }
-  return `${minutes}m`
-}
-
-// Format relative date
-function formatRelativeDate(date: Date): string {
   const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const start = new Date(now)
+  start.setDate(start.getDate() - days)
 
-  if (diffHours < 1) return 'Just now'
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
-  return date.toLocaleDateString()
+  const previousStart = new Date(start)
+  previousStart.setDate(previousStart.getDate() - days)
+
+  return { start, previousStart }
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  if (minutes < 60) return `${minutes}m ${remainingSeconds}s`
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours}h ${remainingMinutes}m`
+}
+
+function calculateTrend(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return Math.round(((current - previous) / previous) * 100)
 }
 
 export async function GET(
@@ -144,148 +48,261 @@ export async function GET(
   { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { courseId } = await params
-    const { searchParams } = new URL(request.url)
-    const range = searchParams.get('range') || '30d'
-
-    // Return mock data if Supabase is not configured
-    if (!isSupabaseConfigured()) {
-      console.log('Supabase not configured - returning mock analytics')
-      return NextResponse.json(getMockAnalytics(courseId, range))
-    }
-
     const supabase = await createServerSupabaseClient()
+    const { courseId } = await params
+    const range = (request.nextUrl.searchParams.get('range') || '30d') as TimeRange
 
-    // Verify instructor authentication
+    // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-
     if (authError || !user) {
-      // Return mock data for unauthenticated users in dev mode
-      console.log('User not authenticated - returning mock analytics')
-      return NextResponse.json(getMockAnalytics(courseId, range))
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get course and verify instructor ownership
+    // Verify instructor owns this course
     const { data: course, error: courseError } = await supabase
       .from('courses')
-      .select('id, title, slug, price, instructor_id')
+      .select('id, title, instructor_id, price, average_rating, total_ratings')
       .eq('id', courseId)
       .single()
 
     if (courseError || !course) {
-      // Fallback to mock data if course not found
-      console.log('Course not found - returning mock analytics')
-      return NextResponse.json(getMockAnalytics(courseId, range))
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
-    // Check if user is the instructor (or admin)
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    if (course.instructor_id !== user.id) {
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
 
-    const isInstructor = course.instructor_id === user.id
-    const isAdmin = userProfile?.role === 'admin'
-
-    if (!isInstructor && !isAdmin) {
-      return NextResponse.json(
-        { error: 'You do not have permission to view analytics for this course' },
-        { status: 403 }
-      )
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
     }
 
-    const { start, previous } = getDateRange(range)
+    const { start: rangeStart, previousStart } = getDateRange(range)
 
-    // Get enrollment stats
-    const { data: currentEnrollments } = await supabase
-      .from('enrollments')
-      .select('id, user_id, enrolled_at, status, progress')
-      .eq('course_id', courseId)
-      .gte('enrolled_at', start.toISOString())
+    // ============================================
+    // STATS QUERIES
+    // ============================================
 
-    const { data: previousEnrollments } = await supabase
+    // Current period enrollments
+    let enrollmentsQuery = supabase
       .from('enrollments')
-      .select('id')
+      .select('id, enrolled_at, progress_percentage, completed_at', { count: 'exact' })
       .eq('course_id', courseId)
-      .gte('enrolled_at', previous.toISOString())
-      .lt('enrolled_at', start.toISOString())
+
+    if (rangeStart) {
+      enrollmentsQuery = enrollmentsQuery.gte('enrolled_at', rangeStart.toISOString())
+    }
+
+    const { data: currentEnrollments, count: totalStudents } = await enrollmentsQuery
+
+    // Previous period enrollments (for trend)
+    let previousStudents = 0
+    if (previousStart && rangeStart) {
+      const { count } = await supabase
+        .from('enrollments')
+        .select('id', { count: 'exact', head: true })
+        .eq('course_id', courseId)
+        .gte('enrolled_at', previousStart.toISOString())
+        .lt('enrolled_at', rangeStart.toISOString())
+      previousStudents = count || 0
+    }
+
+    // Revenue from payments
+    let revenueQuery = supabase
+      .from('payments')
+      .select('amount')
+      .eq('course_id', courseId)
+      .eq('status', 'completed')
+
+    if (rangeStart) {
+      revenueQuery = revenueQuery.gte('created_at', rangeStart.toISOString())
+    }
+
+    const { data: payments } = await revenueQuery
+    const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
+    // Previous period revenue
+    let previousRevenue = 0
+    if (previousStart && rangeStart) {
+      const { data: prevPayments } = await supabase
+        .from('payments')
+        .select('amount')
+        .eq('course_id', courseId)
+        .eq('status', 'completed')
+        .gte('created_at', previousStart.toISOString())
+        .lt('created_at', rangeStart.toISOString())
+      previousRevenue = prevPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    }
+
+    // Reviews and ratings
+    let reviewsQuery = supabase
+      .from('reviews')
+      .select('rating, content, created_at, user_id')
+      .eq('course_id', courseId)
+
+    if (rangeStart) {
+      reviewsQuery = reviewsQuery.gte('created_at', rangeStart.toISOString())
+    }
+
+    const { data: reviews } = await reviewsQuery
+    const avgRating = reviews && reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : course.average_rating || 0
+
+    // Previous period rating
+    let previousRating = avgRating
+    if (previousStart && rangeStart) {
+      const { data: prevReviews } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('course_id', courseId)
+        .gte('created_at', previousStart.toISOString())
+        .lt('created_at', rangeStart.toISOString())
+      if (prevReviews && prevReviews.length > 0) {
+        previousRating = prevReviews.reduce((sum, r) => sum + r.rating, 0) / prevReviews.length
+      }
+    }
+
+    // Lesson progress for views and completion
+    let progressQuery = supabase
+      .from('lesson_progress')
+      .select('id, watch_time_seconds, is_completed, lesson_id')
+      .eq('course_id', courseId)
+
+    if (rangeStart) {
+      progressQuery = progressQuery.gte('started_at', rangeStart.toISOString())
+    }
+
+    const { data: lessonProgressData, count: totalViews } = await progressQuery
+
+    // Previous period views
+    let previousViews = 0
+    if (previousStart && rangeStart) {
+      const { count } = await supabase
+        .from('lesson_progress')
+        .select('id', { count: 'exact', head: true })
+        .eq('course_id', courseId)
+        .gte('started_at', previousStart.toISOString())
+        .lt('started_at', rangeStart.toISOString())
+      previousViews = count || 0
+    }
+
+    // Calculate completion rate
+    const completedLessons = lessonProgressData?.filter(p => p.is_completed).length || 0
+    const completionRate = lessonProgressData && lessonProgressData.length > 0
+      ? Math.round((completedLessons / lessonProgressData.length) * 100)
+      : 0
+
+    // Average watch time
+    const totalWatchTime = lessonProgressData?.reduce((sum, p) => sum + (p.watch_time_seconds || 0), 0) || 0
+    const avgWatchTime = lessonProgressData && lessonProgressData.length > 0
+      ? formatDuration(Math.round(totalWatchTime / lessonProgressData.length))
+      : '0m'
+
+    // ============================================
+    // ENROLLMENT CHART DATA (weekly aggregation)
+    // ============================================
 
     const { data: allEnrollments } = await supabase
       .from('enrollments')
-      .select('id, user_id, enrolled_at, status, progress')
+      .select('enrolled_at')
       .eq('course_id', courseId)
+      .order('enrolled_at', { ascending: true })
 
-    const totalStudents = allEnrollments?.length || 0
-    const currentPeriodStudents = currentEnrollments?.length || 0
-    const previousPeriodStudents = previousEnrollments?.length || 0
-    const studentsTrend = previousPeriodStudents > 0
-      ? Math.round(((currentPeriodStudents - previousPeriodStudents) / previousPeriodStudents) * 100)
-      : currentPeriodStudents > 0 ? 100 : 0
+    const enrollmentData: Array<{ date: string; enrollments: number; revenue: number }> = []
 
-    // Calculate revenue (price * enrollments)
-    const price = course.price || 0
-    const totalRevenue = totalStudents * price
-    const currentRevenue = currentPeriodStudents * price
-    const previousRevenue = previousPeriodStudents * price
-    const revenueTrend = previousRevenue > 0
-      ? Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100)
-      : currentRevenue > 0 ? 100 : 0
+    if (allEnrollments) {
+      // Group by week
+      const weeks = new Map<string, { enrollments: number; revenue: number }>()
 
-    // Calculate completion rate
-    const completedEnrollments = allEnrollments?.filter(e => e.status === 'completed').length || 0
-    const completionRate = totalStudents > 0
-      ? Math.round((completedEnrollments / totalStudents) * 100)
-      : 0
+      for (const enrollment of allEnrollments) {
+        const date = new Date(enrollment.enrolled_at)
+        // Get week start (Sunday)
+        const weekStart = new Date(date)
+        weekStart.setDate(date.getDate() - date.getDay())
+        const weekKey = weekStart.toISOString().split('T')[0]
 
-    // Get lesson performance data
+        const current = weeks.get(weekKey) || { enrollments: 0, revenue: 0 }
+        current.enrollments++
+        current.revenue += Number(course.price) || 0
+        weeks.set(weekKey, current)
+      }
+
+      // Convert to array and filter by range
+      for (const [date, data] of weeks.entries()) {
+        if (!rangeStart || new Date(date) >= rangeStart) {
+          enrollmentData.push({
+            date,
+            enrollments: data.enrollments,
+            revenue: data.revenue
+          })
+        }
+      }
+
+      // Sort by date
+      enrollmentData.sort((a, b) => a.date.localeCompare(b.date))
+    }
+
+    // ============================================
+    // LESSON PERFORMANCE
+    // ============================================
+
     const { data: lessons } = await supabase
       .from('lessons')
-      .select('id, title, order_index')
+      .select('id, title, video_duration_seconds')
       .eq('course_id', courseId)
-      .order('order_index', { ascending: true })
+      .order('display_order', { ascending: true })
 
-    const { data: lessonProgressData } = await supabase
-      .from('lesson_progress')
-      .select('lesson_id, completed, watch_time_seconds, enrollment_id')
-      .in('enrollment_id', allEnrollments?.map(e => e.id) || [])
+    const lessonPerformance = await Promise.all(
+      (lessons || []).map(async (lesson) => {
+        // Get progress for this lesson
+        let lpQuery = supabase
+          .from('lesson_progress')
+          .select('id, watch_time_seconds, is_completed')
+          .eq('lesson_id', lesson.id)
 
-    const lessonPerformance = (lessons || []).map(lesson => {
-      const lessonProgress = lessonProgressData?.filter(lp => lp.lesson_id === lesson.id) || []
-      const views = lessonProgress.length
-      const completed = lessonProgress.filter(lp => lp.completed).length
-      const lessonCompletionRate = views > 0 ? Math.round((completed / views) * 100) : 0
-      const totalWatchTime = lessonProgress.reduce((sum, lp) => sum + (lp.watch_time_seconds || 0), 0)
-      const avgDurationSeconds = views > 0 ? Math.round(totalWatchTime / views) : 0
-      const avgDuration = formatWatchTime(avgDurationSeconds)
+        if (rangeStart) {
+          lpQuery = lpQuery.gte('started_at', rangeStart.toISOString())
+        }
 
-      return {
-        title: lesson.title,
-        views,
-        completionRate: lessonCompletionRate,
-        avgDuration,
-      }
-    })
+        const { data: progress } = await lpQuery
 
-    // Calculate total views (sum of all lesson views)
-    const totalViews = lessonPerformance.reduce((sum, l) => sum + l.views, 0)
+        const views = progress?.length || 0
+        const completed = progress?.filter(p => p.is_completed).length || 0
+        const lessonCompletionRate = views > 0
+          ? Math.round((completed / views) * 100)
+          : 0
 
-    // Calculate average watch time across all enrollments
-    const totalWatchTimeSeconds = lessonProgressData?.reduce((sum, lp) => sum + (lp.watch_time_seconds || 0), 0) || 0
-    const avgWatchTime = totalStudents > 0
-      ? formatWatchTime(Math.round(totalWatchTimeSeconds / totalStudents))
-      : '0m'
+        const lessonTotalWatch = progress?.reduce((sum, p) => sum + (p.watch_time_seconds || 0), 0) || 0
+        const lessonAvgDuration = views > 0
+          ? formatDuration(Math.round(lessonTotalWatch / views))
+          : formatDuration(lesson.video_duration_seconds || 0)
 
-    // Get recent enrollments with user info
-    const { data: recentEnrollmentData } = await supabase
+        return {
+          title: lesson.title,
+          views,
+          completionRate: lessonCompletionRate,
+          avgDuration: lessonAvgDuration
+        }
+      })
+    )
+
+    // ============================================
+    // RECENT ENROLLMENTS
+    // ============================================
+
+    const { data: recentEnrollmentsData } = await supabase
       .from('enrollments')
       .select(`
         id,
         enrolled_at,
-        users!enrollments_user_id_fkey (
-          id,
+        users:user_id (
           full_name,
-          email,
           avatar_url
         )
       `)
@@ -293,115 +310,117 @@ export async function GET(
       .order('enrolled_at', { ascending: false })
       .limit(5)
 
-    const recentEnrollments = (recentEnrollmentData || []).map((enrollment: {
-      id: string
-      enrolled_at: string
-      users: {
-        id: string
-        full_name: string | null
-        email: string
-        avatar_url: string | null
-      } | {
-        id: string
-        full_name: string | null
-        email: string
-        avatar_url: string | null
-      }[] | null
-    }) => {
-      // Handle Supabase returning users as array or object
-      const user = Array.isArray(enrollment.users) ? enrollment.users[0] : enrollment.users
+    const recentEnrollments = (recentEnrollmentsData || []).map(e => {
+      // Handle Supabase join which can return object or array
+      const userData = Array.isArray(e.users) ? e.users[0] : e.users
       return {
-        id: enrollment.id,
+        id: e.id,
         user: {
-          name: user?.full_name || user?.email || 'Unknown',
-          avatar: user?.avatar_url || null,
+          name: userData?.full_name || 'Unknown',
+          avatar: userData?.avatar_url || null
         },
-        date: formatRelativeDate(new Date(enrollment.enrolled_at)),
-        source: 'Direct', // We don't track source yet, defaulting to Direct
+        date: e.enrolled_at,
+        source: 'Direct' // Would need tracking to get real source
       }
     })
 
-    // Get weekly enrollment data for chart
-    const enrollmentData = generateWeeklyData(allEnrollments || [], price, range)
+    // ============================================
+    // RECENT REVIEWS
+    // ============================================
 
-    // Build response (some fields use mock data as we don't have full tracking yet)
-    const analytics = {
+    const { data: recentReviewsData } = await supabase
+      .from('reviews')
+      .select(`
+        id,
+        rating,
+        content,
+        created_at,
+        users:user_id (
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    const recentReviews = (recentReviewsData || []).map(r => {
+      // Handle Supabase join which can return object or array
+      const userData = Array.isArray(r.users) ? r.users[0] : r.users
+      return {
+        id: r.id,
+        user: {
+          name: userData?.full_name || 'Unknown',
+          avatar: userData?.avatar_url || null
+        },
+        rating: r.rating,
+        comment: r.content,
+        date: r.created_at
+      }
+    })
+
+    // ============================================
+    // TRAFFIC SOURCES (mock data - would need tracking)
+    // ============================================
+
+    const trafficSources = [
+      { source: 'Direct', percentage: 45, color: '#3b82f6' },
+      { source: 'Search', percentage: 30, color: '#10b981' },
+      { source: 'Social', percentage: 15, color: '#8b5cf6' },
+      { source: 'Referral', percentage: 10, color: '#f59e0b' }
+    ]
+
+    // ============================================
+    // GEOGRAPHIC DATA (mock data - would need IP tracking)
+    // ============================================
+
+    const geographicData = [
+      { country: 'United States', students: Math.round((totalStudents || 0) * 0.35), percentage: 35 },
+      { country: 'India', students: Math.round((totalStudents || 0) * 0.20), percentage: 20 },
+      { country: 'United Kingdom', students: Math.round((totalStudents || 0) * 0.12), percentage: 12 },
+      { country: 'Canada', students: Math.round((totalStudents || 0) * 0.08), percentage: 8 },
+      { country: 'Germany', students: Math.round((totalStudents || 0) * 0.06), percentage: 6 }
+    ]
+
+    // ============================================
+    // BUILD RESPONSE
+    // ============================================
+
+    const analyticsData = {
       course: {
         id: course.id,
-        title: course.title,
+        title: course.title
       },
       stats: {
-        totalStudents,
-        studentsTrend,
+        totalStudents: totalStudents || 0,
+        studentsTrend: calculateTrend(totalStudents || 0, previousStudents),
         totalRevenue,
-        revenueTrend,
-        avgRating: 4.8, // Mock - no reviews table yet
-        ratingTrend: 0,
-        totalViews,
-        viewsTrend: studentsTrend, // Approximate with student trend
+        revenueTrend: calculateTrend(totalRevenue, previousRevenue),
+        avgRating: Math.round(avgRating * 10) / 10,
+        ratingTrend: calculateTrend(avgRating, previousRating),
+        totalViews: totalViews || 0,
+        viewsTrend: calculateTrend(totalViews || 0, previousViews),
         completionRate,
         avgWatchTime,
-        totalReviews: 0, // Mock - no reviews table yet
-        engagementRate: completionRate, // Use completion as engagement proxy
+        totalReviews: reviews?.length || 0,
+        engagementRate: totalStudents && totalViews
+          ? Math.round((totalViews / totalStudents) * 100)
+          : 0
       },
       enrollmentData,
       lessonPerformance,
       recentEnrollments,
-      // Mock data for features not yet implemented
-      recentReviews: getMockAnalytics(courseId, range).recentReviews,
-      trafficSources: getMockAnalytics(courseId, range).trafficSources,
-      geographicData: getMockAnalytics(courseId, range).geographicData,
+      recentReviews,
+      trafficSources,
+      geographicData
     }
 
-    return NextResponse.json(analytics)
+    return NextResponse.json(analyticsData)
   } catch (error) {
-    console.error('Analytics GET error:', error)
+    console.error('Analytics API error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch analytics' },
       { status: 500 }
     )
   }
-}
-
-// Generate weekly enrollment data for chart
-function generateWeeklyData(
-  enrollments: Array<{ enrolled_at: string }>,
-  price: number,
-  range: string
-): Array<{ date: string; enrollments: number; revenue: number }> {
-  const weeks: Record<string, number> = {}
-  const now = new Date()
-
-  // Determine how many weeks to show based on range
-  let numWeeks = 7
-  switch (range) {
-    case '7d': numWeeks = 1; break
-    case '30d': numWeeks = 4; break
-    case '90d': numWeeks = 12; break
-    case '12m': numWeeks = 52; break
-    default: numWeeks = 7
-  }
-
-  // Initialize weeks
-  for (let i = numWeeks - 1; i >= 0; i--) {
-    const weekStart = new Date(now)
-    weekStart.setDate(now.getDate() - (i * 7))
-    const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    weeks[weekKey] = 0
-  }
-
-  // Count enrollments per week
-  enrollments.forEach(e => {
-    const enrollDate = new Date(e.enrolled_at)
-    const weekKey = enrollDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    if (weeks[weekKey] !== undefined) {
-      weeks[weekKey]++
-    }
-  })
-
-  return Object.entries(weeks).map(([date, count]) => ({
-    date,
-    enrollments: count,
-    revenue: count * price,
-  }))
 }

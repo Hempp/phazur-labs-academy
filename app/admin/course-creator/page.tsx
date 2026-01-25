@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
   Sparkles,
+  Zap,
   BookOpen,
   GraduationCap,
   FileText,
@@ -251,14 +253,23 @@ export default function CourseCreatorPage() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Course Creator</h1>
+                <p className="text-gray-500">AI-Powered Education Guru</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Course Creator</h1>
-              <p className="text-gray-500">AI-Powered Education Guru</p>
-            </div>
+            <Link
+              href="/admin/course-creator/quick"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
+            >
+              <Zap className="w-4 h-4" />
+              Quick Generate
+            </Link>
           </div>
         </div>
       </div>

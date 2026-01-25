@@ -27,6 +27,26 @@ import { cn } from '@/lib/utils'
 
 type TimeRange = '7d' | '30d' | '90d' | '12m' | 'all'
 
+// Format date for display
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+// Format chart date (week labels)
+function formatChartDate(dateString: string): string {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 // Types for analytics data
 interface AnalyticsData {
   course: {
@@ -134,7 +154,7 @@ function EnrollmentChart({ data }: { data: Array<{ date: string; enrollments: nu
                 />
               </div>
             </div>
-            <span className="text-xs text-muted-foreground">{item.date.split(' ')[0]}</span>
+            <span className="text-xs text-muted-foreground">{formatChartDate(item.date)}</span>
           </div>
         ))}
       </div>
@@ -364,38 +384,44 @@ export default function CourseAnalyticsPage() {
               <CardTitle>Lesson Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {lessonPerformance.map((lesson, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <span className="w-6 text-center text-sm text-muted-foreground">{index + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{lesson.title}</p>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {lesson.views.toLocaleString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          {lesson.completionRate}%
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {lesson.avgDuration}
-                        </span>
+              {lessonPerformance.length === 0 ? (
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                  No lesson data available yet
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {lessonPerformance.map((lesson, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <span className="w-6 text-center text-sm text-muted-foreground">{index + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{lesson.title}</p>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {lesson.views.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {lesson.completionRate}%
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {lesson.avgDuration}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-24">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full"
+                            style={{ width: `${lesson.completionRate}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="w-24">
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full"
-                          style={{ width: `${lesson.completionRate}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -414,8 +440,8 @@ export default function CourseAnalyticsPage() {
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={cn('h-full rounded-full', source.color)}
-                        style={{ width: `${source.percentage}%` }}
+                        className="h-full rounded-full"
+                        style={{ width: `${source.percentage}%`, backgroundColor: source.color }}
                       />
                     </div>
                   </div>
@@ -505,19 +531,25 @@ export default function CourseAnalyticsPage() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recentEnrollments.map((enrollment) => (
-                <div key={enrollment.id} className="flex items-center gap-3">
-                  <UserAvatar
-                    user={{ name: enrollment.user.name, avatar_url: enrollment.user.avatar }}
-                    size="sm"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{enrollment.user.name}</div>
-                    <div className="text-xs text-muted-foreground">{enrollment.source}</div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{enrollment.date}</span>
+              {recentEnrollments.length === 0 ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  No enrollments yet
                 </div>
-              ))}
+              ) : (
+                recentEnrollments.map((enrollment) => (
+                  <div key={enrollment.id} className="flex items-center gap-3">
+                    <UserAvatar
+                      user={{ name: enrollment.user.name, avatar_url: enrollment.user.avatar }}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{enrollment.user.name}</div>
+                      <div className="text-xs text-muted-foreground">{enrollment.source}</div>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{formatDate(enrollment.date)}</span>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -533,26 +565,32 @@ export default function CourseAnalyticsPage() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentReviews.map((review) => (
-                <div key={review.id} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <UserAvatar
-                      user={{ name: review.user.name, avatar_url: review.user.avatar }}
-                      size="sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{review.user.name}</div>
-                      <div className="text-xs text-muted-foreground">{review.date}</div>
-                    </div>
-                    <div className="flex items-center">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={i} className="h-3 w-3 text-amber-500 fill-amber-500" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{review.comment}</p>
+              {recentReviews.length === 0 ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  No reviews yet
                 </div>
-              ))}
+              ) : (
+                recentReviews.map((review) => (
+                  <div key={review.id} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <UserAvatar
+                        user={{ name: review.user.name, avatar_url: review.user.avatar }}
+                        size="sm"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{review.user.name}</div>
+                        <div className="text-xs text-muted-foreground">{formatDate(review.date)}</div>
+                      </div>
+                      <div className="flex items-center">
+                        {Array.from({ length: review.rating }).map((_, i) => (
+                          <Star key={i} className="h-3 w-3 text-amber-500 fill-amber-500" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{review.comment}</p>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
