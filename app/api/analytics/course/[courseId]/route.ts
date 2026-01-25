@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 // Time range configurations
 const TIME_RANGES = {
@@ -48,12 +48,16 @@ export async function GET(
   { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient()
     const { courseId } = await params
     const range = (request.nextUrl.searchParams.get('range') || '30d') as TimeRange
 
     // Dev auth bypass for testing
     const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    // Use admin client in dev bypass mode to bypass RLS
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
 
     // Verify authentication (skip in dev bypass mode)
     let userId: string | null = null
