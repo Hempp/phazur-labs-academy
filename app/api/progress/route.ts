@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { enrollmentId, lessonId, watchTimeSeconds, completed } = body
+    const { enrollmentId, lessonId, watchTimeSeconds, lastPositionSeconds, completed } = body
 
     if (!enrollmentId || !lessonId) {
       return NextResponse.json(
@@ -145,6 +145,11 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Save last position for resume feature
+      if (lastPositionSeconds !== undefined) {
+        updateData.last_position_seconds = lastPositionSeconds
+      }
+
       if (completed && !existingProgress.completed) {
         updateData.completed = true
         updateData.completed_at = new Date().toISOString()
@@ -170,6 +175,7 @@ export async function POST(request: NextRequest) {
           enrollment_id: enrollmentId,
           lesson_id: lessonId,
           watch_time_seconds: watchTimeSeconds || 0,
+          last_position_seconds: lastPositionSeconds || 0,
           completed: completed || false,
           completed_at: completed ? new Date().toISOString() : null,
         })

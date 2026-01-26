@@ -93,8 +93,11 @@ export async function updateSession(request: NextRequest) {
   const protectedRoutes = ['/dashboard', '/courses/create', '/api/protected']
   const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/callback', '/auth/reset-password']
 
+  // Course learn pages require authentication (but not enrollment check - that's done at page level)
+  const isLearnPage = /^\/courses\/[^/]+\/learn/.test(pathname)
+
   // Check if accessing protected route without session
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route)) || isLearnPage
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
   if (isProtectedRoute && !user) {

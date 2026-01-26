@@ -88,10 +88,10 @@ const mockLessonData = {
       title: 'Introduction to Advanced Patterns',
       duration: 45,
       lessons: [
-        { id: 'l1', title: 'Course Overview', type: 'video' as const, duration: 8, completed: true },
-        { id: 'l2', title: 'Setting Up the Development Environment', type: 'video' as const, duration: 12, completed: true },
-        { id: 'l3', title: 'Understanding Pattern Categories', type: 'video' as const, duration: 15, completed: true },
-        { id: 'l4', title: 'When to Use Which Pattern', type: 'video' as const, duration: 10, completed: true },
+        { id: 'l1', title: 'Course Overview', type: 'video' as const, duration: 8, completed: true, isFreePreview: true },
+        { id: 'l2', title: 'Setting Up the Development Environment', type: 'video' as const, duration: 12, completed: true, isFreePreview: true },
+        { id: 'l3', title: 'Understanding Pattern Categories', type: 'video' as const, duration: 15, completed: true, isFreePreview: false },
+        { id: 'l4', title: 'When to Use Which Pattern', type: 'video' as const, duration: 10, completed: true, isFreePreview: false },
       ],
     },
     {
@@ -99,13 +99,13 @@ const mockLessonData = {
       title: 'Compound Components Pattern',
       duration: 120,
       lessons: [
-        { id: 'l5', title: 'What are Compound Components?', type: 'video' as const, duration: 18, completed: false },
-        { id: 'l6', title: 'Building a Tabs Component', type: 'video' as const, duration: 25, completed: false },
-        { id: 'l7', title: 'Using Context for Implicit State', type: 'video' as const, duration: 22, completed: false },
-        { id: 'l8', title: 'Flexible Compound Components', type: 'video' as const, duration: 20, completed: false },
-        { id: 'l9', title: 'Real-world Examples', type: 'video' as const, duration: 25, completed: false },
-        { id: 'l10', title: 'Exercise: Build a Menu Component', type: 'exercise' as const, duration: 10, completed: false },
-        { id: 'lesson-react-2-4', title: 'Assignment: Build a Menu Component', type: 'assignment' as const, duration: 60, completed: false },
+        { id: 'l5', title: 'What are Compound Components?', type: 'video' as const, duration: 18, completed: false, isFreePreview: true },
+        { id: 'l6', title: 'Building a Tabs Component', type: 'video' as const, duration: 25, completed: false, isFreePreview: false },
+        { id: 'l7', title: 'Using Context for Implicit State', type: 'video' as const, duration: 22, completed: false, isFreePreview: false },
+        { id: 'l8', title: 'Flexible Compound Components', type: 'video' as const, duration: 20, completed: false, isFreePreview: false },
+        { id: 'l9', title: 'Real-world Examples', type: 'video' as const, duration: 25, completed: false, isFreePreview: false },
+        { id: 'l10', title: 'Exercise: Build a Menu Component', type: 'exercise' as const, duration: 10, completed: false, isFreePreview: false },
+        { id: 'lesson-react-2-4', title: 'Assignment: Build a Menu Component', type: 'assignment' as const, duration: 60, completed: false, isFreePreview: false },
       ],
     },
     {
@@ -113,9 +113,9 @@ const mockLessonData = {
       title: 'Custom Hooks Deep Dive',
       duration: 150,
       lessons: [
-        { id: 'l11', title: 'Custom Hooks Fundamentals', type: 'video' as const, duration: 20, completed: false },
-        { id: 'l12', title: 'Building useToggle and useBoolean', type: 'video' as const, duration: 18, completed: false },
-        { id: 'l13', title: 'Data Fetching with Custom Hooks', type: 'video' as const, duration: 28, completed: false },
+        { id: 'l11', title: 'Custom Hooks Fundamentals', type: 'video' as const, duration: 20, completed: false, isFreePreview: false },
+        { id: 'l12', title: 'Building useToggle and useBoolean', type: 'video' as const, duration: 18, completed: false, isFreePreview: false },
+        { id: 'l13', title: 'Data Fetching with Custom Hooks', type: 'video' as const, duration: 28, completed: false, isFreePreview: false },
       ],
     },
   ],
@@ -348,10 +348,46 @@ export default function CourseLearnPage() {
     modules: typeof mockLessonData.modules
   }>(mockLessonData)
   const [isLoadingLesson, setIsLoadingLesson] = useState(true)
+  // Track saved position from API for resume feature
+  const [savedPosition, setSavedPosition] = useState<number | null>(null)
+  // Track enrollment status for access control
+  const [enrollmentId, setEnrollmentId] = useState<string | null>(null)
+  const [isCheckingEnrollment, setIsCheckingEnrollment] = useState(true)
+  const [isFreePreviewLesson, setIsFreePreviewLesson] = useState(false)
 
   const lessonId = searchParams.get('lesson') || 'l5'
   const activeTab = searchParams.get('tab') || 'overview'
   const courseSlug = params.slug as string
+
+  // Check enrollment status for access control
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (!courseSlug || !isAuthenticated) {
+        setIsCheckingEnrollment(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/enrollments?courseSlug=${courseSlug}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.enrollment) {
+            setEnrollmentId(data.enrollment.id)
+          } else {
+            // User not enrolled - check if it's a free preview lesson
+            // If not, they'll be redirected after lesson data loads
+            setEnrollmentId(null)
+          }
+        }
+      } catch (err) {
+        console.error('Enrollment check error:', err)
+      } finally {
+        setIsCheckingEnrollment(false)
+      }
+    }
+
+    checkEnrollment()
+  }, [courseSlug, isAuthenticated])
 
   // Fetch lesson data from API
   useEffect(() => {
@@ -421,8 +457,27 @@ export default function CourseLearnPage() {
           if (data.progress?.progress_percent) {
             setCurrentCourseProgress(data.progress.progress_percent)
           }
+
+          // Check if this is a free preview lesson
+          const isPreview = data.lesson.isFreePreview === true
+          setIsFreePreviewLesson(isPreview)
+
+          // Access control is handled in render via the access denied screen
+          // (no redirect needed here - let the UI handle it)
+
+          // Set saved position for resume feature
+          if (data.progress?.last_position_seconds) {
+            setSavedPosition(data.progress.last_position_seconds)
+          } else {
+            setSavedPosition(null)
+          }
         } else {
           console.log('Using mock data - API returned:', response.status)
+          // Using mock data - set preview flag based on mock data
+          const mockLesson = mockLessonData.modules.flatMap(m => m.lessons).find(l => l.id === lessonId)
+          if (mockLesson && 'isFreePreview' in mockLesson) {
+            setIsFreePreviewLesson(mockLesson.isFreePreview === true)
+          }
         }
       } catch (err) {
         console.log('Using mock data - fetch error:', err)
@@ -431,8 +486,11 @@ export default function CourseLearnPage() {
       }
     }
 
-    fetchLessonData()
-  }, [courseSlug, lessonId])
+    // Wait for enrollment check before fetching lesson data
+    if (!isCheckingEnrollment) {
+      fetchLessonData()
+    }
+  }, [courseSlug, lessonId, enrollmentId, isCheckingEnrollment, router])
 
   const { lesson, course, modules } = lessonData
 
@@ -447,6 +505,8 @@ export default function CourseLearnPage() {
     isCompleting,
     error: progressError,
   } = useProgress({
+    enrollmentId: enrollmentId || undefined,
+    courseId: course.id,
     lessonId,
     onComplete: (response) => {
       if (response.progress) {
@@ -601,13 +661,52 @@ export default function CourseLearnPage() {
     }
   }, [isLessonCompleted, handleComplete])
 
-  // Show loading state while fetching lesson data
-  if (isLoadingLesson) {
+  // Show loading state while checking enrollment or fetching lesson data
+  if (isCheckingEnrollment || isLoadingLesson) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading lesson...</p>
+          <p className="text-muted-foreground">
+            {isCheckingEnrollment ? 'Checking access...' : 'Loading lesson...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show access denied if not enrolled and not a free preview
+  // This applies to both authenticated users without enrollment AND unauthenticated users
+  if (!isFreePreviewLesson && !enrollmentId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <Lock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">
+            {isAuthenticated ? 'Enrollment Required' : 'Sign In Required'}
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            {isAuthenticated
+              ? 'You need to enroll in this course to access this lesson. Some lessons may be available as free previews.'
+              : 'Please sign in and enroll in this course to access this lesson.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {!isAuthenticated && (
+              <Link
+                href={`/auth/login?redirect=/courses/${courseSlug}/learn?lesson=${lessonId}`}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
+            <Link
+              href={`/courses/${courseSlug}`}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border rounded-lg font-medium hover:bg-muted transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              View Course Details
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -781,7 +880,12 @@ export default function CourseLearnPage() {
                 <AudioPlayer
                   src={lesson.videoUrl}
                   title={lesson.title}
-                  initialProgress={videoProgress}
+                  // Calculate initial progress from saved position for resume feature
+                  initialProgress={
+                    savedPosition && lesson.duration > 0
+                      ? Math.min((savedPosition / (lesson.duration * 60)) * 100, 100)
+                      : videoProgress
+                  }
                   onProgress={handleProgress}
                   onComplete={handleVideoComplete}
                   className="aspect-video"
@@ -791,7 +895,13 @@ export default function CourseLearnPage() {
                   src={lesson.videoUrl}
                   title={lesson.title}
                   chapters={lesson.chapters}
-                  initialProgress={videoProgress}
+                  // Calculate initial progress from saved position for resume feature
+                  // savedPosition is in seconds, lesson.duration is in minutes
+                  initialProgress={
+                    savedPosition && lesson.duration > 0
+                      ? Math.min((savedPosition / (lesson.duration * 60)) * 100, 100)
+                      : videoProgress
+                  }
                   onProgress={handleProgress}
                   onComplete={handleVideoComplete}
                   className="aspect-video"

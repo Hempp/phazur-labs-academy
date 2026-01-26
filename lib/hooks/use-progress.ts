@@ -51,11 +51,13 @@ export function useProgress({
   // Throttle progress updates (save every 30 seconds while watching)
   const lastSaveRef = useRef<number>(0)
   const watchTimeRef = useRef<number>(0)
+  const lastPositionRef = useRef<number>(0)
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Track watch time
+  // Track watch time and current position
   const updateWatchTime = useCallback((seconds: number) => {
     watchTimeRef.current = seconds
+    lastPositionRef.current = seconds
   }, [])
 
   // Save progress to API (throttled)
@@ -79,6 +81,7 @@ export function useProgress({
           enrollmentId,
           lessonId,
           watchTimeSeconds: Math.floor(watchTimeRef.current),
+          lastPositionSeconds: Math.floor(lastPositionRef.current),
         }),
       })
 
