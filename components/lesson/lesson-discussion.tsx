@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { MessageSquare, Plus, ChevronRight, CheckCircle, Pin, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { MessageSquare, Plus, ChevronRight, CheckCircle, Pin, Loader2, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 interface Discussion {
   id: string
@@ -54,12 +55,10 @@ export function LessonDiscussion({
   const [creating, setCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
+  const [isRealtime, setIsRealtime] = useState(false)
 
-  useEffect(() => {
-    fetchDiscussions()
-  }, [courseId, lessonId])
-
-  const fetchDiscussions = async () => {
+  // Memoized fetch function to prevent re-renders
+  const fetchDiscussions = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -80,7 +79,94 @@ export function LessonDiscussion({
     } finally {
       setLoading(false)
     }
-  }
+  }, [courseId, lessonId])
+
+  // Initial fetch and real-time subscription
+  useEffect(() => {
+    fetchDiscussions()
+
+    // Set up real-time subscription for new discussions
+    const supabase = createClient()
+
+    // Skip real-time if Supabase is not configured
+    if (!supabase) {
+      return
+    }
+
+    // Subscribe to new discussions for this course/lesson
+    const channel = supabase
+      .channel(`discussions:${courseId}${lessonId ? `:${lessonId}` : ''}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'discussions',
+          filter: lessonId
+            ? `course_id=eq.${courseId},lesson_id=eq.${lessonId}`
+            : `course_id=eq.${courseId}`,
+        },
+        async (payload) => {
+          // Fetch the full discussion with user data
+          const { data: newDiscussion } = await supabase
+            .from('discussions')
+            .select(`
+              id, title, content, is_pinned, is_resolved, created_at,
+              user:users!discussions_user_id_fkey (id, full_name, avatar_url)
+            `)
+            .eq('id', payload.new.id)
+            .single()
+
+          if (newDiscussion) {
+            const formatted: Discussion = {
+              id: newDiscussion.id,
+              title: newDiscussion.title,
+              content: newDiscussion.content,
+              is_pinned: newDiscussion.is_pinned,
+              is_resolved: newDiscussion.is_resolved,
+              view_count: 0,
+              created_at: newDiscussion.created_at,
+              user: Array.isArray(newDiscussion.user)
+                ? newDiscussion.user[0] as Discussion['user']
+                : newDiscussion.user as Discussion['user'],
+              replies: [{ count: 0 }],
+            }
+
+            setDiscussions(prev => {
+              // Don't add if already exists (from optimistic update)
+              if (prev.some(d => d.id === formatted.id)) return prev
+              return [formatted, ...prev]
+            })
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'discussions',
+        },
+        (payload) => {
+          // Update discussion in state when it's resolved/pinned
+          setDiscussions(prev =>
+            prev.map(d =>
+              d.id === payload.new.id
+                ? { ...d, is_pinned: payload.new.is_pinned, is_resolved: payload.new.is_resolved }
+                : d
+            )
+          )
+        }
+      )
+      .subscribe((status) => {
+        setIsRealtime(status === 'SUBSCRIBED')
+      })
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [courseId, lessonId, fetchDiscussions])
 
   const handleCreateDiscussion = async () => {
     if (!newTitle.trim() || !newContent.trim()) return
@@ -167,7 +253,15 @@ export function LessonDiscussion({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Discussion</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle>Discussion</CardTitle>
+          {isRealtime && (
+            <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300">
+              <Wifi className="h-3 w-3 mr-1" />
+              Live
+            </Badge>
+          )}
+        </div>
         {isAuthenticated ? (
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>

@@ -868,6 +868,12 @@ async function seedCourseContent(courseId: string, courseTitle: string, template
       // Generate video script
       const videoScript = generateVideoScript(lessonTemplate, globalLessonNum, totalLessons, courseTitle)
 
+      // Ensure we have a valid module
+      if (!courseModule) {
+        console.error(`    ❌ No module available for lesson: ${lessonTemplate.title}`)
+        continue
+      }
+
       // Create lesson
       const { data: newLesson, error: lessonError } = await supabase
         .from('lessons')
