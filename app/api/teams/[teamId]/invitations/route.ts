@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/email'
 
 interface RouteParams {
   params: Promise<{ teamId: string }>
@@ -92,20 +93,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Check if user is owner or admin
-    const { data: membership } = await supabase
+    // Check if user is owner or admin and get their name
+    const { data: membershipWithUser } = await supabase
       .from('team_members')
-      .select('role')
+      .select(`
+        role,
+        user:users!team_members_user_id_fkey (
+          full_name
+        )
+      `)
       .eq('team_id', teamId)
       .eq('user_id', user.id)
       .single()
 
-    if (!membership || !['owner', 'admin'].includes(membership.role)) {
+    if (!membershipWithUser || !['owner', 'admin'].includes(membershipWithUser.role)) {
       return NextResponse.json(
         { error: 'Only team owners and admins can send invitations' },
         { status: 403 }
       )
     }
+
+    const inviterName = (membershipWithUser.user as { full_name?: string })?.full_name || 'A team admin'
 
     const body = await request.json()
     const { email, role = 'member' } = body
@@ -198,9 +206,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    // TODO: Send invitation email
-    // In production, this would send an email with the invitation token
-    // const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/teams/join?token=${invitation.token}`
+    // Send invitation email
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/teams/join?token=${invitation.token}`
+
+    const emailResult = await sendEmail({
+      to: email,
+      type: 'team_invitation',
+      data: {
+        teamName: team?.name || 'a team',
+        inviterName,
+        inviteUrl,
+      },
+    })
+
+    if (!emailResult.success) {
+      console.error('Failed to send invitation email:', emailResult.error)
+      // Don't fail the request - invitation was created successfully
+    }
 
     return NextResponse.json({
       message: 'Invitation sent successfully',
@@ -208,6 +230,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         ...invitation,
         team_name: team?.name,
       },
+      emailSent: emailResult.success,
     })
   } catch (error) {
     console.error('Team invitations POST error:', error)
