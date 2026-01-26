@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Upload,
   Video,
@@ -19,33 +19,37 @@ import {
   Play,
   Pause,
   Volume2,
-  VolumeX
+  VolumeX,
+  Loader2,
+  Cloud,
+  Server
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-// Mock data for courses and lessons
-const courses = [
-  { id: 1, title: 'Advanced React Patterns', lessons: [
-    { id: 101, title: 'Introduction to Advanced Patterns' },
-    { id: 102, title: 'Compound Components' },
-    { id: 103, title: 'Render Props Pattern' }
-  ]},
-  { id: 2, title: 'Node.js Masterclass', lessons: [
-    { id: 201, title: 'Getting Started with Node' },
-    { id: 202, title: 'Express Framework' },
-    { id: 203, title: 'REST API Design' }
-  ]},
-  { id: 3, title: 'TypeScript Deep Dive', lessons: [
-    { id: 301, title: 'Type System Fundamentals' },
-    { id: 302, title: 'Advanced Types' },
-    { id: 303, title: 'Generics in Depth' }
-  ]},
-  { id: 4, title: 'Next.js Full Stack', lessons: [
-    { id: 401, title: 'Next.js Basics' },
-    { id: 402, title: 'Server Components' },
-    { id: 403, title: 'API Routes' }
-  ]}
-]
+// Types for courses and lessons from API
+interface Lesson {
+  id: string
+  title: string
+  content_type?: string
+}
+
+interface Course {
+  id: string
+  title: string
+  lessons?: Lesson[]
+}
+
+interface VideoProviderInfo {
+  provider: string
+  maxFileSizeMB: number
+  allowedTypes: string[]
+  features: {
+    cdn: boolean
+    signedUrls: boolean
+    thumbnailGeneration: boolean
+    transcoding: boolean
+  }
+}
 
 interface UploadedFile {
   id: string
@@ -80,10 +84,100 @@ export default function VideoUploadPage() {
   ])
   const [selectedAutoThumb, setSelectedAutoThumb] = useState(0)
 
+  // API data state
+  const [courses, setCourses] = useState<Course[]>([])
+  const [lessons, setLessons] = useState<Lesson[]>([])
+  const [providerInfo, setProviderInfo] = useState<VideoProviderInfo | null>(null)
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true)
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
-  const selectedCourse = courses.find(c => c.id === Number(metadata.courseId))
+  const selectedCourse = courses.find(c => c.id === metadata.courseId)
+
+  // Fetch video provider info on mount
+  useEffect(() => {
+    const fetchProviderInfo = async () => {
+      try {
+        const response = await fetch('/api/admin/videos/upload')
+        if (response.ok) {
+          const data = await response.json()
+          setProviderInfo(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch provider info:', err)
+      }
+    }
+    fetchProviderInfo()
+  }, [])
+
+  // Fetch courses on mount
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoadingCourses(true)
+      try {
+        const response = await fetch('/api/admin/courses')
+        if (response.ok) {
+          const data = await response.json()
+          setCourses(data.courses || [])
+        } else {
+          // Fallback to mock data for development
+          setCourses([
+            { id: '1', title: 'Advanced React Patterns' },
+            { id: '2', title: 'Node.js Masterclass' },
+            { id: '3', title: 'TypeScript Deep Dive' },
+            { id: '4', title: 'Next.js Full Stack' },
+          ])
+        }
+      } catch (err) {
+        console.error('Failed to fetch courses:', err)
+        // Fallback to mock data
+        setCourses([
+          { id: '1', title: 'Advanced React Patterns' },
+          { id: '2', title: 'Node.js Masterclass' },
+        ])
+      } finally {
+        setIsLoadingCourses(false)
+      }
+    }
+    fetchCourses()
+  }, [])
+
+  // Fetch lessons when course changes
+  useEffect(() => {
+    const fetchLessons = async () => {
+      if (!metadata.courseId) {
+        setLessons([])
+        return
+      }
+
+      setIsLoadingLessons(true)
+      try {
+        const response = await fetch(`/api/admin/courses/${metadata.courseId}/lessons`)
+        if (response.ok) {
+          const data = await response.json()
+          setLessons(data.lessons || [])
+        } else {
+          // Fallback mock lessons
+          setLessons([
+            { id: `${metadata.courseId}-1`, title: 'Introduction' },
+            { id: `${metadata.courseId}-2`, title: 'Getting Started' },
+            { id: `${metadata.courseId}-3`, title: 'Advanced Topics' },
+          ])
+        }
+      } catch (err) {
+        console.error('Failed to fetch lessons:', err)
+        setLessons([
+          { id: `${metadata.courseId}-1`, title: 'Introduction' },
+          { id: `${metadata.courseId}-2`, title: 'Getting Started' },
+        ])
+      } finally {
+        setIsLoadingLessons(false)
+      }
+    }
+    fetchLessons()
+  }, [metadata.courseId])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -95,6 +189,67 @@ export default function VideoUploadPage() {
     setIsDragging(false)
   }, [])
 
+  // Real upload function using the API
+  const uploadFile = useCallback(async (uploadedFile: UploadedFile) => {
+    const formData = new FormData()
+    formData.append('file', uploadedFile.file)
+    formData.append('courseId', metadata.courseId)
+    if (metadata.lessonId) {
+      formData.append('lessonId', metadata.lessonId)
+    }
+    formData.append('title', metadata.title || uploadedFile.name)
+    formData.append('description', metadata.description)
+
+    try {
+      // Use XMLHttpRequest for upload progress tracking
+      const xhr = new XMLHttpRequest()
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100
+          setFiles(prev => prev.map(f =>
+            f.id === uploadedFile.id ? { ...f, progress } : f
+          ))
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = JSON.parse(xhr.responseText)
+          setFiles(prev => prev.map(f =>
+            f.id === uploadedFile.id
+              ? { ...f, progress: 100, status: 'complete', duration: response.duration }
+              : f
+          ))
+          toast.success(`${uploadedFile.name} uploaded successfully!`)
+        } else {
+          const error = JSON.parse(xhr.responseText)
+          setFiles(prev => prev.map(f =>
+            f.id === uploadedFile.id ? { ...f, status: 'error' } : f
+          ))
+          toast.error(error.error || 'Upload failed')
+        }
+      }
+
+      xhr.onerror = () => {
+        setFiles(prev => prev.map(f =>
+          f.id === uploadedFile.id ? { ...f, status: 'error' } : f
+        ))
+        toast.error('Upload failed - network error')
+      }
+
+      xhr.open('POST', '/api/admin/videos/upload')
+      xhr.send(formData)
+
+    } catch (error) {
+      setFiles(prev => prev.map(f =>
+        f.id === uploadedFile.id ? { ...f, status: 'error' } : f
+      ))
+      toast.error('Upload failed')
+    }
+  }, [metadata.courseId, metadata.lessonId, metadata.title, metadata.description])
+
+  // Fallback simulation for development without API
   const simulateUpload = useCallback((fileId: string) => {
     let progress = 0
     const interval = setInterval(() => {
@@ -132,11 +287,15 @@ export default function VideoUploadPage() {
 
     setFiles(prev => [...prev, ...uploadedFiles])
 
-    // Simulate upload progress for each file
+    // Use real upload if course is selected, otherwise simulate
     uploadedFiles.forEach(uploadedFile => {
-      simulateUpload(uploadedFile.id)
+      if (metadata.courseId) {
+        uploadFile(uploadedFile)
+      } else {
+        simulateUpload(uploadedFile.id)
+      }
     })
-  }, [simulateUpload])
+  }, [simulateUpload, uploadFile, metadata.courseId])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -583,16 +742,21 @@ export default function VideoUploadPage() {
                       courseId: e.target.value,
                       lessonId: ''
                     }))}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background appearance-none cursor-pointer pr-10"
+                    disabled={isLoadingCourses}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background appearance-none cursor-pointer pr-10 disabled:opacity-50"
                   >
-                    <option value="">Select a course</option>
+                    <option value="">{isLoadingCourses ? 'Loading courses...' : 'Select a course'}</option>
                     {courses.map((course) => (
                       <option key={course.id} value={course.id}>
                         {course.title}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  {isLoadingCourses ? (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+                  ) : (
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  )}
                 </div>
               </div>
 
@@ -602,19 +766,42 @@ export default function VideoUploadPage() {
                   <select
                     value={metadata.lessonId}
                     onChange={(e) => setMetadata(prev => ({ ...prev, lessonId: e.target.value }))}
-                    disabled={!metadata.courseId}
+                    disabled={!metadata.courseId || isLoadingLessons}
                     className="w-full px-4 py-2 border border-border rounded-lg bg-background appearance-none cursor-pointer pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <option value="">Select a lesson</option>
-                    {selectedCourse?.lessons.map((lesson) => (
+                    <option value="">{isLoadingLessons ? 'Loading lessons...' : 'Select a lesson'}</option>
+                    {lessons.map((lesson) => (
                       <option key={lesson.id} value={lesson.id}>
                         {lesson.title}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  {isLoadingLessons ? (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+                  ) : (
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  )}
                 </div>
               </div>
+
+              {/* Video Provider Info */}
+              {providerInfo && (
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {providerInfo.provider === 'bunnycdn' ? (
+                      <Cloud className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Server className="h-4 w-4 text-blue-500" />
+                    )}
+                    <span>
+                      Storage: {providerInfo.provider === 'bunnycdn' ? 'BunnyCDN' : 'Supabase'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Max file size: {providerInfo.maxFileSizeMB}MB
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
