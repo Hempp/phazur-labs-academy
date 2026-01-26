@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Search,
   Download,
@@ -25,11 +25,46 @@ import {
   Video,
   ArrowUpDown,
   Shield,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react'
 
-// Mock instructor data
-const instructors = [
+// Type definitions for API response
+interface Instructor {
+  id: string
+  name: string
+  email: string
+  avatar: string | null
+  specialty: string
+  totalCourses: number
+  activeCourses: number
+  totalStudents: number
+  rating: number
+  totalRevenue: number
+  status: 'active' | 'pending' | 'inactive'
+  verified: boolean
+  joinDate: string
+  lastActive: string
+  payout: string
+}
+
+interface InstructorStats {
+  totalInstructors: number
+  activeInstructors: number
+  totalCourses: number
+  totalRevenue: number
+  avgRating: number
+}
+
+interface InstructorsResponse {
+  instructors: Instructor[]
+  stats: InstructorStats
+  specialties: string[]
+  total: number
+}
+
+// Mock instructor data (fallback)
+const MOCK_INSTRUCTORS: Instructor[] = [
   {
     id: '1',
     name: 'Dr. Alex Turner',
@@ -151,6 +186,14 @@ const instructors = [
   },
 ]
 
+const MOCK_STATS: InstructorStats = {
+  totalInstructors: MOCK_INSTRUCTORS.length,
+  activeInstructors: MOCK_INSTRUCTORS.filter(i => i.status === 'active').length,
+  totalCourses: MOCK_INSTRUCTORS.reduce((sum, i) => sum + i.totalCourses, 0),
+  totalRevenue: MOCK_INSTRUCTORS.reduce((sum, i) => sum + i.totalRevenue, 0),
+  avgRating: Number((MOCK_INSTRUCTORS.reduce((sum, i) => sum + i.rating, 0) / MOCK_INSTRUCTORS.length).toFixed(1)),
+}
+
 const statusColors = {
   active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
@@ -163,8 +206,40 @@ export default function InstructorsPage() {
   const [specialtyFilter, setSpecialtyFilter] = useState('all')
   const [selectedInstructors, setSelectedInstructors] = useState<string[]>([])
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [instructors, setInstructors] = useState<Instructor[]>(MOCK_INSTRUCTORS)
+  const [stats, setStats] = useState<InstructorStats>(MOCK_STATS)
+  const [specialties, setSpecialties] = useState<string[]>([...new Set(MOCK_INSTRUCTORS.map(i => i.specialty))])
 
-  const specialties = [...new Set(instructors.map(i => i.specialty))]
+  // Fetch instructors from API
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        setLoading(true)
+        const params = new URLSearchParams()
+        if (searchQuery) params.set('search', searchQuery)
+        if (statusFilter !== 'all') params.set('status', statusFilter)
+        if (specialtyFilter !== 'all') params.set('specialty', specialtyFilter)
+
+        const response = await fetch(`/api/admin/instructors?${params.toString()}`)
+        if (!response.ok) throw new Error('Failed to fetch instructors')
+
+        const data: InstructorsResponse = await response.json()
+        setInstructors(data.instructors)
+        setStats(data.stats)
+        if (data.specialties.length > 0) {
+          setSpecialties(data.specialties)
+        }
+      } catch (error) {
+        console.error('Instructors fetch error:', error)
+        // Keep mock data on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchInstructors()
+  }, [searchQuery, statusFilter, specialtyFilter])
 
   const filteredInstructors = instructors.filter(instructor => {
     const matchesSearch = instructor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -188,12 +263,49 @@ export default function InstructorsPage() {
     )
   }
 
-  // Stats calculations
-  const totalInstructors = instructors.length
-  const activeInstructors = instructors.filter(i => i.status === 'active').length
-  const totalCourses = instructors.reduce((acc, i) => acc + i.totalCourses, 0)
-  const totalRevenue = instructors.reduce((acc, i) => acc + i.totalRevenue, 0)
-  const avgRating = (instructors.reduce((acc, i) => acc + i.rating, 0) / instructors.length).toFixed(1)
+  // Use stats from API (or computed from local data if API didn't return stats)
+  const totalInstructors = stats.totalInstructors
+  const activeInstructors = stats.activeInstructors
+  const totalCourses = stats.totalCourses
+  const totalRevenue = stats.totalRevenue
+  const avgRating = stats.avgRating.toFixed(1)
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center gap-4 py-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
+            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <LoadingSkeleton />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -523,6 +635,23 @@ export default function InstructorsPage() {
               ))}
             </tbody>
           </table>
+
+          {/* Empty State */}
+          {filteredInstructors.length === 0 && (
+            <div className="p-12 text-center">
+              <GraduationCap className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium mb-2">No instructors found</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchQuery || statusFilter !== 'all' || specialtyFilter !== 'all'
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Get started by inviting your first instructor.'}
+              </p>
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <UserPlus className="h-4 w-4" />
+                Invite Instructor
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
