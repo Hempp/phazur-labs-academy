@@ -183,7 +183,7 @@ export async function GET(
     // Lesson progress for views and completion
     let progressQuery = supabase
       .from('lesson_progress')
-      .select('id, watch_time_seconds, is_completed, lesson_id')
+      .select('id, watch_time_seconds, is_completed, lesson_id', { count: 'exact' })
       .eq('course_id', courseId)
 
     if (rangeStart) {
