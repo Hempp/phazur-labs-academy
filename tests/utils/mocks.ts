@@ -69,10 +69,14 @@ export function createMockSupabaseClient(overrides: Record<string, unknown> = {}
     }
   })
 
+  const authOverrides = typeof overrides.auth === 'object' && overrides.auth !== null
+    ? overrides.auth as Record<string, unknown>
+    : {}
+
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
-      ...overrides.auth,
+      ...authOverrides,
     },
     from: vi.fn().mockReturnValue(chainMethods),
     ...overrides,

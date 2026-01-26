@@ -15,8 +15,15 @@ import {
   FastForward,
   Loader2,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// Completion threshold - lesson marked complete when this % is watched
+const COMPLETION_THRESHOLD = 90
+
+// Resume prompt threshold - show prompt if more than this % was watched
+const RESUME_PROMPT_THRESHOLD = 5
 
 interface VideoChapter {
   id: string
@@ -80,6 +87,8 @@ export function VideoPlayer({
   const [hasCompleted, setHasCompleted] = useState(false)
   const [currentChapter, setCurrentChapter] = useState<VideoChapter | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showResumePrompt, setShowResumePrompt] = useState(false)
+  const [savedResumeTime, setSavedResumeTime] = useState(0)
 
   // Check for empty/invalid src on mount
   useEffect(() => {
@@ -89,13 +98,33 @@ export function VideoPlayer({
     }
   }, [src])
 
-  // Initialize video progress
+  // Initialize video progress - show resume prompt if significant progress exists
   useEffect(() => {
     const video = videoRef.current
-    if (video && initialProgress > 0 && duration > 0) {
-      video.currentTime = (initialProgress / 100) * duration
+    if (video && initialProgress > RESUME_PROMPT_THRESHOLD && duration > 0 && !showResumePrompt) {
+      const resumeTime = (initialProgress / 100) * duration
+      setSavedResumeTime(resumeTime)
+      setShowResumePrompt(true)
     }
-  }, [initialProgress, duration])
+  }, [initialProgress, duration, showResumePrompt])
+
+  // Handle resume from saved position
+  const handleResume = useCallback(() => {
+    const video = videoRef.current
+    if (video && savedResumeTime > 0) {
+      video.currentTime = savedResumeTime
+    }
+    setShowResumePrompt(false)
+  }, [savedResumeTime])
+
+  // Handle start from beginning
+  const handleStartFromBeginning = useCallback(() => {
+    const video = videoRef.current
+    if (video) {
+      video.currentTime = 0
+    }
+    setShowResumePrompt(false)
+  }, [])
 
   // Handle play/pause
   const togglePlay = useCallback(() => {
@@ -158,17 +187,42 @@ export function VideoPlayer({
     setShowSettings(false)
   }, [])
 
-  // Handle fullscreen
+  // Handle fullscreen - with iOS Safari support
   const toggleFullscreen = useCallback(async () => {
     const container = containerRef.current
+    const video = videoRef.current
     if (!container) return
 
-    if (!document.fullscreenElement) {
-      await container.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      await document.exitFullscreen()
-      setIsFullscreen(false)
+    try {
+      // Check if we're currently in fullscreen
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      )
+
+      if (!isCurrentlyFullscreen) {
+        // Try standard fullscreen API first (container for controls)
+        if (container.requestFullscreen) {
+          await container.requestFullscreen()
+        } else if ((container as HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+          // Safari desktop
+          await (container as HTMLDivElement & { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen()
+        } else if (video && (video as HTMLVideoElement & { webkitEnterFullscreen?: () => void }).webkitEnterFullscreen) {
+          // iOS Safari - use video element's native fullscreen
+          (video as HTMLVideoElement & { webkitEnterFullscreen: () => void }).webkitEnterFullscreen()
+        }
+        setIsFullscreen(true)
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if ((document as Document & { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+          await (document as Document & { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen()
+        }
+        setIsFullscreen(false)
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
     }
   }, [])
 
@@ -216,8 +270,8 @@ export function VideoPlayer({
         setCurrentChapter(chapter || null)
       }
 
-      // Check completion (95% watched)
-      if (!hasCompleted && progress >= 95) {
+      // Check completion (90% watched)
+      if (!hasCompleted && progress >= COMPLETION_THRESHOLD) {
         setHasCompleted(true)
         onComplete?.()
       }
@@ -311,14 +365,23 @@ export function VideoPlayer({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [skip, toggleFullscreen, toggleMute, togglePlay])
 
-  // Fullscreen change listener
+  // Fullscreen change listener - with webkit support
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
+      const isFullscreenNow = !!(
+        document.fullscreenElement ||
+        (document as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      )
+      setIsFullscreen(isFullscreenNow)
     }
 
     document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+    }
   }, [])
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
@@ -343,6 +406,7 @@ export function VideoPlayer({
         autoPlay={autoPlay}
         playsInline
         onClick={togglePlay}
+        aria-label={title || 'Video player'}
       />
 
       {/* Loading Spinner */}
@@ -378,10 +442,38 @@ export function VideoPlayer({
         </div>
       )}
 
+      {/* Resume Prompt */}
+      {showResumePrompt && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
+          <div className="bg-card rounded-xl p-6 max-w-sm mx-4 text-center shadow-2xl">
+            <RotateCcw className="h-10 w-10 text-primary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Resume watching?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              You left off at <span className="font-medium text-foreground">{formatTime(savedResumeTime)}</span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleStartFromBeginning}
+                className="flex-1 px-4 py-2 border rounded-lg text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Start Over
+              </button>
+              <button
+                onClick={handleResume}
+                className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Resume
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Play/Pause Overlay */}
-      {!isPlaying && !isLoading && (
+      {!isPlaying && !isLoading && !showResumePrompt && (
         <button
           onClick={togglePlay}
+          aria-label={isPlaying ? 'Pause video' : 'Play video'}
           className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors"
         >
           <div className="p-5 rounded-full bg-white/90 hover:scale-110 transition-transform">
@@ -417,6 +509,13 @@ export function VideoPlayer({
           ref={progressRef}
           className="relative h-1.5 bg-white/30 rounded-full cursor-pointer group/progress mb-4"
           onClick={handleSeek}
+          role="slider"
+          aria-label="Video progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress)}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+          tabIndex={0}
         >
           {/* Buffered */}
           <div
@@ -451,11 +550,12 @@ export function VideoPlayer({
             <button
               onClick={togglePlay}
               className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+              aria-label={isPlaying ? 'Pause (Space or K)' : 'Play (Space or K)'}
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="h-5 w-5" aria-hidden="true" />
               ) : (
-                <Play className="h-5 w-5" />
+                <Play className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
 
@@ -464,8 +564,9 @@ export function VideoPlayer({
               onClick={() => skip(-10)}
               className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
               title="Back 10s (J)"
+              aria-label="Rewind 10 seconds (J)"
             >
-              <Rewind className="h-5 w-5" />
+              <Rewind className="h-5 w-5" aria-hidden="true" />
             </button>
 
             {/* Skip Forward */}
@@ -473,20 +574,22 @@ export function VideoPlayer({
               onClick={() => skip(10)}
               className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
               title="Forward 10s (L)"
+              aria-label="Forward 10 seconds (L)"
             >
-              <FastForward className="h-5 w-5" />
+              <FastForward className="h-5 w-5" aria-hidden="true" />
             </button>
 
             {/* Volume */}
-            <div className="flex items-center gap-1 group/volume">
+            <div className="flex items-center gap-1 group/volume" role="group" aria-label="Volume controls">
               <button
                 onClick={toggleMute}
                 className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                aria-label={isMuted ? 'Unmute (M)' : 'Mute (M)'}
               >
                 {isMuted || volume === 0 ? (
-                  <VolumeX className="h-5 w-5" />
+                  <VolumeX className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <Volume2 className="h-5 w-5" />
+                  <Volume2 className="h-5 w-5" aria-hidden="true" />
                 )}
               </button>
               <input
@@ -497,6 +600,7 @@ export function VideoPlayer({
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
                 className="w-0 group-hover/volume:w-20 transition-all duration-300 accent-primary"
+                aria-label={`Volume: ${Math.round(volume * 100)}%`}
               />
             </div>
 
@@ -512,13 +616,20 @@ export function VideoPlayer({
               <button
                 onClick={() => setShowSettings(!showSettings)}
                 className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors flex items-center gap-1"
+                aria-label={`Playback speed: ${playbackRate}x. Click to change`}
+                aria-expanded={showSettings}
+                aria-haspopup="menu"
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="h-5 w-5" aria-hidden="true" />
                 <span className="text-sm">{playbackRate}x</span>
               </button>
 
               {showSettings && (
-                <div className="absolute bottom-full right-0 mb-2 py-2 bg-black/90 rounded-lg min-w-[120px]">
+                <div
+                  className="absolute bottom-full right-0 mb-2 py-2 bg-black/90 rounded-lg min-w-[120px]"
+                  role="menu"
+                  aria-label="Playback speed options"
+                >
                   <div className="px-3 py-1 text-xs text-white/60 uppercase tracking-wider">
                     Playback Speed
                   </div>
@@ -530,6 +641,8 @@ export function VideoPlayer({
                         'w-full px-3 py-1.5 text-left text-sm hover:bg-white/10 transition-colors',
                         playbackRate === rate ? 'text-primary' : 'text-white'
                       )}
+                      role="menuitemradio"
+                      aria-checked={playbackRate === rate}
                     >
                       {rate === 1 ? 'Normal' : `${rate}x`}
                     </button>
@@ -543,11 +656,12 @@ export function VideoPlayer({
               onClick={toggleFullscreen}
               className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
               title="Fullscreen (F)"
+              aria-label={isFullscreen ? 'Exit fullscreen (F)' : 'Enter fullscreen (F)'}
             >
               {isFullscreen ? (
-                <Minimize className="h-5 w-5" />
+                <Minimize className="h-5 w-5" aria-hidden="true" />
               ) : (
-                <Maximize className="h-5 w-5" />
+                <Maximize className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
           </div>
