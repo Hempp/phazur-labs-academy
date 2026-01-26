@@ -2,7 +2,7 @@
 // Get discussion details, post replies, manage discussion
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 // GET: Get discussion with replies
 export async function GET(
@@ -11,7 +11,13 @@ export async function GET(
 ) {
   try {
     const { discussionId } = await params
-    const supabase = await createServerSupabaseClient()
+
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
 
     // Try to get discussion with view_count, fallback without it
     const selectWithViewCount = `
@@ -98,8 +104,8 @@ export async function GET(
         id,
         content,
         is_instructor_reply,
-        is_solution,
-        likes_count,
+        is_answer,
+        upvotes,
         created_at,
         updated_at,
         user:users!discussion_replies_user_id_fkey (
@@ -109,7 +115,7 @@ export async function GET(
         )
       `)
       .eq('discussion_id', discussionId)
-      .order('is_solution', { ascending: false })
+      .order('is_answer', { ascending: false })
       .order('created_at', { ascending: true })
 
     if (repliesError) {
@@ -145,15 +151,43 @@ export async function POST(
 ) {
   try {
     const { discussionId } = await params
-    const supabase = await createServerSupabaseClient()
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
+
+    let userId: string | null = null
+    let isInstructor = false
+
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        )
+      }
+      userId = user.id
+    } else {
+      // In dev bypass mode, get the first student from users table
+      const { data: testUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'student')
+        .limit(1)
+        .single()
+
+      if (!testUser) {
+        return NextResponse.json(
+          { error: 'No test user found' },
+          { status: 500 }
+        )
+      }
+      userId = testUser.id
     }
 
     const body = await request.json()
@@ -188,15 +222,15 @@ export async function POST(
 
     // Check if user is instructor
     const courseData = discussion.course as unknown as { instructor_id: string }
-    const isInstructor = courseData.instructor_id === user.id
+    isInstructor = courseData.instructor_id === userId
 
-    // Verify enrollment if not instructor
-    if (!isInstructor) {
+    // Skip enrollment check in dev bypass mode
+    if (!isDevBypass && !isInstructor) {
       const { data: enrollment } = await supabase
         .from('enrollments')
         .select('id')
         .eq('course_id', discussion.course_id)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single()
 
       if (!enrollment) {
@@ -212,7 +246,7 @@ export async function POST(
       .from('discussion_replies')
       .insert({
         discussion_id: discussionId,
-        user_id: user.id,
+        user_id: userId,
         content,
         is_instructor_reply: isInstructor,
       })
@@ -220,8 +254,8 @@ export async function POST(
         id,
         content,
         is_instructor_reply,
-        is_solution,
-        likes_count,
+        is_answer,
+        upvotes,
         created_at,
         user:users!discussion_replies_user_id_fkey (
           id,

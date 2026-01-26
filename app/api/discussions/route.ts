@@ -2,7 +2,7 @@
 // List and create course/lesson discussions
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 // Check if Supabase is configured
 const isSupabaseConfigured = () => {
@@ -95,9 +95,15 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const supabase = await createServerSupabaseClient()
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    // Build query with inline select for proper TypeScript inference
+    // Use admin client in dev bypass mode to bypass RLS
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
+
+    // Build query - note: view_count may not exist in all schemas
     let query = supabase
       .from('discussions')
       .select('id, title, content, is_pinned, is_resolved, created_at, updated_at, user:users!discussions_user_id_fkey(id, full_name, avatar_url)', { count: 'exact' })
@@ -117,12 +123,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Format discussions with default values
-    const formattedDiscussions = (discussions || []).map((d) => ({
-      ...d,
-      view_count: 0,  // view_count column may not exist
-      reply_count: 0  // Reply count fetched separately if needed
-    }))
+    // Get reply counts for each discussion
+    const discussionIds = (discussions || []).map(d => d.id)
+    const replyCounts: Record<string, number> = {}
+
+    if (discussionIds.length > 0) {
+      const { data: replies } = await supabase
+        .from('discussion_replies')
+        .select('discussion_id')
+        .in('discussion_id', discussionIds)
+
+      // Count replies per discussion
+      for (const reply of replies || []) {
+        replyCounts[reply.discussion_id] = (replyCounts[reply.discussion_id] || 0) + 1
+      }
+    }
+
+    // Format discussions to match UI expectations
+    const formattedDiscussions = (discussions || []).map((d) => {
+      // Handle Supabase join which can return object or array
+      const userData = Array.isArray(d.user) ? d.user[0] : d.user
+
+      return {
+        id: d.id,
+        title: d.title,
+        content: d.content,
+        is_pinned: d.is_pinned,
+        is_resolved: d.is_resolved,
+        view_count: 0, // Column may not exist - default to 0
+        created_at: d.created_at,
+        user: {
+          id: userData?.id || '',
+          full_name: userData?.full_name || 'Unknown User',
+          avatar_url: userData?.avatar_url || null,
+        },
+        // UI expects replies as array with count object
+        replies: [{ count: replyCounts[d.id] || 0 }]
+      }
+    })
 
     return NextResponse.json({
       discussions: formattedDiscussions,
@@ -145,15 +183,42 @@ export async function GET(request: NextRequest) {
 // POST: Create a new discussion
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Use admin client in dev bypass mode to bypass RLS
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    let userId: string | null = null
+
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        )
+      }
+      userId = user.id
+    } else {
+      // In dev bypass mode, get the first student from users table
+      const { data: testUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'student')
+        .limit(1)
+        .single()
+
+      if (!testUser) {
+        return NextResponse.json(
+          { error: 'No test user found' },
+          { status: 500 }
+        )
+      }
+      userId = testUser.id
     }
 
     const body = await request.json()
@@ -166,99 +231,88 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify user is enrolled or is instructor
+    // Verify course exists
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('id, instructor_id')
       .eq('id', courseId)
       .single()
 
-    const isInstructor = course?.instructor_id === user.id
+    if (!course) {
+      return NextResponse.json(
+        { error: 'Course not found' },
+        { status: 404 }
+      )
+    }
 
-    if (!isInstructor) {
-      const { data: enrollment } = await supabase
-        .from('enrollments')
-        .select('id')
-        .eq('course_id', courseId)
-        .eq('user_id', user.id)
-        .single()
+    // Skip enrollment check in dev bypass mode
+    if (!isDevBypass) {
+      const isInstructor = course.instructor_id === userId
 
-      if (!enrollment) {
-        return NextResponse.json(
-          { error: 'You must be enrolled in this course to post discussions' },
-          { status: 403 }
-        )
+      if (!isInstructor) {
+        const { data: enrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('course_id', courseId)
+          .eq('user_id', userId)
+          .single()
+
+        if (!enrollment) {
+          return NextResponse.json(
+            { error: 'You must be enrolled in this course to post discussions' },
+            { status: 403 }
+          )
+        }
       }
     }
 
-    // Create discussion (try with view_count, fallback without)
-    const selectWithViewCount = `
-      id,
-      title,
-      content,
-      is_pinned,
-      is_resolved,
-      view_count,
-      created_at,
-      user:users!discussions_user_id_fkey (
-        id,
-        full_name,
-        avatar_url
-      )
-    `
-    const selectWithoutViewCount = `
-      id,
-      title,
-      content,
-      is_pinned,
-      is_resolved,
-      created_at,
-      user:users!discussions_user_id_fkey (
-        id,
-        full_name,
-        avatar_url
-      )
-    `
-
-    let { data: discussion, error: insertError } = await supabase
+    // Create discussion
+    const { data: discussion, error: insertError } = await supabase
       .from('discussions')
       .insert({
         course_id: courseId,
         lesson_id: lessonId || null,
-        user_id: user.id,
+        user_id: userId,
         title,
         content,
       })
-      .select(selectWithViewCount)
+      .select(`
+        id,
+        title,
+        content,
+        is_pinned,
+        is_resolved,
+        created_at,
+        user:users!discussions_user_id_fkey (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
       .single()
-
-    // If view_count column doesn't exist, retry without it
-    if (insertError?.message?.includes('view_count')) {
-      const result = await supabase
-        .from('discussions')
-        .insert({
-          course_id: courseId,
-          lesson_id: lessonId || null,
-          user_id: user.id,
-          title,
-          content,
-        })
-        .select(selectWithoutViewCount)
-        .single()
-      // Use type assertion since result has same shape minus view_count
-      discussion = result.data as typeof discussion
-      insertError = result.error
-    }
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
+    // Format response to match UI expectations
+    const userData = Array.isArray(discussion?.user) ? discussion.user[0] : discussion?.user
+
     return NextResponse.json({
-      message: 'Discussion created successfully',
       discussion: {
-        ...discussion,
-        view_count: (discussion as Record<string, unknown>)?.view_count ?? 0
+        id: discussion?.id,
+        title: discussion?.title,
+        content: discussion?.content,
+        is_pinned: discussion?.is_pinned || false,
+        is_resolved: discussion?.is_resolved || false,
+        view_count: 0, // Column may not exist - default to 0
+        created_at: discussion?.created_at,
+        user: {
+          id: userData?.id || userId,
+          full_name: userData?.full_name || 'Unknown User',
+          avatar_url: userData?.avatar_url || null,
+        },
+        replies: [{ count: 0 }]
       },
     })
   } catch (error) {

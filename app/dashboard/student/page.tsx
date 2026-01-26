@@ -26,16 +26,68 @@ import {
 import { useAuth } from '@/lib/hooks/use-auth'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import {
-  courses,
-  getEnrollmentsByStudentId,
-  getStudentAnalytics,
-  getUpcomingLiveTrainings,
-  getCertificatesByStudentId,
-} from '@/lib/data/store'
-
-// For demo purposes, we use a mock student ID
-const CURRENT_STUDENT_ID = 'student-1'
+// Dashboard data type
+interface DashboardData {
+  student: {
+    id: string
+    full_name: string
+    email: string
+    avatar_url: string | null
+    streak_days: number
+    total_hours_learned: number
+  }
+  enrollments: Array<{
+    id: string
+    course_id: string
+    progress_percentage: number
+    status: string
+    enrolled_at: string
+    completed_at: string | null
+    last_accessed_at: string
+    course: {
+      id: string
+      title: string
+      slug: string
+      thumbnail_url: string | null
+      category: string
+      level: string
+      instructor: {
+        full_name: string
+        avatar_url: string | null
+      } | null
+    } | null
+    completed_lessons: number
+    total_lessons: number
+  }>
+  certificates: Array<{
+    id: string
+    course_id: string
+    course_title: string
+    student_name: string
+    certificate_number: string
+    verification_url: string
+    issue_date: string
+    grade: string
+  }>
+  analytics: {
+    total_courses_enrolled: number
+    courses_completed: number
+    certificates_earned: number
+    total_hours_learned: number
+    current_streak: number
+    longest_streak: number
+    average_quiz_score: number
+    learning_by_day: Array<{ day: string; hours: number }>
+    category_distribution: Array<{ category: string; hours: number }>
+  }
+  upcomingLiveTrainings: Array<{
+    id: string
+    title: string
+    scheduled_start: string
+    course?: { title: string }
+    meeting_url: string
+  }>
+}
 
 // Continue Learning Hero Card
 function ContinueLearningHero({
@@ -508,6 +560,9 @@ function RecommendedCourseCard({
 export default function StudentDashboardPage() {
   const { profile } = useAuth()
   const [greeting, setGreeting] = useState('Hello')
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -516,13 +571,44 @@ export default function StudentDashboardPage() {
     else setGreeting('Good evening')
   }, [])
 
-  const firstName = profile?.full_name?.split(' ')[0] || 'Student'
+  // Fetch dashboard data from API
+  useEffect(() => {
+    async function fetchDashboard() {
+      try {
+        setIsLoading(true)
+        const response = await fetch('/api/student/dashboard')
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard data')
+        }
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (err) {
+        console.error('Dashboard fetch error:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchDashboard()
+  }, [])
 
-  // Get student data from shared store
-  const studentAnalytics = useMemo(() => getStudentAnalytics(CURRENT_STUDENT_ID), [])
-  const studentEnrollments = useMemo(() => getEnrollmentsByStudentId(CURRENT_STUDENT_ID), [])
-  const studentCertificates = useMemo(() => getCertificatesByStudentId(CURRENT_STUDENT_ID), [])
-  const upcomingLiveTrainings = useMemo(() => getUpcomingLiveTrainings(), [])
+  const firstName = dashboardData?.student?.full_name?.split(' ')[0] || profile?.full_name?.split(' ')[0] || 'Student'
+
+  // Derive data from API response
+  const studentAnalytics = dashboardData?.analytics || {
+    total_courses_enrolled: 0,
+    courses_completed: 0,
+    certificates_earned: 0,
+    total_hours_learned: 0,
+    current_streak: 0,
+    longest_streak: 0,
+    average_quiz_score: 0,
+    learning_by_day: [],
+    category_distribution: []
+  }
+  const studentEnrollments = dashboardData?.enrollments || []
+  const studentCertificates = dashboardData?.certificates || []
+  const upcomingLiveTrainings = dashboardData?.upcomingLiveTrainings || []
 
   // Most recent course for hero
   const heroCoursre = useMemo(() => {
@@ -534,17 +620,17 @@ export default function StudentDashboardPage() {
         return bDate - aDate
       })[0]
 
-    if (!active) return null
+    if (!active || !active.course) return null
 
     return {
       id: active.course.id,
       title: active.course.title,
-      instructor: active.course.instructor.full_name,
+      instructor: active.course.instructor?.full_name || 'Unknown Instructor',
       progress: active.progress_percentage,
-      currentLesson: `Lesson ${active.completed_lessons.length + 1}`,
-      currentModule: `Module ${Math.floor(active.completed_lessons.length / 5) + 1}`,
-      totalLessons: active.course.total_lessons,
-      completedLessons: active.completed_lessons.length,
+      currentLesson: `Lesson ${active.completed_lessons + 1}`,
+      currentModule: `Module ${Math.floor(active.completed_lessons / 5) + 1}`,
+      totalLessons: active.total_lessons,
+      completedLessons: active.completed_lessons,
       partner: 'Phazur Labs',
     }
   }, [studentEnrollments])
@@ -552,15 +638,15 @@ export default function StudentDashboardPage() {
   // Other active courses (excluding hero)
   const otherCourses = useMemo(() => {
     return studentEnrollments
-      .filter(e => e.status === 'active' && e.course.id !== heroCoursre?.id)
+      .filter(e => e.status === 'active' && e.course && e.course.id !== heroCoursre?.id)
       .slice(0, 3)
       .map(e => ({
-        id: e.course.id,
-        title: e.course.title,
-        instructor: e.course.instructor.full_name,
+        id: e.course!.id,
+        title: e.course!.title,
+        instructor: e.course!.instructor?.full_name || 'Unknown Instructor',
         progress: e.progress_percentage,
-        totalLessons: e.course.total_lessons,
-        completedLessons: e.completed_lessons.length,
+        totalLessons: e.total_lessons,
+        completedLessons: e.completed_lessons,
         partner: 'Phazur Labs',
       }))
   }, [studentEnrollments, heroCoursre])
@@ -578,7 +664,7 @@ export default function StudentDashboardPage() {
     streak: studentAnalytics.current_streak,
   }), [studentAnalytics])
 
-  // Upcoming deadlines (mock)
+  // Upcoming deadlines (mock - would need real deadlines table)
   const upcomingDeadlines = useMemo(() => {
     const deadlines: Array<{
       id: string
@@ -588,20 +674,22 @@ export default function StudentDashboardPage() {
       type: 'assignment' | 'quiz' | 'project'
     }> = []
 
-    if (studentEnrollments.length > 0) {
+    const firstEnrollment = studentEnrollments[0]
+    if (firstEnrollment?.course) {
       deadlines.push({
         id: 'quiz-1',
         title: 'Module 3 Quiz',
-        course: studentEnrollments[0].course.title,
+        course: firstEnrollment.course.title,
         dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
         type: 'quiz',
       })
 
-      if (studentEnrollments.length > 1) {
+      const secondEnrollment = studentEnrollments[1]
+      if (secondEnrollment?.course) {
         deadlines.push({
           id: 'project-1',
           title: 'Final Project Submission',
-          course: studentEnrollments[1].course.title,
+          course: secondEnrollment.course.title,
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           type: 'project',
         })
@@ -624,24 +712,60 @@ export default function StudentDashboardPage() {
     }
   }, [upcomingLiveTrainings])
 
-  // Recommended courses
-  const recommendedCourses = useMemo(() => {
-    const enrolledIds = studentEnrollments.map(e => e.course_id)
-    return courses
-      .filter(c => c.status === 'published' && !enrolledIds.includes(c.id))
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 4)
-      .map(c => ({
-        id: c.id,
-        slug: c.slug,
-        title: c.title,
-        instructor: c.instructor.full_name,
-        partner: 'Phazur Labs',
-        rating: c.rating,
-        students: c.enrolled_students,
-        level: c.level.charAt(0).toUpperCase() + c.level.slice(1),
-      }))
-  }, [studentEnrollments])
+  // Recommended courses (would need separate API for real recommendations)
+  // For now, return empty - recommendations feature to be implemented
+  const recommendedCourses: Array<{
+    id: string
+    slug: string
+    title: string
+    instructor: string
+    partner: string
+    rating: number
+    students: number
+    level: string
+  }> = []
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-64 bg-muted rounded animate-pulse mt-2" />
+        </div>
+        <div className="bg-muted/30 rounded-xl h-64 animate-pulse" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-32 bg-muted rounded-xl animate-pulse" />
+            <div className="h-32 bg-muted rounded-xl animate-pulse" />
+          </div>
+          <div className="space-y-4">
+            <div className="h-40 bg-muted rounded-xl animate-pulse" />
+            <div className="h-32 bg-muted rounded-xl animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <div className="p-4 rounded-full bg-destructive/10 mb-4">
+          <BookOpen className="w-8 h-8 text-destructive" />
+        </div>
+        <h2 className="text-lg font-semibold mb-2">Unable to load dashboard</h2>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

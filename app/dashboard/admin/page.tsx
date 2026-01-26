@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Users,
@@ -20,14 +20,95 @@ import {
   CheckCircle2,
   XCircle,
   MoreVertical,
+  Loader2,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge, StatusBadge } from '@/components/ui/badge'
 import { UserAvatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
-// Mock data
-const platformStats = {
+// Types for API response
+interface PlatformStats {
+  totalUsers: number
+  usersTrend: number
+  activeUsers: number
+  activeTrend: number
+  totalCourses: number
+  coursesTrend: number
+  totalRevenue: number
+  revenueTrend: number
+  monthlyRevenue: number
+  monthlyTrend: number
+  pendingPayouts: number
+  totalInstructors: number
+  avgCourseRating: number
+  completionRate: number
+}
+
+interface RevenueDataPoint {
+  month: string
+  revenue: number
+}
+
+interface UserGrowthDataPoint {
+  month: string
+  users: number
+}
+
+interface TopCourse {
+  id: string
+  title: string
+  instructor: string
+  students: number
+  revenue: number
+  rating: number
+}
+
+interface RecentUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  joinedAt: string
+  avatar: string | null
+}
+
+interface PendingApproval {
+  id: string
+  title?: string
+  name?: string
+  instructor?: string
+  email?: string
+  type: string
+  submittedAt: string
+}
+
+interface SystemAlert {
+  id: string
+  type: 'warning' | 'info' | 'success'
+  message: string
+  time: string
+}
+
+interface CategoryDistribution {
+  name: string
+  count: number
+  color: string
+}
+
+interface AdminAnalyticsData {
+  platformStats: PlatformStats
+  revenueData: RevenueDataPoint[]
+  userGrowthData: UserGrowthDataPoint[]
+  topCourses: TopCourse[]
+  recentUsers: RecentUser[]
+  pendingApprovals: PendingApproval[]
+  systemAlerts: SystemAlert[]
+  categoryDistribution: CategoryDistribution[]
+}
+
+// Fallback mock data
+const MOCK_PLATFORM_STATS: PlatformStats = {
   totalUsers: 24850,
   usersTrend: 8,
   activeUsers: 12420,
@@ -44,7 +125,7 @@ const platformStats = {
   completionRate: 68,
 }
 
-const revenueData = [
+const MOCK_REVENUE_DATA: RevenueDataPoint[] = [
   { month: 'Aug', revenue: 52000 },
   { month: 'Sep', revenue: 58000 },
   { month: 'Oct', revenue: 62000 },
@@ -53,7 +134,7 @@ const revenueData = [
   { month: 'Jan', revenue: 78420 },
 ]
 
-const userGrowthData = [
+const MOCK_USER_GROWTH_DATA: UserGrowthDataPoint[] = [
   { month: 'Aug', users: 18200 },
   { month: 'Sep', users: 19800 },
   { month: 'Oct', users: 21500 },
@@ -62,7 +143,7 @@ const userGrowthData = [
   { month: 'Jan', users: 24850 },
 ]
 
-const topCourses = [
+const MOCK_TOP_COURSES: TopCourse[] = [
   { id: '1', title: 'TypeScript Masterclass', instructor: 'Sarah Chen', students: 5280, revenue: 18900, rating: 4.8 },
   { id: '2', title: 'Advanced React Patterns', instructor: 'Michael Park', students: 3420, revenue: 12500, rating: 4.9 },
   { id: '3', title: 'Node.js Best Practices', instructor: 'David Kim', students: 2150, revenue: 8200, rating: 4.7 },
@@ -70,7 +151,7 @@ const topCourses = [
   { id: '5', title: 'GraphQL Masterclass', instructor: 'James Lee', students: 1650, revenue: 5900, rating: 4.5 },
 ]
 
-const recentUsers = [
+const MOCK_RECENT_USERS: RecentUser[] = [
   { id: 'u1', name: 'John Doe', email: 'john@example.com', role: 'student', joinedAt: '2 hours ago', avatar: null },
   { id: 'u2', name: 'Jane Smith', email: 'jane@example.com', role: 'instructor', joinedAt: '4 hours ago', avatar: null },
   { id: 'u3', name: 'Mike Johnson', email: 'mike@example.com', role: 'student', joinedAt: '6 hours ago', avatar: null },
@@ -78,19 +159,19 @@ const recentUsers = [
   { id: 'u5', name: 'Alex Thompson', email: 'alex@example.com', role: 'instructor', joinedAt: '12 hours ago', avatar: null },
 ]
 
-const pendingApprovals = [
+const MOCK_PENDING_APPROVALS: PendingApproval[] = [
   { id: 'c1', title: 'Machine Learning Basics', instructor: 'Dr. Alan Turing', type: 'course', submittedAt: '1 day ago' },
   { id: 'c2', title: 'UI/UX Design Principles', instructor: 'Lisa Chen', type: 'course', submittedAt: '2 days ago' },
   { id: 'i1', name: 'Robert Brown', email: 'robert@example.com', type: 'instructor', submittedAt: '3 days ago' },
 ]
 
-const systemAlerts = [
+const MOCK_SYSTEM_ALERTS: SystemAlert[] = [
   { id: 'a1', type: 'warning', message: 'High server load detected', time: '10 min ago' },
   { id: 'a2', type: 'info', message: 'Scheduled maintenance in 2 days', time: '1 hour ago' },
   { id: 'a3', type: 'success', message: 'Backup completed successfully', time: '3 hours ago' },
 ]
 
-const categoryDistribution = [
+const MOCK_CATEGORY_DISTRIBUTION: CategoryDistribution[] = [
   { name: 'Web Development', count: 52, color: 'bg-primary' },
   { name: 'Data Science', count: 38, color: 'bg-blue-500' },
   { name: 'Mobile Development', count: 28, color: 'bg-purple-500' },
@@ -153,22 +234,22 @@ function StatCard({
   )
 }
 
-function RevenueChart() {
-  const maxValue = Math.max(...revenueData.map(d => d.revenue))
+function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
+  const maxValue = Math.max(...data.map(d => d.revenue), 1) // Avoid division by zero
 
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-2 h-40">
-        {revenueData.map((data, index) => (
-          <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
+        {data.map((item, index) => (
+          <div key={item.month} className="flex-1 flex flex-col items-center gap-2">
             <div
               className={cn(
                 'w-full rounded-t transition-all duration-300',
-                index === revenueData.length - 1 ? 'bg-primary' : 'bg-primary/30'
+                index === data.length - 1 ? 'bg-primary' : 'bg-primary/30'
               )}
-              style={{ height: `${(data.revenue / maxValue) * 120}px` }}
+              style={{ height: `${(item.revenue / maxValue) * 120}px` }}
             />
-            <span className="text-xs text-muted-foreground">{data.month}</span>
+            <span className="text-xs text-muted-foreground">{item.month}</span>
           </div>
         ))}
       </div>
@@ -176,23 +257,23 @@ function RevenueChart() {
   )
 }
 
-function UserGrowthChart() {
-  const maxValue = Math.max(...userGrowthData.map(d => d.users))
-  const minValue = Math.min(...userGrowthData.map(d => d.users))
-  const range = maxValue - minValue
+function UserGrowthChart({ data }: { data: UserGrowthDataPoint[] }) {
+  const maxValue = Math.max(...data.map(d => d.users), 1)
+  const minValue = Math.min(...data.map(d => d.users))
+  const range = maxValue - minValue || 1 // Avoid division by zero
 
   return (
     <div className="h-32 flex items-end gap-1">
-      {userGrowthData.map((data, index) => (
-        <div key={data.month} className="flex-1 flex flex-col items-center gap-1">
+      {data.map((item, index) => (
+        <div key={item.month} className="flex-1 flex flex-col items-center gap-1">
           <div
             className={cn(
               'w-full rounded-t transition-all duration-300',
-              index === userGrowthData.length - 1 ? 'bg-emerald-500' : 'bg-emerald-500/30'
+              index === data.length - 1 ? 'bg-emerald-500' : 'bg-emerald-500/30'
             )}
-            style={{ height: `${((data.users - minValue) / range) * 80 + 20}px` }}
+            style={{ height: `${((item.users - minValue) / range) * 80 + 20}px` }}
           />
-          <span className="text-[10px] text-muted-foreground">{data.month}</span>
+          <span className="text-[10px] text-muted-foreground">{item.month}</span>
         </div>
       ))}
     </div>
@@ -200,6 +281,109 @@ function UserGrowthChart() {
 }
 
 export default function AdminDashboardPage() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [platformStats, setPlatformStats] = useState<PlatformStats>(MOCK_PLATFORM_STATS)
+  const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>(MOCK_REVENUE_DATA)
+  const [userGrowthData, setUserGrowthData] = useState<UserGrowthDataPoint[]>(MOCK_USER_GROWTH_DATA)
+  const [topCourses, setTopCourses] = useState<TopCourse[]>(MOCK_TOP_COURSES)
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>(MOCK_RECENT_USERS)
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>(MOCK_PENDING_APPROVALS)
+  const [systemAlerts, setSystemAlerts] = useState<SystemAlert[]>(MOCK_SYSTEM_ALERTS)
+  const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistribution[]>(MOCK_CATEGORY_DISTRIBUTION)
+
+  useEffect(() => {
+    async function fetchAnalytics() {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/admin/analytics')
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}))
+          throw new Error(errData.error || 'Failed to fetch analytics')
+        }
+
+        const data: AdminAnalyticsData = await response.json()
+
+        setPlatformStats(data.platformStats)
+        setRevenueData(data.revenueData)
+        setUserGrowthData(data.userGrowthData)
+        setTopCourses(data.topCourses)
+        setRecentUsers(data.recentUsers)
+        setPendingApprovals(data.pendingApprovals)
+        setSystemAlerts(data.systemAlerts)
+        setCategoryDistribution(data.categoryDistribution.length > 0 ? data.categoryDistribution : MOCK_CATEGORY_DISTRIBUTION)
+      } catch (err) {
+        console.error('Failed to fetch admin analytics:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard')
+        // Keep mock data as fallback
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAnalytics()
+  }, [])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-64 bg-muted rounded animate-pulse mt-2" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-6 w-24 bg-muted rounded mb-2" />
+                <div className="h-8 w-32 bg-muted rounded mb-2" />
+                <div className="h-4 w-20 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-40 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-32 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <div className="p-4 rounded-full bg-destructive/10 mb-4">
+          <AlertTriangle className="w-8 h-8 text-destructive" />
+        </div>
+        <h2 className="text-lg font-semibold mb-2">Unable to load dashboard</h2>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -256,7 +440,7 @@ export default function AdminDashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <RevenueChart />
+              <RevenueChart data={revenueData} />
             </CardContent>
           </Card>
 
@@ -346,7 +530,7 @@ export default function AdminDashboardPage() {
               <CardTitle className="text-lg">User Growth</CardTitle>
             </CardHeader>
             <CardContent>
-              <UserGrowthChart />
+              <UserGrowthChart data={userGrowthData} />
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
                   <p className="text-xl font-bold">{platformStats.totalInstructors}</p>
