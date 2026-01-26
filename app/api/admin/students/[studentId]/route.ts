@@ -1,77 +1,128 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 interface RouteParams {
   params: Promise<{ studentId: string }>
 }
 
-// GET - Get a single student
+// Helper to calculate relative time
+function getRelativeTime(date: string | null): string {
+  if (!date) return 'Never'
+  const now = new Date()
+  const past = new Date(date)
+  const diffMs = now.getTime() - past.getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffDays = Math.floor(diffHours / 24)
+  const diffWeeks = Math.floor(diffDays / 7)
+
+  if (diffHours < 1) return 'Just now'
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`
+}
+
+// GET - Get a single student with detailed information
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { studentId } = await params
-    const supabase = await createServerSupabaseClient()
 
-    // Verify admin authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
+
+    // Verify admin authentication (skip in dev bypass mode)
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      }
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
-
+    // Get student
     const { data: student, error } = await supabase
       .from('users')
-      .select(`
-        id,
-        email,
-        full_name,
-        avatar_url,
-        role,
-        bio,
-        created_at,
-        is_active,
-        preferences,
-        enrollments:enrollments(
-          id,
-          course_id,
-          enrolled_at,
-          progress_percentage,
-          completed_at,
-          courses(id, title, slug)
-        )
-      `)
+      .select('id, full_name, email, avatar_url, role, is_active, created_at, updated_at')
       .eq('id', studentId)
       .eq('role', 'student')
       .single()
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Student not found' }, { status: 404 })
-      }
-      throw error
+    if (error || !student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     }
+
+    // Get enrollments with course details
+    const { data: enrollments } = await supabase
+      .from('enrollments')
+      .select(`
+        id,
+        course_id,
+        status,
+        progress_percentage,
+        enrolled_at,
+        courses (
+          id,
+          title,
+          slug
+        )
+      `)
+      .eq('user_id', studentId)
+
+    // Get payment total
+    const { data: payments } = await supabase
+      .from('payments')
+      .select('amount')
+      .eq('user_id', studentId)
+      .eq('status', 'completed')
+
+    const totalSpent = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    const enrolledCourses = enrollments?.length || 0
+    const completedCourses = enrollments?.filter(e => e.status === 'completed').length || 0
+    const avgProgress = enrolledCourses > 0
+      ? Math.round(enrollments!.reduce((sum, e) => sum + (e.progress_percentage || 0), 0) / enrolledCourses)
+      : 0
+
+    // Transform enrollments for response
+    const formattedEnrollments = (enrollments || []).map(e => {
+      const courseData = Array.isArray(e.courses) ? e.courses[0] : e.courses
+      return {
+        id: e.id,
+        course_id: e.course_id,
+        progress_percentage: e.progress_percentage || 0,
+        status: e.status,
+        enrolled_at: e.enrolled_at,
+        courses: courseData || { id: e.course_id, title: 'Unknown Course', slug: '' },
+      }
+    })
 
     return NextResponse.json({
       student: {
         id: student.id,
-        name: student.full_name,
+        name: student.full_name || 'Unknown',
         email: student.email,
         avatar: student.avatar_url,
-        bio: student.bio,
-        status: student.is_active ? 'Active' : 'Inactive',
-        enrolledCourses: student.enrollments?.length || 0,
-        enrollments: student.enrollments,
-        joinDate: student.created_at,
-        preferences: student.preferences,
+        enrolledCourses,
+        completedCourses,
+        progress: avgProgress,
+        totalSpent,
+        status: student.is_active === false ? 'inactive' : 'active',
+        joinDate: student.created_at?.split('T')[0] || '',
+        lastActive: getRelativeTime(student.updated_at),
+        plan: 'basic',
+        enrollments: formattedEnrollments,
       },
     })
 
@@ -88,66 +139,89 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { studentId } = await params
-    const supabase = await createServerSupabaseClient()
 
-    // Verify admin authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
+
+    // Verify admin authentication (skip in dev bypass mode)
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      }
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
+    // Verify student exists
+    const { data: existingStudent, error: fetchError } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', user.id)
+      .select('id, role')
+      .eq('id', studentId)
       .single()
 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+    if (fetchError || !existingStudent) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+    }
+
+    if (existingStudent.role !== 'student') {
+      return NextResponse.json({ error: 'User is not a student' }, { status: 400 })
     }
 
     const body = await request.json()
-    const { name, email, status, bio, courseIds } = body
+    const { name, email, status, courseIds } = body
 
     // Build update object
-    const updateData: Record<string, unknown> = {}
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+
     if (name !== undefined) updateData.full_name = name
     if (email !== undefined) updateData.email = email
-    if (status !== undefined) updateData.is_active = status === 'Active'
-    if (bio !== undefined) updateData.bio = bio
+    if (status !== undefined) updateData.is_active = status === 'active'
 
-    // Check if email is changing and if it's already taken
+    // Check email uniqueness if changing
     if (email) {
-      const { data: existingUser } = await supabase
+      const { data: emailCheck } = await supabase
         .from('users')
         .select('id')
         .eq('email', email)
         .neq('id', studentId)
         .single()
 
-      if (existingUser) {
-        return NextResponse.json({ error: 'Email is already in use by another user' }, { status: 400 })
+      if (emailCheck) {
+        return NextResponse.json(
+          { error: 'Email already in use by another user' },
+          { status: 409 }
+        )
       }
     }
 
-    // Update the student
+    // Update student
     const { data: updatedStudent, error: updateError } = await supabase
       .from('users')
       .update(updateData)
       .eq('id', studentId)
-      .eq('role', 'student')
       .select()
       .single()
 
     if (updateError) {
-      if (updateError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Student not found' }, { status: 404 })
-      }
       throw updateError
     }
 
-    // Update course enrollments if provided
+    // Handle course enrollments if specified
     if (courseIds !== undefined) {
       // Get current enrollments
       const { data: currentEnrollments } = await supabase
@@ -155,21 +229,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         .select('course_id')
         .eq('user_id', studentId)
 
-      const currentCourseIds = currentEnrollments?.map(e => e.course_id) || []
-      const newCourseIds = courseIds as string[]
+      const currentCourseIds = (currentEnrollments || []).map(e => e.course_id)
 
-      // Courses to add
-      const toAdd = newCourseIds.filter(id => !currentCourseIds.includes(id))
-      // Courses to remove
-      const toRemove = currentCourseIds.filter(id => !newCourseIds.includes(id))
+      // Find courses to add and remove
+      const toAdd = courseIds.filter((id: string) => !currentCourseIds.includes(id))
+      const toRemove = currentCourseIds.filter(id => !courseIds.includes(id))
 
       // Add new enrollments
       if (toAdd.length > 0) {
-        const newEnrollments = toAdd.map(courseId => ({
+        const newEnrollments = toAdd.map((courseId: string) => ({
           user_id: studentId,
           course_id: courseId,
-          is_active: true,
+          status: 'active',
+          progress_percentage: 0,
         }))
+
         await supabase.from('enrollments').insert(newEnrollments)
       }
 
@@ -183,15 +257,43 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Fetch updated enrollment data
+    const { data: enrollments } = await supabase
+      .from('enrollments')
+      .select('status, progress_percentage')
+      .eq('user_id', studentId)
+
+    const enrolledCourses = enrollments?.length || 0
+    const completedCourses = enrollments?.filter(e => e.status === 'completed').length || 0
+    const avgProgress = enrolledCourses > 0
+      ? Math.round(enrollments!.reduce((sum, e) => sum + (e.progress_percentage || 0), 0) / enrolledCourses)
+      : 0
+
+    // Get payment total
+    const { data: payments } = await supabase
+      .from('payments')
+      .select('amount')
+      .eq('user_id', studentId)
+      .eq('status', 'completed')
+
+    const totalSpent = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
     return NextResponse.json({
-      success: true,
+      message: 'Student updated successfully',
       student: {
         id: updatedStudent.id,
         name: updatedStudent.full_name,
         email: updatedStudent.email,
-        status: updatedStudent.is_active ? 'Active' : 'Inactive',
+        avatar: updatedStudent.avatar_url,
+        enrolledCourses,
+        completedCourses,
+        progress: avgProgress,
+        totalSpent,
+        status: updatedStudent.is_active === false ? 'inactive' : 'active',
+        joinDate: updatedStudent.created_at?.split('T')[0] || '',
+        lastActive: 'Just now',
+        plan: 'basic',
       },
-      message: 'Student updated successfully',
     })
 
   } catch (error) {
@@ -207,38 +309,85 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { studentId } = await params
-    const supabase = await createServerSupabaseClient()
 
-    // Verify admin authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+    // Verify admin authentication (skip in dev bypass mode)
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      }
     }
 
     // Verify student exists
-    const { data: student, error: fetchError } = await supabase
+    const { data: existingStudent, error: fetchError } = await supabase
       .from('users')
-      .select('id, full_name')
+      .select('id, role')
       .eq('id', studentId)
-      .eq('role', 'student')
       .single()
 
-    if (fetchError || !student) {
+    if (fetchError || !existingStudent) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     }
 
-    // Delete the student (cascades to enrollments, progress, etc due to FK constraints)
+    if (existingStudent.role !== 'student') {
+      return NextResponse.json({ error: 'User is not a student' }, { status: 400 })
+    }
+
+    // Delete related records first (cascade might not be set up)
+    // Delete enrollments
+    await supabase
+      .from('enrollments')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Delete lesson progress
+    await supabase
+      .from('lesson_progress')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Delete quiz attempts
+    await supabase
+      .from('quiz_attempts')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Delete reviews
+    await supabase
+      .from('reviews')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Delete discussion replies
+    await supabase
+      .from('discussion_replies')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Delete discussions
+    await supabase
+      .from('discussions')
+      .delete()
+      .eq('user_id', studentId)
+
+    // Finally delete the student user
     const { error: deleteError } = await supabase
       .from('users')
       .delete()
@@ -249,8 +398,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json({
-      success: true,
-      message: `Student "${student.full_name}" has been deleted`,
+      message: 'Student deleted successfully',
     })
 
   } catch (error) {
