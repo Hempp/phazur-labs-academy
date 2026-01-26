@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Search,
   Download,
@@ -35,8 +35,37 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-// Mock course data
-const courses = [
+// Course type definition
+interface CourseData {
+  id: string
+  title: string
+  thumbnail: string | null
+  instructor: string
+  category: string
+  totalVideos: number
+  totalDuration: string
+  enrolledStudents: number
+  rating: number
+  reviews: number
+  price: number
+  revenue: number
+  status: 'published' | 'draft' | 'pending' | 'archived'
+  visibility: 'public' | 'private'
+  createdAt: string
+  lastUpdated: string
+  completionRate: number
+}
+
+interface StatsData {
+  totalCourses: number
+  publishedCourses: number
+  totalStudents: number
+  totalRevenue: number
+  totalVideos: number
+}
+
+// Mock course data (fallback)
+const mockCourses: CourseData[] = [
   {
     id: '1',
     title: 'Complete AI & Machine Learning Bootcamp 2024',
@@ -191,6 +220,35 @@ const courses = [
   },
 ]
 
+// Loading skeleton component
+function CoursesLoadingSkeleton() {
+  return (
+    <div className="animate-pulse">
+      {/* Stats skeleton */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+              </div>
+              <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Table skeleton */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const statusConfig = {
   published: { label: 'Published', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle },
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300', icon: FileText },
@@ -198,15 +256,67 @@ const statusConfig = {
   archived: { label: 'Archived', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', icon: Archive },
 }
 
-const categories = [...new Set(courses.map(c => c.category))]
-
 export default function CoursesPage() {
+  // Data state
+  const [courses, setCourses] = useState<CourseData[]>(mockCourses)
+  const [stats, setStats] = useState<StatsData>({
+    totalCourses: mockCourses.length,
+    publishedCourses: mockCourses.filter(c => c.status === 'published').length,
+    totalStudents: mockCourses.reduce((acc, c) => acc + c.enrolledStudents, 0),
+    totalRevenue: mockCourses.reduce((acc, c) => acc + c.revenue, 0),
+    totalVideos: mockCourses.reduce((acc, c) => acc + c.totalVideos, 0),
+  })
+  const [categories, setCategories] = useState<string[]>([...new Set(mockCourses.map(c => c.category))])
+
+  // UI state
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null)
+
+  // Loading and error state
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch courses from API
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/admin/courses')
+
+        if (!response.ok) {
+          // Use mock data for non-200 responses
+          console.warn('Courses API returned non-OK status, using mock data')
+          setIsLoading(false)
+          return
+        }
+
+        const data = await response.json()
+
+        if (data.courses && data.courses.length > 0) {
+          setCourses(data.courses)
+          setStats(data.stats)
+          if (data.categories) {
+            setCategories(data.categories)
+          }
+        }
+        // If no courses from API, keep mock data as fallback
+      } catch (err) {
+        console.error('Failed to fetch courses:', err)
+        setError('Failed to load courses. Showing demo data.')
+        // Keep mock data on error
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCourses()
+  }, [])
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -230,15 +340,31 @@ export default function CoursesPage() {
     )
   }
 
-  // Stats
-  const totalCourses = courses.length
-  const publishedCourses = courses.filter(c => c.status === 'published').length
-  const totalStudents = courses.reduce((acc, c) => acc + c.enrolledStudents, 0)
-  const totalRevenue = courses.reduce((acc, c) => acc + c.revenue, 0)
-  const totalVideos = courses.reduce((acc, c) => acc + c.totalVideos, 0)
+  // Show loading skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Courses</h1>
+            <p className="text-muted-foreground">Manage course content and curriculum</p>
+          </div>
+        </div>
+        <CoursesLoadingSkeleton />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-center gap-3">
+          <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <p className="text-amber-800 dark:text-amber-200 text-sm">{error}</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -266,7 +392,7 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Courses</p>
-              <p className="text-2xl font-bold mt-1">{totalCourses}</p>
+              <p className="text-2xl font-bold mt-1">{stats.totalCourses}</p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -278,7 +404,7 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Published</p>
-              <p className="text-2xl font-bold mt-1">{publishedCourses}</p>
+              <p className="text-2xl font-bold mt-1">{stats.publishedCourses}</p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -290,7 +416,7 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Videos</p>
-              <p className="text-2xl font-bold mt-1">{totalVideos}</p>
+              <p className="text-2xl font-bold mt-1">{stats.totalVideos}</p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
               <Video className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -302,7 +428,7 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Enrollments</p>
-              <p className="text-2xl font-bold mt-1">{totalStudents.toLocaleString()}</p>
+              <p className="text-2xl font-bold mt-1">{stats.totalStudents.toLocaleString()}</p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
               <Users className="h-5 w-5 text-amber-600 dark:text-amber-400" />
@@ -314,7 +440,7 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Revenue</p>
-              <p className="text-2xl font-bold mt-1">${(totalRevenue / 1000000).toFixed(1)}M</p>
+              <p className="text-2xl font-bold mt-1">${stats.totalRevenue >= 1000000 ? (stats.totalRevenue / 1000000).toFixed(1) + 'M' : stats.totalRevenue.toLocaleString()}</p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
