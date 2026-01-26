@@ -44,6 +44,7 @@ export async function GET(
         preview_video_url,
         price,
         sale_price,
+        is_free,
         level,
         category_id,
         tags,
@@ -166,6 +167,7 @@ export async function GET(
       previewVideoUrl: course.preview_video_url,
       price: course.price,
       discountPrice: course.sale_price,
+      isFree: course.is_free === true || (course.price !== null && Number(course.price) === 0),
       level: course.level,
       category: (() => {
         // Handle Supabase returning categories as array or object

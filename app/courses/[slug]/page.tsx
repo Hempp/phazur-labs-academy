@@ -31,6 +31,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 // API response type
 interface CourseApiResponse {
@@ -43,6 +45,7 @@ interface CourseApiResponse {
   previewVideoUrl: string | null
   price: number
   discountPrice: number | null
+  isFree: boolean
   level: string
   category: string
   tags: string[]
@@ -123,6 +126,7 @@ const mockCourseData = {
   lastUpdated: '2024-01-15',
   price: 49,
   originalPrice: null,
+  isFree: false,
   category: 'Development',
   subcategory: 'Web Development',
   badge: 'Professional Certificate',
@@ -338,11 +342,14 @@ function ReviewCard({ review }: { review: typeof mockReviews[0] }) {
 
 export default function CourseDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const [activeSection, setActiveSection] = useState('about')
   const [showStickyNav, setShowStickyNav] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [apiData, setApiData] = useState<CourseApiResponse | null>(null)
+  const [isEnrolling, setIsEnrolling] = useState(false)
+  const [isEnrolled, setIsEnrolled] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
   const slug = params?.slug as string
@@ -372,6 +379,44 @@ export default function CourseDetailPage() {
 
     fetchCourse()
   }, [slug])
+
+  // Handle free course enrollment
+  const handleFreeEnroll = async () => {
+    if (!apiData?.id) return
+
+    setIsEnrolling(true)
+    try {
+      const response = await fetch('/api/enrollments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId: apiData.id }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setIsEnrolled(true)
+        toast.success(data.message || 'Successfully enrolled!')
+        // Redirect to the learn page
+        router.push(`/courses/${slug}/learn`)
+      } else if (response.status === 409) {
+        // Already enrolled
+        setIsEnrolled(true)
+        toast.success('You are already enrolled! Redirecting...')
+        router.push(`/courses/${slug}/learn`)
+      } else if (response.status === 401) {
+        toast.error('Please sign in to enroll')
+        router.push(`/auth/login?redirect=/courses/${slug}`)
+      } else {
+        toast.error(data.error || 'Failed to enroll')
+      }
+    } catch (error) {
+      console.error('Enrollment error:', error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setIsEnrolling(false)
+    }
+  }
 
   // Map API data to page format, or fallback to mock data
   const course = apiData ? {
@@ -403,6 +448,7 @@ export default function CourseDetailPage() {
     lastUpdated: apiData.updatedAt,
     price: apiData.price,
     originalPrice: apiData.discountPrice ? apiData.price : null,
+    isFree: apiData.isFree || false,
     category: apiData.category,
     subcategory: apiData.category,
     badge: 'Professional Certificate',
@@ -651,24 +697,64 @@ export default function CourseDetailPage() {
 
                   {/* CTA Buttons */}
                   <div className="mt-6 space-y-3">
-                    <AddToCartButton
-                      course={{
-                        id: course.id,
-                        title: course.title,
-                        slug: course.slug,
-                        instructor: course.instructor.name,
-                        price: course.price,
-                        originalPrice: course.originalPrice ?? undefined,
-                        image: '/images/courses/default-course.jpg',
-                        category: course.category,
-                      }}
-                      variant="primary"
-                      showIcon={true}
-                      className="w-full h-11"
-                    />
-                    <button className="w-full h-11 border rounded-md font-medium hover:bg-muted transition-colors">
-                      Try for Free
-                    </button>
+                    {course.isFree ? (
+                      // Free course - show Enroll Now button
+                      <>
+                        <button
+                          onClick={handleFreeEnroll}
+                          disabled={isEnrolling || isEnrolled}
+                          className="w-full h-11 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {isEnrolling ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Enrolling...
+                            </>
+                          ) : isEnrolled ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4" />
+                              Enrolled
+                            </>
+                          ) : (
+                            <>
+                              <GraduationCap className="w-4 h-4" />
+                              Enroll Now — Free
+                            </>
+                          )}
+                        </button>
+                        {isEnrolled && (
+                          <Link
+                            href={`/courses/${course.slug}/learn`}
+                            className="w-full h-11 border rounded-md font-medium hover:bg-muted transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Play className="w-4 h-4" />
+                            Start Learning
+                          </Link>
+                        )}
+                      </>
+                    ) : (
+                      // Paid course - show Add to Cart
+                      <>
+                        <AddToCartButton
+                          course={{
+                            id: course.id,
+                            title: course.title,
+                            slug: course.slug,
+                            instructor: course.instructor.name,
+                            price: course.price,
+                            originalPrice: course.originalPrice ?? undefined,
+                            image: '/images/courses/default-course.jpg',
+                            category: course.category,
+                          }}
+                          variant="primary"
+                          showIcon={true}
+                          className="w-full h-11"
+                        />
+                        <button className="w-full h-11 border rounded-md font-medium hover:bg-muted transition-colors">
+                          Try for Free
+                        </button>
+                      </>
+                    )}
                   </div>
 
                   {/* Financial Aid */}

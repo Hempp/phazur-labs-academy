@@ -1,8 +1,8 @@
 // Enrollments API
-// Check if user is enrolled in a course
+// Check enrollment status and handle free course enrollment
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 
 // Check if Supabase is configured
 const isSupabaseConfigured = () => {
@@ -108,6 +108,138 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Enrollment check error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST - Enroll in a free course
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { courseId } = body
+
+    if (!courseId) {
+      return NextResponse.json(
+        { error: 'courseId is required' },
+        { status: 400 }
+      )
+    }
+
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    const supabase = await createServerSupabaseClient()
+    const supabaseAdmin = await createServerSupabaseAdmin()
+
+    let userId: string
+
+    // Check authentication
+    if (isDevBypass) {
+      // In dev mode, try to get a real user from the database for testing
+      const headerUserId = request.headers.get('x-mock-user-id')
+      if (headerUserId) {
+        userId = headerUserId
+      } else {
+        // Try to find any existing user for dev testing
+        const { data: anyUser } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .limit(1)
+          .single()
+
+        if (anyUser) {
+          userId = anyUser.id
+        } else {
+          return NextResponse.json(
+            { error: 'No users found in database. Please create a user first or sign in.' },
+            { status: 400 }
+          )
+        }
+      }
+    } else {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        return NextResponse.json(
+          { error: 'You must be logged in to enroll' },
+          { status: 401 }
+        )
+      }
+      userId = user.id
+    }
+
+    // Verify course exists and is free
+    const { data: course, error: courseError } = await supabaseAdmin
+      .from('courses')
+      .select('id, title, price, is_free, status')
+      .eq('id', courseId)
+      .single()
+
+    if (courseError || !course) {
+      return NextResponse.json(
+        { error: 'Course not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if course is free (either is_free flag or price is 0)
+    const isFree = course.is_free === true || (course.price !== null && Number(course.price) === 0)
+
+    if (!isFree) {
+      return NextResponse.json(
+        { error: 'This course requires payment. Please use the checkout flow.' },
+        { status: 400 }
+      )
+    }
+
+    // Check if already enrolled
+    const { data: existingEnrollment } = await supabaseAdmin
+      .from('enrollments')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('course_id', courseId)
+      .single()
+
+    if (existingEnrollment) {
+      return NextResponse.json(
+        { error: 'You are already enrolled in this course', enrollmentId: existingEnrollment.id },
+        { status: 409 }
+      )
+    }
+
+    // Create enrollment
+    const { data: enrollment, error: enrollError } = await supabaseAdmin
+      .from('enrollments')
+      .insert({
+        user_id: userId,
+        course_id: courseId,
+        enrolled_at: new Date().toISOString(),
+        progress_percentage: 0,
+        is_active: true,
+        last_accessed_at: new Date().toISOString(),
+      })
+      .select('id, course_id, enrolled_at, progress_percentage')
+      .single()
+
+    if (enrollError) {
+      console.error('Enrollment creation error:', enrollError)
+      return NextResponse.json(
+        { error: 'Failed to create enrollment' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully enrolled in ${course.title}`,
+      enrollment,
+    })
+
+  } catch (error) {
+    console.error('Free enrollment error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
