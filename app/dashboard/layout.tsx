@@ -18,6 +18,7 @@ import {
   ChevronDown,
   LogOut,
   User,
+  Users,
   HelpCircle,
   Bookmark,
   Calendar,
@@ -37,6 +38,7 @@ interface SidebarLink {
 const studentLinks: SidebarLink[] = [
   { href: '/dashboard/student', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/student/courses', icon: BookOpen, label: 'My Courses' },
+  { href: '/dashboard/teams', icon: Users, label: 'Teams' },
   { href: '/dashboard/student/bookmarks', icon: Bookmark, label: 'Bookmarks' },
   { href: '/dashboard/student/calendar', icon: Calendar, label: 'Schedule' },
   { href: '/dashboard/student/certificates', icon: Award, label: 'Certificates' },
