@@ -582,6 +582,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Increment a specific stat for a user
+CREATE OR REPLACE FUNCTION increment_stat(
+  p_user_id UUID,
+  p_stat_name TEXT,
+  p_increment INTEGER DEFAULT 1
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  -- Ensure stats row exists
+  INSERT INTO user_gamification_stats (user_id)
+  VALUES (p_user_id)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Increment the specified stat
+  EXECUTE format('UPDATE user_gamification_stats SET %I = COALESCE(%I, 0) + $1, updated_at = NOW() WHERE user_id = $2',
+    p_stat_name, p_stat_name)
+  USING p_increment, p_user_id;
+
+  RETURN true;
+EXCEPTION WHEN OTHERS THEN
+  RETURN false;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Refresh leaderboard cache
 CREATE OR REPLACE FUNCTION refresh_leaderboard_cache()
 RETURNS void AS $$

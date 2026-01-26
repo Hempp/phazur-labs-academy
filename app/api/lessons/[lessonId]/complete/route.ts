@@ -161,6 +161,25 @@ export async function POST(
       certificate = cert
     }
 
+    // =============================================
+    // GAMIFICATION: Award points and check achievements
+    // =============================================
+    let gamificationResult = null
+    try {
+      gamificationResult = await processGamificationRewards(
+        supabase,
+        user.id,
+        {
+          type: 'lesson_complete',
+          lessonId,
+          courseId,
+          courseCompleted,
+        }
+      )
+    } catch (gamificationError) {
+      console.error('Gamification error (non-blocking):', gamificationError)
+    }
+
     return NextResponse.json({
       message: courseCompleted
         ? 'Congratulations! Course completed!'
@@ -172,7 +191,8 @@ export async function POST(
         percentage: newProgress,
         courseCompleted
       },
-      certificate
+      certificate,
+      gamification: gamificationResult
     })
   } catch (error) {
     console.error('Lesson complete error:', error)
@@ -278,4 +298,168 @@ async function generateCertificate(
 
   console.log(`Certificate ${certificateNumber} generated for user ${userId}`)
   return certificate
+}
+
+// Gamification rewards processing
+async function processGamificationRewards(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  event: {
+    type: 'lesson_complete' | 'quiz_pass' | 'quiz_perfect' | 'course_complete'
+    lessonId?: string
+    quizId?: string
+    courseId?: string
+    courseCompleted?: boolean
+    quizScore?: number
+  }
+) {
+  const results = {
+    points_awarded: 0,
+    achievements_unlocked: 0,
+    streak_updated: false,
+    new_streak: 0,
+  }
+
+  try {
+    // Update streak first
+    const { data: streakData } = await supabase
+      .rpc('update_user_streak', { p_user_id: userId })
+
+    if (streakData !== null) {
+      results.streak_updated = true
+      results.new_streak = streakData
+    }
+
+    // Award points based on event type
+    let points = 0
+    let transactionType: string = 'lesson_complete'
+    let description = ''
+
+    switch (event.type) {
+      case 'lesson_complete':
+        points = 10
+        transactionType = 'lesson_complete'
+        description = 'Completed a lesson'
+        break
+      case 'quiz_pass':
+        points = 25
+        transactionType = 'quiz_pass'
+        description = 'Passed a quiz'
+        break
+      case 'quiz_perfect':
+        points = 50
+        transactionType = 'quiz_perfect'
+        description = 'Perfect quiz score!'
+        break
+      case 'course_complete':
+        points = 100
+        transactionType = 'course_complete'
+        description = 'Completed a course!'
+        break
+    }
+
+    // Award the points
+    const { data: newBalance } = await supabase
+      .rpc('award_points', {
+        p_user_id: userId,
+        p_transaction_type: transactionType,
+        p_points: points,
+        p_reference_type: event.lessonId ? 'lesson' : event.quizId ? 'quiz' : event.courseId ? 'course' : null,
+        p_reference_id: event.lessonId || event.quizId || event.courseId || null,
+        p_description: description,
+      })
+
+    if (newBalance !== null) {
+      results.points_awarded = points
+    }
+
+    // If course completed, award additional points
+    if (event.courseCompleted && event.type !== 'course_complete') {
+      const { data: courseBonus } = await supabase
+        .rpc('award_points', {
+          p_user_id: userId,
+          p_transaction_type: 'course_complete',
+          p_points: 100,
+          p_reference_type: 'course',
+          p_reference_id: event.courseId,
+          p_description: 'Course completion bonus!',
+        })
+
+      if (courseBonus !== null) {
+        results.points_awarded += 100
+      }
+    }
+
+    // Update user stats
+    await updateUserGamificationStats(supabase, userId, event)
+
+    // Check for new achievements
+    const { data: achievementsUnlocked } = await supabase
+      .rpc('check_achievements', { p_user_id: userId })
+
+    if (achievementsUnlocked) {
+      results.achievements_unlocked = achievementsUnlocked
+    }
+
+    return results
+  } catch (error) {
+    console.error('Error processing gamification rewards:', error)
+    return results
+  }
+}
+
+// Update gamification stats based on event
+async function updateUserGamificationStats(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  event: {
+    type: string
+    courseCompleted?: boolean
+    quizScore?: number
+  }
+) {
+  try {
+    switch (event.type) {
+      case 'lesson_complete':
+        await supabase.rpc('increment_stat', {
+          p_user_id: userId,
+          p_stat_name: 'lessons_completed',
+          p_increment: 1,
+        })
+        break
+
+      case 'quiz_pass':
+        await supabase.rpc('increment_stat', {
+          p_user_id: userId,
+          p_stat_name: 'quizzes_passed',
+          p_increment: 1,
+        })
+        break
+
+      case 'quiz_perfect':
+        await supabase.rpc('increment_stat', {
+          p_user_id: userId,
+          p_stat_name: 'perfect_quizzes',
+          p_increment: 1,
+        })
+        break
+    }
+
+    if (event.courseCompleted) {
+      await supabase.rpc('increment_stat', {
+        p_user_id: userId,
+        p_stat_name: 'courses_completed',
+        p_increment: 1,
+      })
+
+      // Also increment certificates since course completion generates one
+      await supabase.rpc('increment_stat', {
+        p_user_id: userId,
+        p_stat_name: 'certificates_earned',
+        p_increment: 1,
+      })
+    }
+  } catch (error) {
+    console.log('increment_stat RPC not available or failed:', error)
+  }
 }
