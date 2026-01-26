@@ -31,14 +31,55 @@ import {
   BarChart2
 } from 'lucide-react'
 import {
-  courses,
-  students,
-  enrollments,
-  activities,
   liveTrainings,
-  getAdminDashboardStats,
   getUpcomingLiveTrainings,
 } from '@/lib/data/store'
+
+// Types for API response
+interface DashboardStats {
+  totalStudents: number
+  activeStudents: number
+  publishedCourses: number
+  totalCompletions: number
+  monthlyRevenue: number
+  averageCompletionRate: number
+}
+
+interface TopCourse {
+  id: string
+  title: string
+  enrollments: number
+  revenue: number
+  rating: number
+}
+
+interface RecentEnrollment {
+  id: string
+  studentName: string
+  courseName: string
+  enrolledAt: string
+  progress: number
+}
+
+interface RecentActivity {
+  id: string
+  type: string
+  description: string
+  timestamp: string
+}
+
+interface EngagementDataPoint {
+  date: string
+  activeStudents: number
+}
+
+interface DashboardData {
+  stats: DashboardStats
+  topCourses: TopCourse[]
+  recentEnrollments: RecentEnrollment[]
+  recentActivities: RecentActivity[]
+  engagementData: EngagementDataPoint[]
+}
 
 // Activity icon mapping
 const activityIcons = {
@@ -56,8 +97,28 @@ export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState('7d')
   const [chartMenuOpen, setChartMenuOpen] = useState(false)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const chartMenuRef = useRef<HTMLDivElement>(null)
   const exportMenuRef = useRef<HTMLDivElement>(null)
+
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(`/api/admin/dashboard?range=${timeRange}`)
+        if (!response.ok) throw new Error('Failed to fetch dashboard')
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (error) {
+        console.error('Dashboard fetch error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchDashboard()
+  }, [timeRange])
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -73,8 +134,7 @@ export default function AdminDashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Get stats from shared store
-  const dashboardStats = useMemo(() => getAdminDashboardStats(), [])
+  // Get upcoming trainings from store (live trainings still use mock for now)
   const upcomingTrainings = useMemo(() => getUpcomingLiveTrainings(), [])
 
   // Format currency
@@ -92,130 +152,103 @@ export default function AdminDashboard() {
     return new Intl.NumberFormat('en-US').format(num)
   }
 
-  // Stats from shared data
-  const stats = [
+  // Stats from API data
+  const stats = useMemo(() => [
     {
       name: 'Total Students',
-      value: formatNumber(dashboardStats.total_students),
+      value: formatNumber(dashboardData?.stats.totalStudents || 0),
       change: '+12.5%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: Users,
       color: 'bg-blue-500',
     },
     {
       name: 'Active Courses',
-      value: dashboardStats.published_courses.toString(),
+      value: (dashboardData?.stats.publishedCourses || 0).toString(),
       change: '+8.2%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: BookOpen,
       color: 'bg-violet-500',
     },
     {
       name: 'Course Completions',
-      value: formatNumber(dashboardStats.total_completions),
+      value: formatNumber(dashboardData?.stats.totalCompletions || 0),
       change: '+23.1%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: GraduationCap,
       color: 'bg-emerald-500',
     },
     {
       name: 'Monthly Revenue',
-      value: formatCurrency(dashboardStats.monthly_revenue),
+      value: formatCurrency(dashboardData?.stats.monthlyRevenue || 0),
       change: '+18.7%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: DollarSign,
       color: 'bg-amber-500',
     },
-  ]
+  ], [dashboardData])
 
-  // Top courses from shared data
+  // Top courses from API data
   const topCourses = useMemo(() => {
-    return courses
-      .filter(c => c.status === 'published')
-      .sort((a, b) => b.enrolled_students - a.enrolled_students)
-      .slice(0, 4)
-      .map(course => ({
-        id: course.id,
-        name: course.title,
-        students: course.enrolled_students,
-        completionRate: course.completion_rate,
-        revenue: formatCurrency(course.revenue),
-        rating: course.rating,
-      }))
-  }, [])
+    return (dashboardData?.topCourses || []).slice(0, 4).map(course => ({
+      id: course.id,
+      name: course.title,
+      students: course.enrollments,
+      completionRate: 0, // API doesn't return this yet
+      revenue: formatCurrency(course.revenue),
+      rating: course.rating,
+    }))
+  }, [dashboardData])
 
-  // Recent students with enrollments from shared data
+  // Recent students with enrollments from API data
   const recentStudents = useMemo(() => {
-    return enrollments
-      .sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime())
-      .slice(0, 5)
-      .map(enrollment => ({
-        id: enrollment.id,
-        name: enrollment.student.full_name,
-        email: enrollment.student.email,
-        course: enrollment.course.title,
-        progress: enrollment.progress_percentage,
-        status: enrollment.status === 'active' ? 'active' : 'inactive',
-        avatar: enrollment.student.full_name.charAt(0),
-      }))
-  }, [])
+    return (dashboardData?.recentEnrollments || []).map(enrollment => ({
+      id: enrollment.id,
+      name: enrollment.studentName,
+      email: '', // API doesn't return email
+      course: enrollment.courseName,
+      progress: enrollment.progress,
+      status: 'active' as const,
+      avatar: enrollment.studentName.charAt(0),
+    }))
+  }, [dashboardData])
 
-  // Recent activities from shared data
+  // Recent activities from API data
   const recentActivities = useMemo(() => {
-    return activities
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5)
-      .map(activity => {
-        const Icon = activityIcons[activity.type] || Activity
-        const now = new Date()
-        const activityDate = new Date(activity.created_at)
-        const diffMs = now.getTime() - activityDate.getTime()
-        const diffMins = Math.floor(diffMs / 60000)
-        const diffHours = Math.floor(diffMins / 60)
-        const diffDays = Math.floor(diffHours / 24)
+    return (dashboardData?.recentActivities || []).map(activity => {
+      const activityType = activity.type as keyof typeof activityIcons
+      const Icon = activityIcons[activityType] || Activity
+      return {
+        id: activity.id,
+        type: activity.type,
+        message: activity.description,
+        time: activity.timestamp,
+        icon: Icon,
+      }
+    })
+  }, [dashboardData])
 
-        let time = ''
-        if (diffMins < 60) {
-          time = `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
-        } else if (diffHours < 24) {
-          time = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
-        } else {
-          time = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
-        }
-
-        return {
-          id: activity.id,
-          type: activity.type,
-          message: activity.message,
-          time,
-          icon: Icon,
-        }
-      })
-  }, [])
-
-  // Mock engagement data (would come from analytics in production)
-  const engagementData = [
-    { day: 'Mon', students: 2400 },
-    { day: 'Tue', students: 1398 },
-    { day: 'Wed', students: 3800 },
-    { day: 'Thu', students: 3908 },
-    { day: 'Fri', students: 4800 },
-    { day: 'Sat', students: 3800 },
-    { day: 'Sun', students: 2300 },
-  ]
+  // Engagement data from API
+  const engagementData = useMemo(() => {
+    return (dashboardData?.engagementData || []).map(d => ({
+      day: d.date,
+      students: d.activeStudents,
+    }))
+  }, [dashboardData])
 
   // Export report functionality
   const exportReport = (format: 'csv' | 'json') => {
+    const apiStats = dashboardData?.stats || { totalStudents: 0, activeStudents: 0, publishedCourses: 0, totalCompletions: 0, monthlyRevenue: 0, averageCompletionRate: 0 }
     const reportData = {
       generatedAt: new Date().toISOString(),
       timeRange,
       stats: {
-        totalStudents: dashboardStats.total_students,
-        activeStudents: dashboardStats.active_students,
-        publishedCourses: dashboardStats.published_courses,
-        totalCompletions: dashboardStats.total_completions,
-        monthlyRevenue: dashboardStats.monthly_revenue,
-        completionRate: dashboardStats.average_completion_rate,
+        totalStudents: apiStats.totalStudents,
+        activeStudents: apiStats.activeStudents,
+        publishedCourses: apiStats.publishedCourses,
+        totalCompletions: apiStats.totalCompletions,
+        monthlyRevenue: apiStats.monthlyRevenue,
+        completionRate: apiStats.averageCompletionRate,
       },
       topCourses: topCourses.map(c => ({
         name: c.name,
@@ -234,12 +267,12 @@ export default function AdminDashboard() {
     if (format === 'csv') {
       // Generate CSV
       const statsCSV = `Metric,Value
-Total Students,${dashboardStats.total_students}
-Active Students,${dashboardStats.active_students}
-Published Courses,${dashboardStats.published_courses}
-Total Completions,${dashboardStats.total_completions}
-Monthly Revenue,$${dashboardStats.monthly_revenue}
-Completion Rate,${dashboardStats.average_completion_rate}%
+Total Students,${apiStats.totalStudents}
+Active Students,${apiStats.activeStudents}
+Published Courses,${apiStats.publishedCourses}
+Total Completions,${apiStats.totalCompletions}
+Monthly Revenue,$${apiStats.monthlyRevenue}
+Completion Rate,${apiStats.averageCompletionRate}%
 
 Top Courses
 Name,Students,Completion Rate,Revenue,Rating
@@ -283,6 +316,34 @@ ${engagementData.map(d => `${d.day},${d.students}`).join('\n')}`
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     setChartMenuOpen(false)
+  }
+
+  // Show loading skeleton
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Loading dashboard data...</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
+              <div className="flex items-start justify-between">
+                <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700" />
+                <div className="w-16 h-5 rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="w-20 h-8 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="w-24 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (

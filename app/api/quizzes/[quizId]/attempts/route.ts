@@ -240,9 +240,27 @@ export async function POST(
       }
     }
 
+    // =============================================
+    // GAMIFICATION: Award points for quiz completion
+    // =============================================
+    let gamificationResult = null
+    if (passed) {
+      try {
+        gamificationResult = await processQuizGamification(
+          supabase,
+          user.id,
+          score,
+          quiz.course_id
+        )
+      } catch (gamificationError) {
+        console.error('Quiz gamification error (non-blocking):', gamificationError)
+      }
+    }
+
     return NextResponse.json({
       message: 'Quiz attempt saved successfully',
       attempt,
+      gamification: gamificationResult,
     })
   } catch (error) {
     console.error('Quiz attempts POST error:', error)
@@ -250,5 +268,81 @@ export async function POST(
       { error: 'Internal server error' },
       { status: 500 }
     )
+  }
+}
+
+// Process gamification rewards for quiz completion
+async function processQuizGamification(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  score: number,
+  courseId: string | null
+) {
+  const results = {
+    points_awarded: 0,
+    achievements_unlocked: 0,
+    is_perfect: score === 100,
+  }
+
+  try {
+    // Update streak
+    await supabase.rpc('update_user_streak', { p_user_id: userId })
+
+    // Award base points for passing
+    const basePoints = 25
+    await supabase.rpc('award_points', {
+      p_user_id: userId,
+      p_transaction_type: 'quiz_pass',
+      p_points: basePoints,
+      p_reference_type: 'quiz',
+      p_reference_id: null,
+      p_description: `Passed a quiz with ${score}%`,
+    })
+    results.points_awarded = basePoints
+
+    // Bonus for perfect score
+    if (score === 100) {
+      const bonusPoints = 50
+      await supabase.rpc('award_points', {
+        p_user_id: userId,
+        p_transaction_type: 'quiz_perfect',
+        p_points: bonusPoints,
+        p_reference_type: 'quiz',
+        p_reference_id: null,
+        p_description: 'Perfect quiz score!',
+      })
+      results.points_awarded += bonusPoints
+
+      // Increment perfect quiz count in stats
+      try {
+        await supabase.rpc('increment_stat', {
+          p_user_id: userId,
+          p_stat_name: 'perfect_quizzes',
+          p_increment: 1,
+        })
+      } catch (e) { /* ignore */ }
+    }
+
+    // Increment quizzes passed in stats
+    try {
+      await supabase.rpc('increment_stat', {
+        p_user_id: userId,
+        p_stat_name: 'quizzes_passed',
+        p_increment: 1,
+      })
+    } catch (e) { /* ignore */ }
+
+    // Check for new achievements
+    const { data: achievementsUnlocked } = await supabase
+      .rpc('check_achievements', { p_user_id: userId })
+
+    if (achievementsUnlocked) {
+      results.achievements_unlocked = achievementsUnlocked
+    }
+
+    return results
+  } catch (error) {
+    console.error('Error processing quiz gamification:', error)
+    return results
   }
 }

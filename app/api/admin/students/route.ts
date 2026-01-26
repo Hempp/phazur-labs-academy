@@ -1,26 +1,124 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
+
+// Mock data fallback when Supabase not configured
+const MOCK_STUDENTS = [
+  {
+    id: '1',
+    name: 'Sarah Johnson',
+    email: 'sarah@example.com',
+    avatar: null,
+    enrolledCourses: 3,
+    completedCourses: 1,
+    progress: 67,
+    totalSpent: 447,
+    status: 'active',
+    joinDate: '2024-01-15',
+    lastActive: '2 hours ago',
+    plan: 'premium',
+  },
+  {
+    id: '2',
+    name: 'Michael Chen',
+    email: 'michael@example.com',
+    avatar: null,
+    enrolledCourses: 2,
+    completedCourses: 2,
+    progress: 100,
+    totalSpent: 298,
+    status: 'active',
+    joinDate: '2024-02-20',
+    lastActive: '1 day ago',
+    plan: 'basic',
+  },
+  {
+    id: '3',
+    name: 'Emily Davis',
+    email: 'emily@example.com',
+    avatar: null,
+    enrolledCourses: 1,
+    completedCourses: 0,
+    progress: 23,
+    totalSpent: 149,
+    status: 'inactive',
+    joinDate: '2024-03-10',
+    lastActive: '2 weeks ago',
+    plan: 'basic',
+  },
+]
+
+// Check if Supabase is configured
+const isSupabaseConfigured = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  return !!(
+    url && key &&
+    !url.includes('placeholder') &&
+    !url.includes('your-project') &&
+    !key.includes('your-') &&
+    key !== 'your-anon-key'
+  )
+}
+
+// Helper to calculate relative time
+function getRelativeTime(date: string | null): string {
+  if (!date) return 'Never'
+  const now = new Date()
+  const past = new Date(date)
+  const diffMs = now.getTime() - past.getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffDays = Math.floor(diffHours / 24)
+  const diffWeeks = Math.floor(diffDays / 7)
+
+  if (diffHours < 1) return 'Just now'
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`
+}
 
 // GET - List all students
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
-
-    // Verify admin authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Return mock data if Supabase not configured
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({
+        students: MOCK_STUDENTS,
+        total: MOCK_STUDENTS.length,
+        stats: {
+          totalStudents: MOCK_STUDENTS.length,
+          activeStudents: MOCK_STUDENTS.filter(s => s.status === 'active').length,
+          avgProgress: Math.round(MOCK_STUDENTS.reduce((sum, s) => sum + s.progress, 0) / MOCK_STUDENTS.length),
+          totalRevenue: MOCK_STUDENTS.reduce((sum, s) => sum + s.totalSpent, 0),
+        },
+      })
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+    // Use admin client in dev bypass mode to bypass RLS
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
+
+    // Verify admin authentication (skip in dev bypass mode)
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      }
     }
 
     const { searchParams } = new URL(request.url)
@@ -30,38 +128,21 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // Build query for students
+    // Build query for students (users with role='student')
     let query = supabase
       .from('users')
-      .select(`
-        id,
-        email,
-        full_name,
-        avatar_url,
-        role,
-        created_at,
-        is_active,
-        preferences,
-        enrollments:enrollments(
-          id,
-          course_id,
-          enrolled_at,
-          progress_percentage,
-          courses(id, title, slug)
-        )
-      `, { count: 'exact' })
+      .select('id, full_name, email, avatar_url, role, is_active, created_at, updated_at', { count: 'exact' })
       .eq('role', 'student')
       .order('created_at', { ascending: false })
 
-    // Apply filters
+    // Apply search filter
     if (search) {
       query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`)
     }
 
-    if (status === 'active') {
-      query = query.eq('is_active', true)
-    } else if (status === 'inactive') {
-      query = query.eq('is_active', false)
+    // Apply status filter (map 'active'/'inactive' to boolean is_active)
+    if (status !== 'all') {
+      query = query.eq('is_active', status === 'active')
     }
 
     // Apply pagination
@@ -73,25 +154,92 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    // Transform data to match UI expectations
-    const transformedStudents = students?.map(student => ({
-      id: student.id,
-      name: student.full_name,
-      email: student.email,
-      avatar: student.avatar_url,
-      status: student.is_active ? 'Active' : 'Inactive',
-      plan: 'Pro', // TODO: Get from subscriptions table when implemented
-      enrolledCourses: student.enrollments?.length || 0,
-      enrollments: student.enrollments,
-      joinDate: student.created_at,
-      lastActive: student.created_at, // TODO: Track last activity
-    }))
+    // Get all student IDs
+    const studentIds = students?.map(s => s.id) || []
+
+    // Get enrollment data for all students
+    const enrollmentData: Record<string, { count: number; completed: number; progress: number }> = {}
+    if (studentIds.length > 0) {
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('user_id, status, progress_percentage')
+        .in('user_id', studentIds)
+
+      for (const enrollment of enrollments || []) {
+        if (!enrollmentData[enrollment.user_id]) {
+          enrollmentData[enrollment.user_id] = { count: 0, completed: 0, progress: 0 }
+        }
+        enrollmentData[enrollment.user_id].count++
+        if (enrollment.status === 'completed') {
+          enrollmentData[enrollment.user_id].completed++
+        }
+        enrollmentData[enrollment.user_id].progress += enrollment.progress_percentage || 0
+      }
+    }
+
+    // Get payment totals for all students
+    const spentData: Record<string, number> = {}
+    if (studentIds.length > 0) {
+      const { data: payments } = await supabase
+        .from('payments')
+        .select('user_id, amount')
+        .in('user_id', studentIds)
+        .eq('status', 'completed')
+
+      for (const payment of payments || []) {
+        spentData[payment.user_id] = (spentData[payment.user_id] || 0) + Number(payment.amount)
+      }
+    }
+
+    // Transform students to match UI expectations
+    const transformedStudents = students?.map(student => {
+      const enrollment = enrollmentData[student.id] || { count: 0, completed: 0, progress: 0 }
+      const avgProgress = enrollment.count > 0
+        ? Math.round(enrollment.progress / enrollment.count)
+        : 0
+
+      // Map is_active boolean to status string for UI compatibility
+      const studentStatus = student.is_active === false ? 'inactive' : 'active'
+
+      // Plan would typically come from a subscriptions table
+      // For now, default to 'basic' unless we have subscription data
+      const studentPlan = 'basic'
+
+      return {
+        id: student.id,
+        name: student.full_name || 'Unknown',
+        email: student.email,
+        avatar: student.avatar_url,
+        enrolledCourses: enrollment.count,
+        completedCourses: enrollment.completed,
+        progress: avgProgress,
+        totalSpent: spentData[student.id] || 0,
+        status: studentStatus,
+        joinDate: student.created_at?.split('T')[0] || '',
+        lastActive: getRelativeTime(student.updated_at),
+        plan: studentPlan,
+      }
+    }) || []
+
+    // Apply plan filter (done after transformation since plan is computed)
+    const filteredStudents = plan !== 'all'
+      ? transformedStudents.filter(s => s.plan === plan)
+      : transformedStudents
+
+    // Calculate stats
+    const stats = {
+      totalStudents: count || 0,
+      activeStudents: transformedStudents.filter(s => s.status === 'active').length,
+      avgProgress: transformedStudents.length > 0
+        ? Math.round(transformedStudents.reduce((sum, s) => sum + s.progress, 0) / transformedStudents.length)
+        : 0,
+      totalRevenue: Object.values(spentData).reduce((sum, amount) => sum + amount, 0),
+    }
 
     return NextResponse.json({
-      students: transformedStudents,
+      students: filteredStudents,
       total: count,
-      limit,
-      offset,
+      stats,
     })
 
   } catch (error) {
@@ -106,31 +254,39 @@ export async function GET(request: NextRequest) {
 // POST - Create a new student
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
 
-    // Verify admin authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = isDevBypass
+      ? await createServerSupabaseAdmin()
+      : await createServerSupabaseClient()
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    // Verify admin authentication (skip in dev bypass mode)
+    if (!isDevBypass) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      }
     }
 
     const body = await request.json()
     const { name, email, courseIds } = body
 
-    // Validate required fields
     if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Name and email are required' },
+        { status: 400 }
+      )
     }
 
     // Check if email already exists
@@ -141,43 +297,37 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existingUser) {
-      return NextResponse.json({ error: 'A user with this email already exists' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'A user with this email already exists' },
+        { status: 409 }
+      )
     }
 
-    // Create the user in auth (this will trigger the users table insert via trigger)
-    // For now, we'll create a record directly since we don't have signup flow
-    // In production, you'd send an invite email
-
-    // Generate a UUID for the new user
-    const { data: newUserId } = await supabase.rpc('uuid_generate_v4')
-
-    // Insert into users table
-    const { data: newStudent, error: insertError } = await supabase
+    // Create the student user
+    // Note: In a real app, you'd also create an auth user via Supabase Auth
+    // This creates just the profile entry
+    const { data: newStudent, error: createError } = await supabase
       .from('users')
       .insert({
-        id: newUserId || crypto.randomUUID(),
-        email,
         full_name: name,
+        email,
         role: 'student',
         is_active: true,
       })
       .select()
       .single()
 
-    if (insertError) {
-      // Check for unique constraint violation
-      if (insertError.code === '23505') {
-        return NextResponse.json({ error: 'A user with this email already exists' }, { status: 400 })
-      }
-      throw insertError
+    if (createError) {
+      throw createError
     }
 
-    // Enroll in selected courses
-    if (courseIds && courseIds.length > 0 && newStudent) {
+    // Enroll in courses if specified
+    if (courseIds && courseIds.length > 0) {
       const enrollments = courseIds.map((courseId: string) => ({
         user_id: newStudent.id,
         course_id: courseId,
-        is_active: true,
+        status: 'active',
+        progress_percentage: 0,
       }))
 
       const { error: enrollError } = await supabase
@@ -185,20 +335,27 @@ export async function POST(request: NextRequest) {
         .insert(enrollments)
 
       if (enrollError) {
-        console.error('Failed to enroll student in courses:', enrollError)
-        // Continue anyway - user is created
+        console.error('Enrollment error:', enrollError)
+        // Don't fail the whole request, student was created
       }
     }
 
     return NextResponse.json({
-      success: true,
+      message: 'Student created successfully',
       student: {
         id: newStudent.id,
         name: newStudent.full_name,
         email: newStudent.email,
-        status: 'Active',
+        avatar: newStudent.avatar_url,
+        enrolledCourses: courseIds?.length || 0,
+        completedCourses: 0,
+        progress: 0,
+        totalSpent: 0,
+        status: 'active',
+        joinDate: newStudent.created_at?.split('T')[0] || '',
+        lastActive: 'Just now',
+        plan: 'basic',
       },
-      message: 'Student created successfully',
     })
 
   } catch (error) {

@@ -177,6 +177,37 @@ RESTful API endpoints for all backend operations.
 | `/api/analytics` | Platform analytics |
 | `/api/certificates` | Certificate generation |
 
+### Live Training APIs
+
+| Endpoint | Methods | Purpose |
+|----------|---------|---------|
+| `/api/live-trainings` | GET, POST | List/create trainings |
+| `/api/live-trainings/[id]` | GET, PATCH, DELETE, POST | Training CRUD & registration |
+
+### Team APIs
+
+| Endpoint | Methods | Purpose |
+|----------|---------|---------|
+| `/api/teams` | GET, POST | List/create teams |
+| `/api/teams/[id]` | GET, PATCH, DELETE | Team management |
+| `/api/teams/[id]/members` | GET, POST, PATCH, DELETE | Member management |
+| `/api/teams/[id]/invitations` | GET, POST, DELETE | Invitation management |
+
+### Gamification APIs
+
+| Endpoint | Methods | Purpose |
+|----------|---------|---------|
+| `/api/achievements` | GET | List all achievements |
+| `/api/achievements/user` | GET, PATCH, POST | User achievements & check |
+| `/api/gamification/stats` | GET, POST | User points, streaks, activity |
+| `/api/gamification/leaderboard` | GET, POST | Leaderboards & cache refresh |
+
+### Recommendations API
+
+| Endpoint | Methods | Purpose |
+|----------|---------|---------|
+| `/api/recommendations` | GET | AI-powered course recommendations |
+
 ---
 
 ## Component Architecture
@@ -214,6 +245,16 @@ Learning experience components:
 | `header.tsx` | Main navigation |
 | `footer.tsx` | Site footer |
 | `sidebar.tsx` | Dashboard sidebar |
+
+### Gamification Components (`/components/gamification/`)
+
+| Component | Purpose |
+|-----------|---------|
+| `achievement-badge.tsx` | Display achievement badges with progress |
+| `achievements-grid.tsx` | Grid view of all achievements |
+| `streak-display.tsx` | Streak display card and badge |
+| `leaderboard.tsx` | Points leaderboard with tabs |
+| `points-display.tsx` | User points display (card, compact, inline) |
 
 ---
 
@@ -260,21 +301,20 @@ Static data and mock content for development.
 - [x] Admin dashboard structure
 - [x] User authentication (Supabase)
 - [x] Certificate system
-
-### In Development
-
-- [ ] Real-time discussions (needs Supabase connection)
-- [ ] Quiz system with scoring
-- [ ] Progress tracking & analytics
-- [ ] Live training sessions
-- [ ] Team management
+- [x] Real-time discussions (Supabase Realtime)
+- [x] Quiz system with scoring
+- [x] Progress tracking & analytics
+- [x] Live training sessions (scheduling, registration, management)
+- [x] Team management (members, invitations, course access)
+- [x] AI-powered course recommendations
+- [x] Gamification system (badges, achievements, streaks, points, leaderboards)
 
 ### Planned
 
-- [ ] AI-powered recommendations
-- [ ] Gamification (badges, streaks)
-- [ ] Mobile app
-- [ ] Offline mode
+- [ ] Mobile app (React Native)
+- [ ] Offline mode (PWA)
+- [ ] Advanced analytics dashboard
+- [ ] Social features (follow instructors, share progress)
 
 ---
 
@@ -345,10 +385,11 @@ When Supabase is not configured, APIs return mock data automatically:
 | Metric | Count |
 |--------|-------|
 | Page Components | 66 |
-| React Components | 23 |
-| API Routes | 16 |
-| Total TypeScript Files | 100+ |
+| React Components | 28 |
+| API Routes | 26 |
+| Database Migrations | 10 |
+| Total TypeScript Files | 120+ |
 
 ---
 
-*Last Updated: January 23, 2026*
+*Last Updated: January 26, 2026*

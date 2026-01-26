@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
+  Loader2,
   DollarSign,
   TrendingUp,
   TrendingDown,
@@ -25,58 +26,81 @@ import {
   PieChart
 } from 'lucide-react'
 
-// Mock revenue data
-const statsCards = [
-  {
-    title: 'Total Revenue',
-    value: '$847,293',
-    change: '+18.2%',
-    trend: 'up',
-    icon: DollarSign,
-    color: 'green',
-    subtitle: 'All time'
-  },
-  {
-    title: 'Monthly Revenue',
-    value: '$128,450',
-    change: '+12.5%',
-    trend: 'up',
-    icon: TrendingUp,
-    color: 'blue',
-    subtitle: 'January 2024'
-  },
-  {
-    title: 'Avg. Order Value',
-    value: '$149',
-    change: '+5.8%',
-    trend: 'up',
-    icon: Receipt,
-    color: 'purple',
-    subtitle: 'Per transaction'
-  },
-  {
-    title: 'Refund Rate',
-    value: '2.4%',
-    change: '-0.8%',
-    trend: 'down',
-    icon: RefreshCcw,
-    color: 'amber',
-    subtitle: 'Last 30 days'
-  }
+// TypeScript interfaces
+interface RevenueStats {
+  totalRevenue: number
+  monthlyRevenue: number
+  avgOrderValue: number
+  refundRate: number
+  totalRevenueChange: number
+  monthlyRevenueChange: number
+  avgOrderValueChange: number
+  refundRateChange: number
+}
+
+interface Transaction {
+  id: string
+  customer: string
+  email: string
+  amount: number
+  course: string
+  courseId: string
+  status: 'completed' | 'pending' | 'refunded' | 'failed'
+  method: string
+  date: string
+}
+
+interface CourseRevenue {
+  name: string
+  revenue: number
+  sales: number
+  percentage: number
+}
+
+interface PaymentMethod {
+  method: string
+  percentage: number
+  amount: number
+}
+
+interface MonthlyRevenue {
+  month: string
+  revenue: number | null
+  projected: number | null
+}
+
+interface RevenueResponse {
+  stats: RevenueStats
+  transactions: Transaction[]
+  courseRevenue: CourseRevenue[]
+  paymentMethods: PaymentMethod[]
+  monthlyRevenue: MonthlyRevenue[]
+}
+
+// Mock data fallback
+const MOCK_STATS: RevenueStats = {
+  totalRevenue: 847293,
+  monthlyRevenue: 128450,
+  avgOrderValue: 149,
+  refundRate: 2.4,
+  totalRevenueChange: 18.2,
+  monthlyRevenueChange: 12.5,
+  avgOrderValueChange: 5.8,
+  refundRateChange: -0.8,
+}
+
+const MOCK_TRANSACTIONS: Transaction[] = [
+  { id: 'TXN-001', customer: 'John Smith', email: 'john@example.com', amount: 299, course: 'Advanced React Patterns', courseId: '1', status: 'completed', method: 'card', date: '2024-01-15 14:32' },
+  { id: 'TXN-002', customer: 'Emily Chen', email: 'emily@example.com', amount: 199, course: 'Node.js Masterclass', courseId: '2', status: 'completed', method: 'paypal', date: '2024-01-15 12:18' },
+  { id: 'TXN-003', customer: 'Michael Brown', email: 'michael@example.com', amount: 149, course: 'TypeScript Deep Dive', courseId: '3', status: 'pending', method: 'card', date: '2024-01-15 11:45' },
+  { id: 'TXN-004', customer: 'Sarah Davis', email: 'sarah@example.com', amount: 399, course: 'Full Stack Bundle', courseId: '4', status: 'completed', method: 'card', date: '2024-01-15 10:22' },
+  { id: 'TXN-005', customer: 'James Wilson', email: 'james@example.com', amount: 99, course: 'Git & GitHub Essentials', courseId: '5', status: 'refunded', method: 'card', date: '2024-01-14 16:55' },
+  { id: 'TXN-006', customer: 'Lisa Anderson', email: 'lisa@example.com', amount: 249, course: 'System Design Fundamentals', courseId: '6', status: 'completed', method: 'paypal', date: '2024-01-14 14:30' },
+  { id: 'TXN-007', customer: 'David Taylor', email: 'david@example.com', amount: 199, course: 'AWS Solutions Architect', courseId: '7', status: 'failed', method: 'card', date: '2024-01-14 12:10' },
+  { id: 'TXN-008', customer: 'Jennifer Martinez', email: 'jennifer@example.com', amount: 349, course: 'DevOps Professional', courseId: '8', status: 'completed', method: 'card', date: '2024-01-14 09:45' }
 ]
 
-const transactions = [
-  { id: 'TXN-001', customer: 'John Smith', email: 'john@example.com', amount: 299, course: 'Advanced React Patterns', status: 'completed', method: 'card', date: '2024-01-15 14:32' },
-  { id: 'TXN-002', customer: 'Emily Chen', email: 'emily@example.com', amount: 199, course: 'Node.js Masterclass', status: 'completed', method: 'paypal', date: '2024-01-15 12:18' },
-  { id: 'TXN-003', customer: 'Michael Brown', email: 'michael@example.com', amount: 149, course: 'TypeScript Deep Dive', status: 'pending', method: 'card', date: '2024-01-15 11:45' },
-  { id: 'TXN-004', customer: 'Sarah Davis', email: 'sarah@example.com', amount: 399, course: 'Full Stack Bundle', status: 'completed', method: 'card', date: '2024-01-15 10:22' },
-  { id: 'TXN-005', customer: 'James Wilson', email: 'james@example.com', amount: 99, course: 'Git & GitHub Essentials', status: 'refunded', method: 'card', date: '2024-01-14 16:55' },
-  { id: 'TXN-006', customer: 'Lisa Anderson', email: 'lisa@example.com', amount: 249, course: 'System Design Fundamentals', status: 'completed', method: 'paypal', date: '2024-01-14 14:30' },
-  { id: 'TXN-007', customer: 'David Taylor', email: 'david@example.com', amount: 199, course: 'AWS Solutions Architect', status: 'failed', method: 'card', date: '2024-01-14 12:10' },
-  { id: 'TXN-008', customer: 'Jennifer Martinez', email: 'jennifer@example.com', amount: 349, course: 'DevOps Professional', status: 'completed', method: 'card', date: '2024-01-14 09:45' }
-]
-
-const courseRevenue = [
+const MOCK_COURSE_REVENUE: CourseRevenue[] = [
   { name: 'Advanced React Patterns', revenue: 142705, sales: 478, percentage: 28 },
   { name: 'Node.js Masterclass', revenue: 98340, sales: 328, percentage: 19 },
   { name: 'TypeScript Deep Dive', revenue: 78845, sales: 263, percentage: 15 },
@@ -85,14 +109,14 @@ const courseRevenue = [
   { name: 'Other Courses', revenue: 76800, sales: 384, percentage: 15 }
 ]
 
-const paymentMethods = [
-  { method: 'Credit Card', percentage: 62, amount: '$525,322', icon: CreditCard },
-  { method: 'PayPal', percentage: 28, amount: '$237,242', icon: DollarSign },
-  { method: 'Bank Transfer', percentage: 7, amount: '$59,310', icon: Receipt },
-  { method: 'Other', percentage: 3, amount: '$25,419', icon: PieChart }
+const MOCK_PAYMENT_METHODS: PaymentMethod[] = [
+  { method: 'Credit Card', percentage: 62, amount: 525322 },
+  { method: 'PayPal', percentage: 28, amount: 237242 },
+  { method: 'Bank Transfer', percentage: 7, amount: 59310 },
+  { method: 'Other', percentage: 3, amount: 25419 }
 ]
 
-const monthlyRevenue = [
+const MOCK_MONTHLY_REVENUE: MonthlyRevenue[] = [
   { month: 'Aug', revenue: 89000, projected: null },
   { month: 'Sep', revenue: 95000, projected: null },
   { month: 'Oct', revenue: 108000, projected: null },
@@ -103,6 +127,54 @@ const monthlyRevenue = [
   { month: 'Mar', revenue: null, projected: 142000 },
   { month: 'Apr', revenue: null, projected: 150000 }
 ]
+
+// Stats cards configuration (icons and colors)
+const statsCardConfig = [
+  {
+    key: 'totalRevenue',
+    title: 'Total Revenue',
+    icon: DollarSign,
+    color: 'green',
+    subtitle: 'All time',
+    format: 'currency',
+    changeKey: 'totalRevenueChange',
+  },
+  {
+    key: 'monthlyRevenue',
+    title: 'Monthly Revenue',
+    icon: TrendingUp,
+    color: 'blue',
+    subtitle: 'Last 30 days',
+    format: 'currency',
+    changeKey: 'monthlyRevenueChange',
+  },
+  {
+    key: 'avgOrderValue',
+    title: 'Avg. Order Value',
+    icon: Receipt,
+    color: 'purple',
+    subtitle: 'Per transaction',
+    format: 'currency',
+    changeKey: 'avgOrderValueChange',
+  },
+  {
+    key: 'refundRate',
+    title: 'Refund Rate',
+    icon: RefreshCcw,
+    color: 'amber',
+    subtitle: 'Last 30 days',
+    format: 'percent',
+    changeKey: 'refundRateChange',
+  }
+]
+
+// Payment method icons
+const paymentMethodIcons: Record<string, typeof CreditCard> = {
+  'Credit Card': CreditCard,
+  'PayPal': DollarSign,
+  'Bank Transfer': Receipt,
+  'Other': PieChart,
+}
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
   completed: { label: 'Completed', color: 'text-green-500 bg-green-500/10', icon: CheckCircle },
@@ -123,14 +195,42 @@ export default function RevenuePage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<RevenueStats>(MOCK_STATS)
+  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS)
+  const [courseRevenue, setCourseRevenue] = useState<CourseRevenue[]>(MOCK_COURSE_REVENUE)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(MOCK_PAYMENT_METHODS)
+  const [monthlyRevenue, setMonthlyRevenue] = useState<MonthlyRevenue[]>(MOCK_MONTHLY_REVENUE)
 
-  const filteredTransactions = transactions.filter(txn => {
-    const matchesStatus = statusFilter === 'all' || txn.status === statusFilter
-    const matchesSearch = txn.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          txn.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          txn.id.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      try {
+        setLoading(true)
+        const params = new URLSearchParams()
+        params.set('range', dateRange)
+        if (statusFilter !== 'all') params.set('status', statusFilter)
+        if (searchQuery) params.set('search', searchQuery)
+
+        const response = await fetch(`/api/admin/revenue?${params.toString()}`)
+        if (!response.ok) throw new Error('Failed to fetch revenue data')
+
+        const data: RevenueResponse = await response.json()
+        setStats(data.stats)
+        setTransactions(data.transactions)
+        setCourseRevenue(data.courseRevenue)
+        setPaymentMethods(data.paymentMethods)
+        setMonthlyRevenue(data.monthlyRevenue)
+      } catch (error) {
+        console.error('Revenue fetch error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRevenue()
+  }, [dateRange, statusFilter, searchQuery])
+
+  const filteredTransactions = transactions
 
   const maxRevenue = Math.max(...monthlyRevenue.map(m => m.revenue || m.projected || 0))
 
@@ -184,32 +284,53 @@ export default function RevenuePage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsCards.map((stat) => {
-          const Icon = stat.icon
-          const colors = colorClasses[stat.color]
-          return (
-            <div key={stat.title} className="bg-card border border-border rounded-xl p-6">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-6 animate-pulse">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg ${colors.bg}`}>
-                  <Icon className={`h-5 w-5 ${colors.text}`} />
-                </div>
-                <span className={`flex items-center gap-1 text-sm font-medium ${
-                  stat.trend === 'up' ? 'text-green-500' : 'text-green-500'
-                }`}>
-                  {stat.trend === 'up' ? (
-                    <ArrowUpRight className="h-4 w-4" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4" />
-                  )}
-                  {stat.change}
-                </span>
+                <div className="w-10 h-10 bg-muted rounded-lg" />
+                <div className="w-16 h-4 bg-muted rounded" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground">{stat.value}</h3>
-              <p className="text-sm text-muted-foreground">{stat.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+              <div className="w-24 h-8 bg-muted rounded mb-2" />
+              <div className="w-20 h-4 bg-muted rounded" />
             </div>
-          )
-        })}
+          ))
+        ) : (
+          statsCardConfig.map((config) => {
+            const Icon = config.icon
+            const colors = colorClasses[config.color]
+            const value = stats[config.key as keyof RevenueStats] as number
+            const change = stats[config.changeKey as keyof RevenueStats] as number
+            const isPositive = change >= 0 && config.key !== 'refundRate'
+            const formattedValue = config.format === 'currency'
+              ? `$${value.toLocaleString()}`
+              : `${value}%`
+            const formattedChange = `${change >= 0 ? '+' : ''}${change}%`
+
+            return (
+              <div key={config.title} className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-2 rounded-lg ${colors.bg}`}>
+                    <Icon className={`h-5 w-5 ${colors.text}`} />
+                  </div>
+                  <span className={`flex items-center gap-1 text-sm font-medium ${
+                    isPositive ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {isPositive ? (
+                      <ArrowUpRight className="h-4 w-4" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4" />
+                    )}
+                    {formattedChange}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-foreground">{formattedValue}</h3>
+                <p className="text-sm text-muted-foreground">{config.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{config.subtitle}</p>
+              </div>
+            )
+          })
+        )}
       </div>
 
       {/* Revenue Chart & Payment Methods */}
@@ -261,31 +382,45 @@ export default function RevenuePage() {
         {/* Payment Methods */}
         <div className="bg-card border border-border rounded-xl p-6">
           <h2 className="text-lg font-semibold text-foreground mb-6">Payment Methods</h2>
-          <div className="space-y-4">
-            {paymentMethods.map((pm) => {
-              const Icon = pm.icon
-              return (
-                <div key={pm.method} className="space-y-2">
+          {loading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2 animate-pulse">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-foreground">{pm.method}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{pm.amount}</span>
+                    <div className="w-24 h-4 bg-muted rounded" />
+                    <div className="w-16 h-4 bg-muted rounded" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full"
-                        style={{ width: `${pm.percentage}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-foreground w-10">{pm.percentage}%</span>
-                  </div>
+                  <div className="h-2 bg-muted rounded-full" />
                 </div>
-              )
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {paymentMethods.map((pm) => {
+                const Icon = paymentMethodIcons[pm.method] || PieChart
+                return (
+                  <div key={pm.method} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-foreground">{pm.method}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">${pm.amount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full"
+                          style={{ width: `${pm.percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-foreground w-10">{pm.percentage}%</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 

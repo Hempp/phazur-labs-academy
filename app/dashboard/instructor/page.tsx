@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   BookOpen,
@@ -26,8 +26,64 @@ import { UserAvatar } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { cn } from '@/lib/utils'
 
-// Mock data
-const mockStats = {
+// TypeScript interfaces
+interface InstructorStats {
+  totalCourses: number
+  totalStudents: number
+  totalEarnings: number
+  monthlyEarnings: number
+  avgRating: number
+  totalReviews: number
+  viewsThisMonth: number
+  enrollmentsThisMonth: number
+  studentsTrend: number
+  ratingTrend: number
+  reviewsThisMonth: number
+}
+
+interface Course {
+  id: string
+  title: string
+  thumbnail: string | null
+  students: number
+  rating: number
+  revenue: number
+  status: 'published' | 'draft' | 'archived'
+  lastUpdated: string
+  level: 'beginner' | 'intermediate' | 'advanced'
+}
+
+interface Review {
+  id: string
+  user: { name: string; avatar: string | null }
+  course: string
+  rating: number
+  comment: string
+  date: string
+}
+
+interface Enrollment {
+  id: string
+  user: { name: string; avatar: string | null }
+  course: string
+  date: string
+}
+
+interface EarningsData {
+  month: string
+  amount: number
+}
+
+interface DashboardResponse {
+  stats: InstructorStats
+  courses: Course[]
+  recentReviews: Review[]
+  recentEnrollments: Enrollment[]
+  earningsData: EarningsData[]
+}
+
+// Mock data fallback
+const MOCK_STATS: InstructorStats = {
   totalCourses: 8,
   totalStudents: 12450,
   totalEarnings: 45890,
@@ -36,9 +92,12 @@ const mockStats = {
   totalReviews: 2847,
   viewsThisMonth: 45200,
   enrollmentsThisMonth: 342,
+  studentsTrend: 12,
+  ratingTrend: 3,
+  reviewsThisMonth: 24,
 }
 
-const mockCourses = [
+const MOCK_COURSES: Course[] = [
   {
     id: '1',
     title: 'Advanced React Patterns',
@@ -46,9 +105,9 @@ const mockCourses = [
     students: 3420,
     rating: 4.9,
     revenue: 12500,
-    status: 'published' as const,
+    status: 'published',
     lastUpdated: '2024-01-15',
-    level: 'advanced' as const,
+    level: 'advanced',
   },
   {
     id: '2',
@@ -57,9 +116,9 @@ const mockCourses = [
     students: 5280,
     rating: 4.8,
     revenue: 18900,
-    status: 'published' as const,
+    status: 'published',
     lastUpdated: '2024-02-01',
-    level: 'intermediate' as const,
+    level: 'intermediate',
   },
   {
     id: '3',
@@ -68,9 +127,9 @@ const mockCourses = [
     students: 2150,
     rating: 4.7,
     revenue: 8200,
-    status: 'published' as const,
+    status: 'published',
     lastUpdated: '2024-01-20',
-    level: 'intermediate' as const,
+    level: 'intermediate',
   },
   {
     id: '4',
@@ -79,13 +138,13 @@ const mockCourses = [
     students: 0,
     rating: 0,
     revenue: 0,
-    status: 'draft' as const,
+    status: 'draft',
     lastUpdated: '2024-02-10',
-    level: 'beginner' as const,
+    level: 'beginner',
   },
 ]
 
-const mockRecentReviews = [
+const MOCK_RECENT_REVIEWS: Review[] = [
   {
     id: 'r1',
     user: { name: 'Alex Thompson', avatar: null },
@@ -112,14 +171,14 @@ const mockRecentReviews = [
   },
 ]
 
-const mockRecentEnrollments = [
+const MOCK_RECENT_ENROLLMENTS: Enrollment[] = [
   { id: 'e1', user: { name: 'John Doe', avatar: null }, course: 'Advanced React Patterns', date: '2 hours ago' },
   { id: 'e2', user: { name: 'Jane Smith', avatar: null }, course: 'TypeScript Masterclass', date: '3 hours ago' },
   { id: 'e3', user: { name: 'Mike Johnson', avatar: null }, course: 'Advanced React Patterns', date: '5 hours ago' },
   { id: 'e4', user: { name: 'Sarah Williams', avatar: null }, course: 'Node.js Best Practices', date: '6 hours ago' },
 ]
 
-const earningsData = [
+const MOCK_EARNINGS_DATA: EarningsData[] = [
   { month: 'Aug', amount: 5200 },
   { month: 'Sep', amount: 6100 },
   { month: 'Oct', amount: 5800 },
@@ -181,28 +240,28 @@ function StatCard({
   )
 }
 
-function MiniEarningsChart() {
-  const maxAmount = Math.max(...earningsData.map(d => d.amount))
+function MiniEarningsChart({ data }: { data: EarningsData[] }) {
+  const maxAmount = Math.max(...data.map(d => d.amount), 1)
 
   return (
     <div className="flex items-end justify-between gap-1 h-20">
-      {earningsData.map((data, index) => (
-        <div key={data.month} className="flex-1 flex flex-col items-center gap-1">
+      {data.map((item, index) => (
+        <div key={item.month} className="flex-1 flex flex-col items-center gap-1">
           <div
             className={cn(
               'w-full rounded-t transition-all duration-300',
-              index === earningsData.length - 1 ? 'bg-primary' : 'bg-primary/30'
+              index === data.length - 1 ? 'bg-primary' : 'bg-primary/30'
             )}
-            style={{ height: `${(data.amount / maxAmount) * 60}px` }}
+            style={{ height: `${(item.amount / maxAmount) * 60}px` }}
           />
-          <span className="text-[10px] text-muted-foreground">{data.month}</span>
+          <span className="text-[10px] text-muted-foreground">{item.month}</span>
         </div>
       ))}
     </div>
   )
 }
 
-function CourseRow({ course }: { course: typeof mockCourses[0] }) {
+function CourseRow({ course }: { course: Course }) {
   const [showMenu, setShowMenu] = useState(false)
 
   return (
@@ -280,6 +339,70 @@ function CourseRow({ course }: { course: typeof mockCourses[0] }) {
 
 export default function InstructorDashboardPage() {
   const { profile } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<InstructorStats>(MOCK_STATS)
+  const [courses, setCourses] = useState<Course[]>(MOCK_COURSES)
+  const [recentReviews, setRecentReviews] = useState<Review[]>(MOCK_RECENT_REVIEWS)
+  const [recentEnrollments, setRecentEnrollments] = useState<Enrollment[]>(MOCK_RECENT_ENROLLMENTS)
+  const [earningsData, setEarningsData] = useState<EarningsData[]>(MOCK_EARNINGS_DATA)
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/instructor/dashboard')
+        if (!response.ok) throw new Error('Failed to fetch dashboard')
+
+        const data: DashboardResponse = await response.json()
+        setStats(data.stats)
+        setCourses(data.courses)
+        setRecentReviews(data.recentReviews)
+        setRecentEnrollments(data.recentEnrollments)
+        setEarningsData(data.earningsData)
+      } catch (error) {
+        console.error('Dashboard fetch error:', error)
+        // Keep mock data on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboard()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div className="h-8 w-64 bg-muted rounded" />
+            <div className="h-5 w-48 bg-muted rounded mt-2" />
+          </div>
+          <div className="h-10 w-36 bg-muted rounded" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="h-4 w-24 bg-muted rounded mb-2" />
+                <div className="h-8 w-32 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card><CardContent className="h-48" /></Card>
+            <Card><CardContent className="h-64" /></Card>
+          </div>
+          <div className="space-y-6">
+            <Card><CardContent className="h-40" /></Card>
+            <Card><CardContent className="h-48" /></Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -307,26 +430,26 @@ export default function InstructorDashboardPage() {
         <StatCard
           icon={BookOpen}
           label="Total Courses"
-          value={mockStats.totalCourses}
+          value={stats.totalCourses}
         />
         <StatCard
           icon={Users}
           label="Total Students"
-          value={mockStats.totalStudents}
-          trend={12}
+          value={stats.totalStudents}
+          trend={stats.studentsTrend}
           trendLabel="this month"
         />
         <StatCard
           icon={DollarSign}
           label="Total Earnings"
-          value={mockStats.totalEarnings}
+          value={stats.totalEarnings}
           prefix="$"
         />
         <StatCard
           icon={Star}
           label="Average Rating"
-          value={mockStats.avgRating}
-          trend={3}
+          value={stats.avgRating}
+          trend={stats.ratingTrend}
           trendLabel="this month"
         />
       </div>
@@ -340,12 +463,12 @@ export default function InstructorDashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Earnings Overview</CardTitle>
               <span className="text-2xl font-bold text-primary">
-                ${mockStats.monthlyEarnings.toLocaleString()}
+                ${stats.monthlyEarnings.toLocaleString()}
                 <span className="text-sm font-normal text-muted-foreground ml-1">this month</span>
               </span>
             </CardHeader>
             <CardContent>
-              <MiniEarningsChart />
+              <MiniEarningsChart data={earningsData} />
             </CardContent>
           </Card>
 
@@ -362,7 +485,7 @@ export default function InstructorDashboardPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y">
-                {mockCourses.map((course) => (
+                {courses.map((course) => (
                   <CourseRow key={course.id} course={course} />
                 ))}
               </div>
@@ -385,7 +508,7 @@ export default function InstructorDashboardPage() {
                   </div>
                   <span className="text-sm">Course Views</span>
                 </div>
-                <span className="font-semibold">{mockStats.viewsThisMonth.toLocaleString()}</span>
+                <span className="font-semibold">{stats.viewsThisMonth.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -394,7 +517,7 @@ export default function InstructorDashboardPage() {
                   </div>
                   <span className="text-sm">New Enrollments</span>
                 </div>
-                <span className="font-semibold">{mockStats.enrollmentsThisMonth}</span>
+                <span className="font-semibold">{stats.enrollmentsThisMonth}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -403,7 +526,7 @@ export default function InstructorDashboardPage() {
                   </div>
                   <span className="text-sm">New Reviews</span>
                 </div>
-                <span className="font-semibold">24</span>
+                <span className="font-semibold">{stats.reviewsThisMonth}</span>
               </div>
             </CardContent>
           </Card>
@@ -420,7 +543,7 @@ export default function InstructorDashboardPage() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-4">
-              {mockRecentReviews.map((review) => (
+              {recentReviews.map((review) => (
                 <div key={review.id} className="space-y-2">
                   <div className="flex items-center gap-2">
                     <UserAvatar
@@ -449,7 +572,7 @@ export default function InstructorDashboardPage() {
               <CardTitle className="text-lg">Recent Enrollments</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockRecentEnrollments.map((enrollment) => (
+              {recentEnrollments.map((enrollment) => (
                 <div key={enrollment.id} className="flex items-center gap-3">
                   <UserAvatar
                     user={{ name: enrollment.user.name, avatar_url: enrollment.user.avatar }}
