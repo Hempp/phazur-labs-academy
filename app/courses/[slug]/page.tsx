@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+import { VideoPlaceholder } from '@/components/video-player/video-placeholder'
 
 // API response type
 interface CourseApiResponse {
@@ -219,6 +220,7 @@ const mockCourseData = {
     'Self-taught developers wanting structured learning',
     'Students preparing for software development roles',
   ],
+  totalDurationMinutes: 0, // No preview video for mock data
 }
 
 const mockReviews = [
@@ -471,6 +473,7 @@ export default function CourseDetailPage() {
     targetAudience: mockCourseData.targetAudience,
     previewVideoUrl: apiData.previewVideoUrl,
     thumbnailUrl: apiData.thumbnailUrl,
+    totalDurationMinutes: apiData.totalDurationMinutes,
   } : mockCourseData
 
   // Handle scroll for sticky nav
@@ -646,14 +649,25 @@ export default function CourseDetailPage() {
             {/* Right Column - CTA Card */}
             <div className="lg:col-span-2">
               <div className="bg-background border rounded-lg shadow-sm overflow-hidden">
-                {/* Preview Video Placeholder */}
-                <div className="relative aspect-video bg-muted">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <button className="p-4 rounded-full bg-white/90 shadow-lg hover:scale-110 transition-transform">
-                      <Play className="w-8 h-8 text-primary fill-primary" />
-                    </button>
+                {/* Preview Video */}
+                {course.previewVideoUrl ? (
+                  <div className="relative aspect-video bg-black">
+                    <video
+                      src={course.previewVideoUrl}
+                      poster={course.thumbnailUrl || undefined}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
+                ) : (
+                  <VideoPlaceholder
+                    lessonTitle={course.title}
+                    videoType="introduction"
+                    status="coming_soon"
+                    estimatedDuration={course.totalDurationMinutes ? course.totalDurationMinutes * 60 : undefined}
+                    description={course.subtitle || `Preview video for ${course.title}`}
+                  />
+                )}
 
                 <div className="p-5">
                   {/* Key Info */}

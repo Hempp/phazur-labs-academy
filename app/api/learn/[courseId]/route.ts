@@ -21,7 +21,22 @@ export async function GET(
     // Get authenticated user
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    let effectiveUserId: string | null = user?.id || null
+
+    if (!user && isDevBypass) {
+      // In dev mode, use the first user from the database
+      const { data: devUser } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .limit(1)
+        .single()
+      effectiveUserId = devUser?.id || null
+    }
+
+    if (!effectiveUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -51,12 +66,13 @@ export async function GET(
       )
     }
 
-    // Check enrollment
-    const { data: enrollment, error: enrollmentError } = await supabase
+    // Check enrollment (use admin client in dev bypass mode to skip RLS)
+    const enrollmentClient = isDevBypass ? supabaseAdmin : supabase
+    const { data: enrollment, error: enrollmentError } = await enrollmentClient
       .from('enrollments')
       .select('id, is_active, progress_percentage')
       .eq('course_id', courseId)
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .single()
 
     if (enrollmentError || !enrollment) {
@@ -105,11 +121,12 @@ export async function GET(
     // Get all lessons flat for easy access
     const allLessons = sortedModules.flatMap(m => m.lessons)
 
-    // Get completed lessons for the user
-    const { data: lessonProgress } = await supabase
+    // Get completed lessons for the user (use admin client in dev bypass mode)
+    const progressClient = isDevBypass ? supabaseAdmin : supabase
+    const { data: lessonProgress } = await progressClient
       .from('lesson_progress')
       .select('lesson_id, is_completed, last_position_seconds')
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .eq('course_id', courseId)
 
     const progressMap = new Map(
@@ -280,8 +297,8 @@ export async function GET(
         progress: enrollment.progress_percentage,
       },
       user: {
-        id: user.id,
-        email: user.email,
+        id: effectiveUserId,
+        email: user?.email || 'dev@phazurlabs.com',
       },
     })
 

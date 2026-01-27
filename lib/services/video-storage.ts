@@ -2,8 +2,18 @@
 // Abstraction layer for video storage providers (Supabase, BunnyCDN, S3, etc.)
 
 import { createServerSupabaseAdmin } from '@/lib/supabase/server'
+import {
+  isS3Configured,
+  getS3Config,
+  generateLibraryKey,
+  generateUploadPresignedUrl,
+  generateDownloadPresignedUrl,
+  getVideoUrl,
+  deleteObject as deleteS3Object,
+  getObjectMetadata,
+} from './s3-storage'
 
-export type VideoProvider = 'supabase' | 'bunnycdn' | 'local'
+export type VideoProvider = 'supabase' | 'bunnycdn' | 's3' | 'local'
 
 export interface VideoUploadOptions {
   file: File | Buffer
@@ -43,7 +53,18 @@ export interface VideoMetadata {
 }
 
 // Get the active video provider from environment
+// Priority: S3 > BunnyCDN > Supabase > local
 export function getVideoProvider(): VideoProvider {
+  // Check for explicit provider override
+  const explicitProvider = process.env.VIDEO_STORAGE_PROVIDER
+  if (explicitProvider && ['s3', 'bunnycdn', 'supabase', 'local'].includes(explicitProvider)) {
+    return explicitProvider as VideoProvider
+  }
+
+  // Auto-detect based on available credentials
+  if (isS3Configured()) {
+    return 's3'
+  }
   if (process.env.BUNNYCDN_API_KEY && process.env.BUNNYCDN_STORAGE_ZONE) {
     return 'bunnycdn'
   }
@@ -218,6 +239,92 @@ async function uploadToBunnyCDN(options: VideoUploadOptions): Promise<VideoUploa
   }
 }
 
+// Upload to AWS S3
+async function uploadToS3(options: VideoUploadOptions): Promise<VideoUploadResult> {
+  const config = getS3Config()
+  if (!config) {
+    return {
+      success: false,
+      videoId: '',
+      url: '',
+      provider: 's3',
+      size: 0,
+      error: 'S3 not configured. Set AWS_S3_BUCKET, AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY.',
+    }
+  }
+
+  const videoId = generateVideoId()
+  const storageKey = generateLibraryKey({
+    videoId,
+    filename: options.fileName,
+  })
+
+  // Convert File to ArrayBuffer if needed
+  let fileBuffer: ArrayBuffer
+  let fileSize: number
+  if (options.file instanceof Buffer) {
+    fileBuffer = options.file
+    fileSize = options.file.length
+  } else {
+    fileBuffer = await options.file.arrayBuffer()
+    fileSize = options.file.size
+  }
+
+  try {
+    // For small files (< 100MB), use direct upload via presigned URL
+    // For larger files, use multipart upload via upload-session service
+    if (fileSize < 100 * 1024 * 1024) {
+      // Generate presigned URL for upload
+      const { uploadUrl } = await generateUploadPresignedUrl(storageKey, options.contentType)
+
+      // Upload the file
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: fileBuffer,
+        headers: {
+          'Content-Type': options.contentType,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`S3 upload failed: ${response.statusText}`)
+      }
+
+      // Get the video URL (CDN or presigned)
+      const videoUrl = await getVideoUrl(storageKey)
+
+      return {
+        success: true,
+        videoId,
+        url: `s3://${config.bucket}/${storageKey}`,
+        cdnUrl: videoUrl,
+        provider: 's3',
+        size: fileSize,
+      }
+    } else {
+      // For large files, return info needed for multipart upload
+      // The actual multipart upload should be handled via the upload-session API
+      return {
+        success: false,
+        videoId,
+        url: '',
+        provider: 's3',
+        size: fileSize,
+        error: 'File too large for direct upload. Use the Video Library upload feature for files over 100MB.',
+      }
+    }
+  } catch (error) {
+    return {
+      success: false,
+      videoId,
+      url: '',
+      provider: 's3',
+      size: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
 // Main upload function - routes to appropriate provider
 export async function uploadVideo(options: VideoUploadOptions): Promise<VideoUploadResult> {
   const provider = getVideoProvider()
@@ -236,6 +343,8 @@ export async function uploadVideo(options: VideoUploadOptions): Promise<VideoUpl
   }
 
   switch (provider) {
+    case 's3':
+      return uploadToS3(options)
     case 'bunnycdn':
       return uploadToBunnyCDN(options)
     case 'supabase':
@@ -247,6 +356,15 @@ export async function uploadVideo(options: VideoUploadOptions): Promise<VideoUpl
 // Delete video from storage
 export async function deleteVideo(videoId: string, provider: VideoProvider, filePath: string): Promise<boolean> {
   switch (provider) {
+    case 's3': {
+      try {
+        await deleteS3Object(filePath)
+        return true
+      } catch {
+        return false
+      }
+    }
+
     case 'bunnycdn': {
       const apiKey = process.env.BUNNYCDN_API_KEY
       const storageZone = process.env.BUNNYCDN_STORAGE_ZONE
@@ -285,6 +403,15 @@ export async function getSignedVideoUrl(
   expiresInSeconds = 3600
 ): Promise<string | null> {
   switch (provider) {
+    case 's3': {
+      try {
+        const { downloadUrl } = await generateDownloadPresignedUrl(filePath, expiresInSeconds)
+        return downloadUrl
+      } catch {
+        return null
+      }
+    }
+
     case 'bunnycdn': {
       // BunnyCDN uses token authentication for signed URLs
       const securityKey = process.env.BUNNYCDN_SECURITY_KEY

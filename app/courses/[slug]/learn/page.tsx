@@ -141,6 +141,7 @@ function LessonSidebar({
   currentLessonId,
   courseProgress,
   completedLessonIds = [],
+  courseSlug,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -148,6 +149,7 @@ function LessonSidebar({
   currentLessonId: string
   courseProgress: number
   completedLessonIds?: string[]
+  courseSlug: string
 }) {
   const [expandedModules, setExpandedModules] = useState<string[]>(['m1', 'm2'])
 
@@ -265,7 +267,7 @@ function LessonSidebar({
                       return (
                         <Link
                           key={lesson.id}
-                          href={`/courses/${mockLessonData.course.slug}/learn?lesson=${lesson.id}`}
+                          href={`/courses/${courseSlug}/learn?lesson=${lesson.id}`}
                           className={cn(
                             'flex items-center gap-3 px-4 py-2 mx-2 rounded-lg text-sm transition-colors',
                             isCurrent
@@ -755,6 +757,7 @@ export default function CourseLearnPage() {
         currentLessonId={lessonId}
         courseProgress={currentCourseProgress}
         completedLessonIds={completedLessonIds}
+        courseSlug={courseSlug}
       />
 
       {/* Main Content */}
