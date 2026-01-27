@@ -30,6 +30,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import ProtectedVideoPlayer from '@/components/protected-video-player';
+import { VideoPlaceholder } from '@/components/video-player/video-placeholder';
+import type { VideoType, VideoStatus } from '@/components/video-player/video-placeholder';
 import { useContentProtection, useVideoProgress } from '@/hooks/use-content-protection';
 
 interface Lesson {
@@ -61,6 +63,12 @@ interface CurrentLesson {
   chapters: Array<{ id: string; title: string; start_time_seconds: number }>;
   quiz: unknown;
   progress: { completed: boolean; progress_percent: number; last_position_seconds: number } | null;
+  // Video placeholder fields
+  videoStatus?: 'ready' | 'in_production' | 'scheduled' | 'coming_soon' | 'placeholder';
+  videoType?: VideoType;
+  estimatedDuration?: number;
+  videoDescription?: string;
+  expectedReadyDate?: string;
 }
 
 interface Course {
@@ -298,12 +306,17 @@ export default function CourseLearnPage() {
                   watermarkEnabled={true}
                 />
               ) : currentLesson?.type === 'video' ? (
-                <div className="aspect-video bg-gray-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">Video content not available</p>
-                  </div>
-                </div>
+                <VideoPlaceholder
+                  lessonTitle={currentLesson.title}
+                  moduleTitle={data?.modules?.find(m => m.id === currentLesson.moduleId)?.title}
+                  videoType={currentLesson.videoType || 'lecture'}
+                  status={currentLesson.videoStatus && currentLesson.videoStatus !== 'ready'
+                    ? currentLesson.videoStatus as VideoStatus
+                    : 'coming_soon'}
+                  estimatedDuration={currentLesson.estimatedDuration || currentLesson.duration || undefined}
+                  description={currentLesson.videoDescription || currentLesson.description}
+                  expectedReadyDate={currentLesson.expectedReadyDate}
+                />
               ) : (
                 <div className="aspect-video bg-gray-900 flex items-center justify-center">
                   <div className="text-center">

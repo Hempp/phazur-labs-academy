@@ -148,7 +148,12 @@ export async function GET(
           video_duration_seconds,
           article_content,
           module_id,
-          display_order
+          display_order,
+          video_status,
+          video_type,
+          estimated_duration_seconds,
+          video_description,
+          expected_ready_date
         `)
         .eq('id', currentLessonId)
         .single()
@@ -210,6 +215,12 @@ export async function GET(
           chapters: chapters || [],
           quiz,
           progress: progressMap.get(lesson.id) || null,
+          // Video placeholder fields
+          videoStatus: lesson.video_status,
+          videoType: lesson.video_type,
+          estimatedDuration: lesson.estimated_duration_seconds,
+          videoDescription: lesson.video_description,
+          expectedReadyDate: lesson.expected_ready_date,
         }
       }
     }

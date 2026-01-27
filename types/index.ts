@@ -132,9 +132,17 @@ export interface Lesson {
   is_free_preview: boolean
   resources: Resource[]
   chapters: VideoChapter[]
+  // Video placeholder fields
+  video_status?: VideoStatus
+  video_type?: VideoType
+  estimated_duration_seconds?: number
+  video_description?: string
+  expected_ready_date?: string
 }
 
 export type LessonContentType = 'video' | 'article' | 'quiz' | 'assignment' | 'live'
+export type VideoStatus = 'ready' | 'in_production' | 'scheduled' | 'coming_soon' | 'placeholder'
+export type VideoType = 'lecture' | 'demonstration' | 'interview' | 'walkthrough' | 'summary' | 'introduction' | 'recap'
 
 export interface VideoChapter {
   id: string
