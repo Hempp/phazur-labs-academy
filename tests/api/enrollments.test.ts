@@ -25,8 +25,8 @@ describe('/api/enrollments', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Reset environment
-    process.env.NODE_ENV = 'development'
-    process.env.DEV_AUTH_BYPASS = 'true'
+    vi.stubEnv('NODE_ENV', 'development')
+    vi.stubEnv('DEV_AUTH_BYPASS', 'true')
   })
 
   describe('GET - Check enrollment status', () => {
@@ -45,7 +45,7 @@ describe('/api/enrollments', () => {
 
     it('returns not enrolled for unauthenticated user when Supabase not configured', async () => {
       // Force mock mode by not configuring Supabase properly
-      process.env.NEXT_PUBLIC_SUPABASE_URL = 'placeholder'
+      vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'placeholder')
 
       const request = {
         url: 'http://localhost:3000/api/enrollments?courseId=test-id',
@@ -60,7 +60,7 @@ describe('/api/enrollments', () => {
     })
 
     it('returns enrolled when x-mock-enrolled header is true', async () => {
-      process.env.NEXT_PUBLIC_SUPABASE_URL = 'placeholder'
+      vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'placeholder')
 
       const headers = new Headers()
       headers.set('x-mock-enrolled', 'true')
