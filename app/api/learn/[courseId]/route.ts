@@ -40,7 +40,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the course
+    // Get the course (courseId can be either a slug or UUID)
+    // First try by slug (most common for URLs), then by id
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(courseId)
+
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
@@ -56,7 +59,7 @@ export async function GET(
           avatar_url
         )
       `)
-      .eq('id', courseId)
+      .eq(isUuid ? 'id' : 'slug', courseId)
       .single()
 
     if (courseError || !course) {
@@ -71,7 +74,7 @@ export async function GET(
     const { data: enrollment, error: enrollmentError } = await enrollmentClient
       .from('enrollments')
       .select('id, is_active, progress_percentage')
-      .eq('course_id', courseId)
+      .eq('course_id', course.id)
       .eq('user_id', effectiveUserId)
       .single()
 
@@ -102,7 +105,7 @@ export async function GET(
           is_free_preview
         )
       `)
-      .eq('course_id', courseId)
+      .eq('course_id', course.id)
       .order('display_order')
 
     if (modulesError) {
@@ -127,7 +130,7 @@ export async function GET(
       .from('lesson_progress')
       .select('lesson_id, is_completed, last_position_seconds')
       .eq('user_id', effectiveUserId)
-      .eq('course_id', courseId)
+      .eq('course_id', course.id)
 
     const progressMap = new Map(
       (lessonProgress || []).map(p => [p.lesson_id, p])

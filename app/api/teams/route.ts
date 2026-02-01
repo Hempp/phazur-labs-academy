@@ -2,7 +2,7 @@
 // List and create teams for group learning
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerSupabaseAdmin } from '@/lib/supabase/server'
 import slugify from 'slugify'
 
 // Check if Supabase is configured
@@ -66,23 +66,51 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createServerSupabaseClient()
+    const supabaseAdmin = await createServerSupabaseAdmin()
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (authError || !user) {
+    // Dev auth bypass for testing
+    const isDevBypass = process.env.NODE_ENV === 'development' && process.env.DEV_AUTH_BYPASS === 'true'
+
+    let effectiveUserId: string | null = user?.id || null
+
+    if (!user && isDevBypass) {
+      // In dev mode, use the first user from the database
+      const { data: devUser } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .limit(1)
+        .single()
+      effectiveUserId = devUser?.id || null
+    }
+
+    if (!effectiveUserId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get teams the user is a member of
-    const { data: memberships, error: membershipError } = await supabase
+    // Get teams the user is a member of (use admin client in dev bypass mode)
+    const memberClient = isDevBypass ? supabaseAdmin : supabase
+    const { data: memberships, error: membershipError } = await memberClient
       .from('team_members')
       .select('team_id, role')
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
 
+    // If table doesn't exist or other schema error, return mock data in dev mode
     if (membershipError) {
+      const isTableMissing = membershipError.message.toLowerCase().includes('could not find')
+        || membershipError.message.includes('does not exist')
+        || membershipError.code === '42P01'
+      if (isDevBypass && isTableMissing) {
+        console.warn('Teams tables not found, returning mock data')
+        return NextResponse.json({
+          teams: mockTeams.map(t => ({ ...t, user_role: 'owner' })),
+          total: mockTeams.length,
+        })
+      }
       return NextResponse.json({ error: membershipError.message }, { status: 500 })
     }
 
@@ -92,8 +120,8 @@ export async function GET(request: NextRequest) {
 
     const teamIds = memberships.map(m => m.team_id)
 
-    // Get team details
-    const { data: teams, error: teamsError } = await supabase
+    // Get team details (use admin client in dev bypass mode)
+    const { data: teams, error: teamsError } = await memberClient
       .from('teams')
       .select(`
         id,
@@ -118,12 +146,12 @@ export async function GET(request: NextRequest) {
 
     // Get member counts and course counts for each team
     const enrichedTeams = await Promise.all((teams || []).map(async (team) => {
-      const { count: memberCount } = await supabase
+      const { count: memberCount } = await memberClient
         .from('team_members')
         .select('id', { count: 'exact', head: true })
         .eq('team_id', team.id)
 
-      const { count: courseCount } = await supabase
+      const { count: courseCount } = await memberClient
         .from('team_course_access')
         .select('id', { count: 'exact', head: true })
         .eq('team_id', team.id)
