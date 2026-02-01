@@ -334,7 +334,7 @@ export default function AdminLayout({
             </div>
             <div>
               <span className="font-bold text-lg">Admin Portal</span>
-              <p className="text-xs text-muted-foreground">Phazur Labs Academy</p>
+              <p className="text-xs text-muted-foreground">Course Training</p>
             </div>
           </Link>
           <button
@@ -384,7 +384,7 @@ export default function AdminLayout({
               Check our documentation or contact support.
             </p>
             <button
-              onClick={() => window.open('https://docs.phazurlabs.com', '_blank')}
+              onClick={() => window.open('https://docs.coursetraining.com', '_blank')}
               className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
             >
               View Docs

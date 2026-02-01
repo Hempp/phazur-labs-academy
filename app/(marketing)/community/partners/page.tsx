@@ -99,7 +99,7 @@ const stats = [
 
 const testimonials = [
   {
-    quote: 'Phazur Labs transformed how we onboard engineers. New hires are productive 50% faster.',
+    quote: 'Course Training transformed how we onboard engineers. New hires are productive 50% faster.',
     name: 'Jennifer Walsh',
     role: 'VP of Engineering',
     company: 'TechCorp Inc.'
@@ -260,7 +260,7 @@ export default function PartnersPage() {
           <Zap className="h-12 w-12 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Team?</h2>
           <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Let&apos;s discuss how Phazur Labs can help upskill your workforce.
+            Let&apos;s discuss how Course Training can help upskill your workforce.
           </p>
           <Link
             href="/contact?subject=enterprise"

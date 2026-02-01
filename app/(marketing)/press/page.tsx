@@ -14,31 +14,31 @@ import {
 const pressReleases = [
   {
     date: 'January 15, 2025',
-    title: 'Phazur Labs Raises $50M Series B to Expand AI-Powered Learning Platform',
+    title: 'Course Training Raises $50M Series B to Expand AI-Powered Learning Platform',
     excerpt: 'Funding led by Andreessen Horowitz will accelerate product development and global expansion.',
     link: '#'
   },
   {
     date: 'December 5, 2024',
-    title: 'Phazur Labs Reaches 1 Million Active Learners Milestone',
+    title: 'Course Training Reaches 1 Million Active Learners Milestone',
     excerpt: 'Platform crosses major milestone with learners in 120+ countries.',
     link: '#'
   },
   {
     date: 'November 12, 2024',
-    title: 'Phazur Labs Launches Enterprise Learning Suite',
+    title: 'Course Training Launches Enterprise Learning Suite',
     excerpt: 'New product line designed for corporate training and workforce development.',
     link: '#'
   },
   {
     date: 'October 3, 2024',
-    title: 'Phazur Labs Partners with Google Cloud for Scalable Infrastructure',
+    title: 'Course Training Partners with Google Cloud for Scalable Infrastructure',
     excerpt: 'Strategic partnership to deliver faster, more reliable learning experiences globally.',
     link: '#'
   },
   {
     date: 'September 18, 2024',
-    title: 'Phazur Labs Named to Forbes Cloud 100 Rising Stars',
+    title: 'Course Training Named to Forbes Cloud 100 Rising Stars',
     excerpt: 'Recognition highlights company\'s rapid growth and innovative approach to edtech.',
     link: '#'
   }
@@ -47,7 +47,7 @@ const pressReleases = [
 const mediaFeatures = [
   {
     publication: 'TechCrunch',
-    title: 'How Phazur Labs is Reimagining Tech Education',
+    title: 'How Course Training is Reimagining Tech Education',
     date: 'January 2025',
     link: '#',
     logo: 'TC'
@@ -147,10 +147,10 @@ export default function PressPage() {
             Press Room
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            The latest news, press releases, and media resources from Phazur Labs.
+            The latest news, press releases, and media resources from Course Training.
           </p>
           <Link
-            href="mailto:press@phazurlabs.com"
+            href="mailto:press@coursetraining.com"
             className="inline-flex items-center h-12 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
           >
             <Mail className="mr-2 h-5 w-5" />
@@ -301,11 +301,11 @@ export default function PressPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="mailto:press@phazurlabs.com"
+              href="mailto:press@coursetraining.com"
               className="inline-flex items-center h-12 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
             >
               <Mail className="mr-2 h-5 w-5" />
-              press@phazurlabs.com
+              press@coursetraining.com
             </Link>
           </div>
         </div>

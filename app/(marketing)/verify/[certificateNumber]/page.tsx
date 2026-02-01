@@ -90,7 +90,7 @@ export default function CertificateVerifyPage() {
       try {
         await navigator.share({
           title: `Certificate - ${result.certificate.courseTitle}`,
-          text: `${result.certificate.studentName} completed ${result.certificate.courseTitle} at Phazur Labs Academy`,
+          text: `${result.certificate.studentName} completed ${result.certificate.courseTitle} at Course Training`,
           url: window.location.href,
         })
       } catch (error) {
@@ -144,7 +144,7 @@ export default function CertificateVerifyPage() {
                   Certificate Verified
                 </h1>
                 <p className="text-emerald-600 dark:text-emerald-400">
-                  This is an authentic Phazur Labs Academy certificate
+                  This is an authentic Course Training certificate
                 </p>
               </div>
 
@@ -154,7 +154,7 @@ export default function CertificateVerifyPage() {
                 <div className="bg-gradient-to-r from-primary to-violet-600 px-6 py-4 text-white">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="h-6 w-6" />
-                    <span className="font-semibold">Phazur Labs Academy Certificate</span>
+                    <span className="font-semibold">Course Training Certificate</span>
                   </div>
                 </div>
 
@@ -274,7 +274,7 @@ export default function CertificateVerifyPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary">2.</span>
-                    Make sure the certificate was issued by Phazur Labs Academy
+                    Make sure the certificate was issued by Course Training
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary">3.</span>

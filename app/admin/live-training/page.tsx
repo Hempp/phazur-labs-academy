@@ -194,7 +194,7 @@ export default function LiveTrainingPage() {
         <div className="flex h-16 items-center gap-2 border-b px-6 dark:border-gray-700">
           <Image
             src="/images/logo/phazur-logo-dark.png"
-            alt="Phazur Labs"
+            alt="Course Training"
             width={32}
             height={32}
             className="dark:invert"

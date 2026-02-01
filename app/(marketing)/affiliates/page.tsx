@@ -74,7 +74,7 @@ const testimonials = [
   {
     name: 'Alex Thompson',
     role: 'Tech Blogger',
-    quote: 'Phazur Labs has been my top-performing affiliate program. The high-quality courses practically sell themselves.',
+    quote: 'Course Training has been my top-performing affiliate program. The high-quality courses practically sell themselves.',
     earnings: '$8,500/month avg'
   },
   {
@@ -86,7 +86,7 @@ const testimonials = [
   {
     name: 'David Kim',
     role: 'LinkedIn Influencer',
-    quote: 'My audience trusts Phazur Labs courses. The conversion rate is the best I\'ve seen in edtech.',
+    quote: 'My audience trusts Course Training courses. The conversion rate is the best I\'ve seen in edtech.',
     earnings: '$6,200/month avg'
   }
 ]

@@ -1,6 +1,6 @@
 {
-  "name": "Phazur Labs Academy",
-  "short_name": "Phazur Labs",
+  "name": "Course Training",
+  "short_name": "Course Training",
   "description": "Learn without limits. Build your future with industry-recognized certificates.",
   "start_url": "/",
   "display": "standalone",

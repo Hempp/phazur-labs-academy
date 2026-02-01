@@ -4,7 +4,7 @@ import { Facebook, Twitter, Linkedin, Youtube, Instagram } from 'lucide-react'
 
 const footerLinks = {
   coursera: {
-    title: 'Phazur Labs',
+    title: 'Course Training',
     links: [
       { label: 'About', href: '/about' },
       { label: 'What We Offer', href: '/courses' },
@@ -40,11 +40,11 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Facebook, href: 'https://facebook.com/phazurlabs', label: 'Facebook' },
-  { icon: Linkedin, href: 'https://linkedin.com/company/phazurlabs', label: 'LinkedIn' },
-  { icon: Twitter, href: 'https://twitter.com/phazurlabs', label: 'Twitter' },
-  { icon: Youtube, href: 'https://youtube.com/phazurlabs', label: 'YouTube' },
-  { icon: Instagram, href: 'https://instagram.com/phazurlabs', label: 'Instagram' },
+  { icon: Facebook, href: 'https://facebook.com/coursetraining', label: 'Facebook' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/coursetraining', label: 'LinkedIn' },
+  { icon: Twitter, href: 'https://twitter.com/coursetraining', label: 'Twitter' },
+  { icon: Youtube, href: 'https://youtube.com/coursetraining', label: 'YouTube' },
+  { icon: Instagram, href: 'https://instagram.com/coursetraining', label: 'Instagram' },
 ]
 
 export function Footer() {
@@ -58,13 +58,13 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Image
                 src="/images/logo/phazur-logo-dark.png"
-                alt="Phazur Labs"
+                alt="Course Training"
                 width={32}
                 height={32}
                 className="dark:invert"
               />
               <span className="font-bold text-lg text-foreground">
-                Phazur Labs
+                Course Training
               </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">
@@ -111,7 +111,7 @@ export function Footer() {
         <div className="pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.
+              © {new Date().getFullYear()} Course Training Academy. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link href="/terms" className="hover:text-foreground transition-colors">

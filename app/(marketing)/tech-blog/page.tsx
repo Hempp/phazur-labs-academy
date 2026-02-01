@@ -153,7 +153,7 @@ export default function TechBlogPage() {
               Tech Blog
             </h1>
             <p className="text-xl text-gray-300 mb-8">
-              Deep dives into how we build and scale the Phazur Labs platform. Engineering insights, architecture decisions, and lessons learned.
+              Deep dives into how we build and scale the Course Training platform. Engineering insights, architecture decisions, and lessons learned.
             </p>
             <div className="flex items-center gap-4">
               <Link
@@ -163,7 +163,7 @@ export default function TechBlogPage() {
                 Read Articles
               </Link>
               <Link
-                href="https://github.com/phazurlabs"
+                href="https://github.com/coursetraining"
                 className="inline-flex items-center h-12 px-6 border border-white/30 text-white rounded-md font-medium hover:bg-white/10"
               >
                 View GitHub
@@ -286,7 +286,7 @@ export default function TechBlogPage() {
             {openSourceProjects.map((project, index) => (
               <Link
                 key={index}
-                href={`https://github.com/phazurlabs/${project.name}`}
+                href={`https://github.com/coursetraining/${project.name}`}
                 className="p-6 border rounded-xl hover:shadow-lg transition-all"
               >
                 <div className="flex items-center gap-2 mb-3">

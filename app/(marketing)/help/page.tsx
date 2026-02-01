@@ -30,7 +30,7 @@ const categories = [
     id: 'getting-started',
     icon: BookOpen,
     title: 'Getting Started',
-    description: 'New to Phazur Labs? Start here.',
+    description: 'New to Course Training? Start here.',
     color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600',
     articles: [
       { title: 'How to create an account', views: 12500 },
@@ -164,7 +164,7 @@ export default function HelpCenterPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Help Center</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Find answers to your questions and learn how to get the most out of Phazur Labs Academy.
+            Find answers to your questions and learn how to get the most out of Course Training.
           </p>
 
           {/* Search */}

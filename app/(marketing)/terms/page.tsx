@@ -17,13 +17,13 @@ const sections = [
   {
     icon: CheckCircle,
     title: '1. Acceptance of Terms',
-    content: 'By accessing or using Phazur Labs Academy, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+    content: 'By accessing or using Course Training, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
     items: []
   },
   {
     icon: FileText,
     title: '2. Description of Service',
-    content: 'Phazur Labs Academy provides online educational courses, certifications, and related services. We reserve the right to modify, suspend, or discontinue any part of our services at any time.',
+    content: 'Course Training provides online educational courses, certifications, and related services. We reserve the right to modify, suspend, or discontinue any part of our services at any time.',
     items: []
   },
   {
@@ -66,7 +66,7 @@ const sections = [
   {
     icon: Copyright,
     title: '7. Intellectual Property',
-    content: 'All course content, materials, and platform features are owned by Phazur Labs Academy. You may not:',
+    content: 'All course content, materials, and platform features are owned by Course Training. You may not:',
     items: [
       'Copy, distribute, or share course content',
       'Record or screenshot video lessons',
@@ -88,7 +88,7 @@ const sections = [
   {
     icon: AlertTriangle,
     title: '9. Limitation of Liability',
-    content: 'Phazur Labs Academy is not liable for any indirect, incidental, or consequential damages arising from your use of our services.',
+    content: 'Course Training is not liable for any indirect, incidental, or consequential damages arising from your use of our services.',
     items: []
   },
   {
@@ -108,7 +108,7 @@ const sections = [
     title: '12. Contact',
     content: 'For questions about these terms, contact us at:',
     contact: {
-      email: 'legal@phazurlabs.com'
+      email: 'legal@coursetraining.com'
     }
   }
 ]
@@ -130,7 +130,7 @@ export default function TermsPage() {
           {/* Introduction */}
           <div className="bg-surface-secondary rounded-2xl p-8 mb-12">
             <p className="text-lg text-muted-foreground">
-              Welcome to Phazur Labs Academy. These Terms of Service govern your use of our platform,
+              Welcome to Course Training. These Terms of Service govern your use of our platform,
               courses, and services. Please read them carefully before using our services.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function TermsPage() {
           {/* Footer Note */}
           <div className="mt-12 text-center text-sm text-muted-foreground">
             <p>
-              By using Phazur Labs Academy, you acknowledge that you have read, understood, and agree to these Terms of Service.
+              By using Course Training, you acknowledge that you have read, understood, and agree to these Terms of Service.
             </p>
           </div>
         </div>

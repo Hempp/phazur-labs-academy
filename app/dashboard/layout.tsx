@@ -113,12 +113,12 @@ export default function DashboardLayout({
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/images/logo/phazur-logo-dark.png"
-              alt="Phazur Labs"
+              alt="Course Training"
               width={32}
               height={32}
               className="dark:invert"
             />
-            <span className="font-bold">Phazur Labs</span>
+            <span className="font-bold">Course Training</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}

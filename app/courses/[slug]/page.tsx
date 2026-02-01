@@ -98,7 +98,7 @@ const mockCourseData = {
   slug: 'full-stack-web-development',
   title: 'Full-Stack Web Development Professional Certificate',
   subtitle: 'Launch your career as a full-stack developer. Master React, Node.js, TypeScript, and PostgreSQL to build production-ready applications.',
-  partner: 'Phazur Labs',
+  partner: 'Course Training',
   partnerLogo: null,
   description: `
     Become a job-ready full-stack developer in this comprehensive program. You'll learn to build complete web applications from the ground up, using modern technologies and best practices employed by top tech companies.
@@ -112,7 +112,7 @@ const mockCourseData = {
     name: 'Sarah Johnson',
     avatar: null,
     title: 'Principal Software Engineer',
-    company: 'Phazur Labs',
+    company: 'Course Training',
     bio: 'Sarah has been building web applications for over 12 years and has led engineering teams at multiple startups. She specializes in React architecture and has contributed to several popular open-source libraries.',
     courses: 8,
     students: 185000,
@@ -417,7 +417,7 @@ export default function CourseDetailPage() {
     slug: apiData.slug,
     title: apiData.title,
     subtitle: apiData.subtitle || apiData.description?.slice(0, 150) || '',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     partnerLogo: null,
     description: apiData.description,
     instructor: {
@@ -425,7 +425,7 @@ export default function CourseDetailPage() {
       name: apiData.instructor?.name || 'Instructor',
       avatar: apiData.instructor?.avatar,
       title: 'Senior Instructor',
-      company: 'Phazur Labs',
+      company: 'Course Training',
       bio: apiData.instructor?.bio || `Expert instructor teaching ${apiData.title}`,
       courses: 8,
       students: 185000,

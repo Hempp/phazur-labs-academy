@@ -105,7 +105,7 @@ export default function DevelopersPage() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
-              href="https://docs.phazurlabs.com"
+              href="https://docs.coursetraining.com"
               className="inline-flex items-center h-14 px-8 border rounded-md font-medium hover:bg-muted"
             >
               <Book className="mr-2 h-5 w-5" />
@@ -166,10 +166,10 @@ export default function DevelopersPage() {
                 <span className="text-sm text-gray-400">JavaScript</span>
               </div>
               <pre className="p-6 overflow-x-auto">
-                <code className="text-sm text-gray-300">{`import { PhazurLabs } from '@phazurlabs/sdk';
+                <code className="text-sm text-gray-300">{`import { CourseTraining } from '@coursetraining/sdk';
 
-const client = new PhazurLabs({
-  apiKey: process.env.PHAZUR_API_KEY
+const client = new CourseTraining({
+  apiKey: process.env.COURSETRAINING_API_KEY
 });
 
 // Get all courses
@@ -218,7 +218,7 @@ const cert = await client.certificates.verify({
           <h2 className="text-3xl font-bold mb-12 text-center">Developer Resources</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <Link
-              href="https://docs.phazurlabs.com"
+              href="https://docs.coursetraining.com"
               className="flex items-center gap-4 p-6 bg-background border rounded-xl hover:shadow-lg transition-all"
             >
               <Book className="h-10 w-10 text-primary" />
@@ -228,7 +228,7 @@ const cert = await client.certificates.verify({
               </div>
             </Link>
             <Link
-              href="https://github.com/phazurlabs"
+              href="https://github.com/coursetraining"
               className="flex items-center gap-4 p-6 bg-background border rounded-xl hover:shadow-lg transition-all"
             >
               <Github className="h-10 w-10 text-primary" />
@@ -238,7 +238,7 @@ const cert = await client.certificates.verify({
               </div>
             </Link>
             <Link
-              href="https://discord.gg/phazurlabs"
+              href="https://discord.gg/coursetraining"
               className="flex items-center gap-4 p-6 bg-background border rounded-xl hover:shadow-lg transition-all"
             >
               <MessageSquare className="h-10 w-10 text-primary" />

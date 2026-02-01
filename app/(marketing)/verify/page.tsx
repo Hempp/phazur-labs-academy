@@ -80,7 +80,7 @@ export default function VerifyPage() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Certificate Verification</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Verify the authenticity of Phazur Labs Academy certificates. Enter a certificate ID below to confirm credentials.
+              Verify the authenticity of Course Training certificates. Enter a certificate ID below to confirm credentials.
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function VerifyPage() {
                 </button>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                The certificate ID can be found at the bottom of any Phazur Labs Academy certificate.
+                The certificate ID can be found at the bottom of any Course Training certificate.
               </p>
             </form>
           </div>
@@ -139,7 +139,7 @@ export default function VerifyPage() {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-emerald-800 dark:text-emerald-200">Certificate Verified</h2>
-                      <p className="text-emerald-600 dark:text-emerald-400">This is an authentic Phazur Labs Academy certificate</p>
+                      <p className="text-emerald-600 dark:text-emerald-400">This is an authentic Course Training certificate</p>
                     </div>
                   </div>
 
@@ -191,7 +191,7 @@ export default function VerifyPage() {
                       <div className="flex items-center gap-2">
                         <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
                           <BadgeCheck className="h-4 w-4" />
-                          Phazur Labs Academy
+                          Course Training
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
@@ -242,7 +242,7 @@ export default function VerifyPage() {
               </div>
               <h3 className="font-semibold mb-2">50,000+ Certified</h3>
               <p className="text-sm text-muted-foreground">
-                Join a community of professionals who have earned Phazur Labs certifications
+                Join a community of professionals who have earned Course Training certifications
               </p>
             </div>
           </div>

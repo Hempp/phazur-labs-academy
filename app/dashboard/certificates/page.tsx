@@ -80,13 +80,13 @@ export default function CertificatesPage() {
     // Would integrate with LinkedIn API
     const cert = certificates.find(c => c.id === certId)
     if (cert) {
-      const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(cert.courseName)}&organizationName=Phazur%20Labs%20Academy&issueYear=2024&issueMonth=1&certUrl=${encodeURIComponent(`https://verify.phazurlabs.com/certificate/${certId}`)}&certId=${certId}`
+      const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(cert.courseName)}&organizationName=Course%20Training&issueYear=2024&issueMonth=1&certUrl=${encodeURIComponent(`https://verify.coursetraining.com/certificate/${certId}`)}&certId=${certId}`
       window.open(linkedInUrl, '_blank')
     }
   }
 
   const handleShare = (certId: string) => {
-    const shareUrl = `https://verify.phazurlabs.com/certificate/${certId}`
+    const shareUrl = `https://verify.coursetraining.com/certificate/${certId}`
     navigator.clipboard.writeText(shareUrl)
     alert('Certificate verification link copied to clipboard!')
   }
@@ -348,7 +348,7 @@ export default function CertificatesPage() {
           <div>
             <h3 className="font-semibold text-gray-900 mb-1">Employer Verification</h3>
             <p className="text-sm text-gray-600 mb-3">
-              All Phazur Labs Academy certificates are verifiable by employers. Share your certificate ID or
+              All Course Training certificates are verifiable by employers. Share your certificate ID or
               verification link with potential employers so they can confirm your skills and achievements.
             </p>
             <div className="flex items-center gap-4">

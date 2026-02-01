@@ -116,11 +116,11 @@ export async function createCheckoutSession({
     invoice_creation: {
       enabled: true,
       invoice_data: {
-        description: 'Phazur Labs Academy Course Purchase',
+        description: 'Course Training Course Purchase',
         metadata: {
           userId,
         },
-        footer: 'Thank you for learning with Phazur Labs Academy!',
+        footer: 'Thank you for learning with Course Training!',
       },
     },
   })

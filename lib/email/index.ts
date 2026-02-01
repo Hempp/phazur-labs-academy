@@ -7,7 +7,7 @@ import { Resend } from 'resend'
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // Default from address
-const DEFAULT_FROM = process.env.EMAIL_FROM || 'Phazur Labs Academy <noreply@phazuracademy.com>'
+const DEFAULT_FROM = process.env.EMAIL_FROM || 'Course Training <noreply@coursetraining.com>'
 
 // Email types
 export type EmailType =
@@ -115,17 +115,17 @@ function getEmailContent(type: EmailType, data: Record<string, unknown>): {
   text: string
   subject: string
 } {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://phazuracademy.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coursetraining.com'
 
   switch (type) {
     case 'welcome':
       return {
-        subject: `Welcome to Phazur Labs Academy, ${data.name}!`,
+        subject: `Welcome to Course Training, ${data.name}!`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #0070f3;">Welcome to Phazur Labs Academy!</h1>
+            <h1 style="color: #0070f3;">Welcome to Course Training!</h1>
             <p>Hi ${data.name},</p>
-            <p>Thanks for joining Phazur Labs Academy. We're excited to have you on board!</p>
+            <p>Thanks for joining Course Training. We're excited to have you on board!</p>
             <p>Here's what you can do next:</p>
             <ul>
               <li>Browse our course catalog</li>
@@ -138,15 +138,15 @@ function getEmailContent(type: EmailType, data: Record<string, unknown>): {
               </a>
             </p>
             <p>Happy learning!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
-Welcome to Phazur Labs Academy!
+Welcome to Course Training!
 
 Hi ${data.name},
 
-Thanks for joining Phazur Labs Academy. We're excited to have you on board!
+Thanks for joining Course Training. We're excited to have you on board!
 
 Here's what you can do next:
 - Browse our course catalog
@@ -156,7 +156,7 @@ Here's what you can do next:
 Explore courses: ${baseUrl}/courses
 
 Happy learning!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -175,7 +175,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Good luck!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -188,7 +188,7 @@ Congratulations! You're now enrolled in ${data.courseTitle}.
 Start learning: ${baseUrl}/courses/${data.courseSlug}/learn
 
 Good luck!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -211,7 +211,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Keep up the great work!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -228,7 +228,7 @@ You've earned:
 View your certificate: ${baseUrl}/dashboard/certificates
 
 Keep up the great work!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -247,7 +247,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Share your achievement on LinkedIn and other platforms!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -260,7 +260,7 @@ Certificate Number: ${data.certificateNumber}
 Download your certificate: ${baseUrl}/dashboard/certificates
 
 Share your achievement!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -283,7 +283,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Keep learning to unlock more!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -300,7 +300,7 @@ ${data.pointsReward ? `+${data.pointsReward} points` : ''}
 View all achievements: ${baseUrl}/dashboard/student/achievements
 
 Keep learning to unlock more!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -319,7 +319,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Every day counts!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -332,7 +332,7 @@ Complete a lesson today to keep your streak going!
 Continue learning: ${baseUrl}/dashboard/student/courses
 
 Every day counts!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -351,7 +351,7 @@ The Phazur Labs Academy Team
               <p style="color: #92400e; margin: 0;">+${data.bonusPoints} bonus points earned!</p>
             </div>
             <p>Keep the momentum going!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -364,29 +364,29 @@ You've maintained a ${data.streakDays}-day learning streak!
 +${data.bonusPoints} bonus points earned!
 
 Keep the momentum going!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
     case 'team_invitation':
       return {
-        subject: `You're invited to join ${data.teamName} on Phazur Labs Academy`,
+        subject: `You're invited to join ${data.teamName} on Course Training`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #0070f3;">Team Invitation</h1>
             <p>Hi,</p>
-            <p><strong>${data.inviterName}</strong> has invited you to join <strong>${data.teamName}</strong> on Phazur Labs Academy.</p>
+            <p><strong>${data.inviterName}</strong> has invited you to join <strong>${data.teamName}</strong> on Course Training.</p>
             <p>
               <a href="${data.inviteUrl}" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
                 Accept Invitation
               </a>
             </p>
             <p>This invitation expires in 7 days.</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
-You're invited to join ${data.teamName} on Phazur Labs Academy
+You're invited to join ${data.teamName} on Course Training
 
 ${data.inviterName} has invited you to join ${data.teamName}.
 
@@ -394,13 +394,13 @@ Accept invitation: ${data.inviteUrl}
 
 This invitation expires in 7 days.
 
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
     case 'password_reset':
       return {
-        subject: 'Reset your Phazur Labs Academy password',
+        subject: 'Reset your Course Training password',
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #0070f3;">Reset Your Password</h1>
@@ -413,7 +413,7 @@ The Phazur Labs Academy Team
             </p>
             <p>This link will expire in 1 hour.</p>
             <p>If you didn't request this, you can safely ignore this email.</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -427,7 +427,7 @@ This link will expire in 1 hour.
 
 If you didn't request this, you can safely ignore this email.
 
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -447,7 +447,7 @@ The Phazur Labs Academy Team
                 View Discussion
               </a>
             </p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -461,7 +461,7 @@ ${data.replierName} replied to "${data.discussionTitle}":
 
 View discussion: ${baseUrl}/courses/${data.courseSlug}/discussions/${data.discussionId}
 
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
@@ -484,7 +484,7 @@ The Phazur Labs Academy Team
               </a>
             </p>
             <p>Don't miss it!</p>
-            <p>The Phazur Labs Academy Team</p>
+            <p>The Course Training Team</p>
           </div>
         `,
         text: `
@@ -501,16 +501,16 @@ Instructor: ${data.instructorName}
 Join session: ${data.joinUrl}
 
 Don't miss it!
-The Phazur Labs Academy Team
+The Course Training Team
         `.trim(),
       }
 
     default:
       return {
-        subject: 'Notification from Phazur Labs Academy',
+        subject: 'Notification from Course Training',
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #0070f3;">Phazur Labs Academy</h1>
+            <h1 style="color: #0070f3;">Course Training</h1>
             <p>${JSON.stringify(data)}</p>
           </div>
         `,

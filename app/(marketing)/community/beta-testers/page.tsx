@@ -74,7 +74,7 @@ const currentBetas = [
 ]
 
 const requirements = [
-  'Active Phazur Labs account (free or paid)',
+  'Active Course Training account (free or paid)',
   'Commitment to provide regular feedback',
   'Willingness to try new features',
   'Basic technical proficiency',
@@ -101,7 +101,7 @@ export default function BetaTestersPage() {
             Beta Testers Program
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Get early access to new features and help shape the future of learning at Phazur Labs.
+            Get early access to new features and help shape the future of learning at Course Training.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link

@@ -116,7 +116,7 @@ const featuredPartners = [
 
 const testimonials = [
   {
-    quote: "Partnering with Phazur Labs Academy transformed our L&D program. Our employees now have access to cutting-edge tech courses that directly impact our bottom line.",
+    quote: "Partnering with Course Training transformed our L&D program. Our employees now have access to cutting-edge tech courses that directly impact our bottom line.",
     author: 'Sarah Chen',
     role: 'VP of Learning & Development',
     company: 'TechCorp Global'
@@ -221,7 +221,7 @@ export default function PartnersPage() {
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             Grow Together with{' '}
-            <span className="text-primary">Phazur Labs</span>
+            <span className="text-primary">Course Training</span>
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
@@ -344,7 +344,7 @@ export default function PartnersPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">
-              Why Partner with Phazur Labs?
+              Why Partner with Course Training?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               We provide the tools, support, and platform you need to succeed
@@ -468,7 +468,7 @@ export default function PartnersPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Email Us</h4>
-                    <p className="text-muted-foreground">partners@phazurlabs.com</p>
+                    <p className="text-muted-foreground">partners@coursetraining.com</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -627,7 +627,7 @@ export default function PartnersPage() {
               Start Your Partnership Journey Today
             </h2>
             <p className="text-xl text-white/80 mb-8">
-              Join 500+ partners already growing with Phazur Labs Academy
+              Join 500+ partners already growing with Course Training
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

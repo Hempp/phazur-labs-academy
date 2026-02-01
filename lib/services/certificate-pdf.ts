@@ -24,7 +24,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
     courseHours,
     skills = [],
     grade,
-    verificationUrl = `https://phazuracademy.com/verify/${certificateId}`,
+    verificationUrl = `https://coursetraining.com/verify/${certificateId}`,
   } = data
 
   // Build skills text
@@ -88,7 +88,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
   lines.push('0 0 0 rg')
 
   // Title section
-  addCenteredText('PHAZUR LABS', height - 80, 18, 'F2')
+  addCenteredText('COURSE TRAINING', height - 80, 18, 'F2')
 
   // Set dark blue color for title
   lines.push('0.118 0.227 0.373 rg')
@@ -139,7 +139,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
   // Right signature
   addText('Academy Director', 540, 100, 12, 'F1')
   lines.push(`q 0.5 w 520 85 m 670 85 l S Q`)
-  addText('Phazur Labs Academy', 530, 70, 10, 'F1')
+  addText('Course Training', 530, 70, 10, 'F1')
 
   // Certificate ID at bottom
   lines.push('0.6 0.6 0.6 rg')

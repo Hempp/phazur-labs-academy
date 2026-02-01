@@ -68,7 +68,7 @@ const stats = [
 ]
 
 const milestones = [
-  { year: '2020', title: 'Founded', description: 'Phazur Labs Academy launched with 10 courses.' },
+  { year: '2020', title: 'Founded', description: 'Course Training launched with 10 courses.' },
   { year: '2021', title: 'Series A', description: 'Raised $15M to expand course library and team.' },
   { year: '2022', title: '10K Students', description: 'Reached 10,000 active learners milestone.' },
   { year: '2023', title: 'Enterprise Launch', description: 'Launched enterprise solutions for teams.' },
@@ -111,7 +111,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold mb-8 text-center">Our Story</h2>
             <div className="prose prose-lg dark:prose-invert mx-auto">
               <p>
-                Phazur Labs Academy was founded in 2020 by a team of educators and technologists who saw a gap in the market for high-quality, practical tech education that actually leads to career outcomes.
+                Course Training was founded in 2020 by a team of educators and technologists who saw a gap in the market for high-quality, practical tech education that actually leads to career outcomes.
               </p>
               <p>
                 Having worked at leading tech companies and universities, our founders experienced firsthand how traditional education often fails to prepare students for real-world challenges. They set out to build something different—a platform that combines rigorous curriculum with hands-on projects and industry-recognized certifications.

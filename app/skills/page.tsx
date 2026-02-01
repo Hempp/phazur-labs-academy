@@ -132,12 +132,12 @@ export default function SkillsPage() {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/images/logo/phazur-logo-dark.png"
-              alt="Phazur Labs"
+              alt="Course Training"
               width={32}
               height={32}
               className="dark:invert"
             />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
+            <span className="font-bold text-xl">Course Training</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/courses" className="text-sm font-medium hover:text-primary transition-colors">Courses</Link>
@@ -287,7 +287,7 @@ export default function SkillsPage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Phazur Labs Academy. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Course Training. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -101,7 +101,7 @@ export default function AccessibilityPage() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Accessibility Statement</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Phazur Labs Academy is committed to ensuring digital accessibility for all users,
+              Course Training is committed to ensuring digital accessibility for all users,
               including people with disabilities.
             </p>
           </div>
@@ -215,7 +215,7 @@ export default function AccessibilityPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
-                href="mailto:accessibility@phazurlabs.com"
+                href="mailto:accessibility@coursetraining.com"
                 className="inline-flex items-center h-12 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
               >
                 <Mail className="h-5 w-5 mr-2" />

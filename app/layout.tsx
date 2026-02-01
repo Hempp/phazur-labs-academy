@@ -18,11 +18,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Phazur Labs Academy',
-    template: '%s | Phazur Labs Academy',
+    default: 'Course Training',
+    template: '%s | Course Training',
   },
   description:
-    'Learn cutting-edge technology skills with Phazur Labs Academy. Expert-led courses in software development, AI, data science, and more.',
+    'Learn cutting-edge technology skills with Course Training. Expert-led courses in software development, AI, data science, and more.',
   keywords: [
     'online learning',
     'programming courses',
@@ -30,11 +30,11 @@ export const metadata: Metadata = {
     'AI courses',
     'data science',
     'web development',
-    'Phazur Labs',
+    'Course Training',
   ],
-  authors: [{ name: 'Phazur Labs' }],
-  creator: 'Phazur Labs',
-  publisher: 'Phazur Labs Academy',
+  authors: [{ name: 'Course Training' }],
+  creator: 'Course Training',
+  publisher: 'Course Training',
   formatDetection: {
     email: false,
     address: false,
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    siteName: 'Phazur Labs Academy',
-    title: 'Phazur Labs Academy',
+    siteName: 'Course Training',
+    title: 'Course Training',
     description:
       'Learn cutting-edge technology skills with expert-led courses in software development, AI, data science, and more.',
     images: [
@@ -54,17 +54,17 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Phazur Labs Academy',
+        alt: 'Course Training',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Phazur Labs Academy',
+    title: 'Course Training',
     description:
       'Learn cutting-edge technology skills with expert-led courses in software development, AI, data science, and more.',
     images: ['/og-image.png'],
-    creator: '@phazurlabs',
+    creator: '@coursetraining',
   },
   robots: {
     index: true,

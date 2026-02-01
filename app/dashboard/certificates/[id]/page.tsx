@@ -19,7 +19,7 @@ const certificateData = {
   grade: 'A',
   score: 94,
   skills: ['React 18', 'Next.js 14', 'TypeScript', 'Server Components', 'App Router', 'Performance Optimization'],
-  verificationUrl: 'https://verify.phazurlabs.com/certificate/CERT-2024-ABC123',
+  verificationUrl: 'https://verify.coursetraining.com/certificate/CERT-2024-ABC123',
   blockchainHash: '0x7f3a8b9c2d1e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
   linkedInAdded: true,
   downloadCount: 3,
@@ -51,7 +51,7 @@ export default function CertificateDetailPage() {
 
   const handleShare = (platform: string) => {
     const shareUrl = certificateData.verificationUrl
-    const text = `I just earned my ${certificateData.courseName} certificate from Phazur Labs Academy!`
+    const text = `I just earned my ${certificateData.courseName} certificate from Course Training!`
 
     const urls: Record<string, string> = {
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
@@ -70,7 +70,7 @@ export default function CertificateDetailPage() {
   }
 
   const handleAddToLinkedIn = () => {
-    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(certificateData.courseName)}&organizationName=Phazur%20Labs%20Academy&issueYear=2024&issueMonth=1&certUrl=${encodeURIComponent(certificateData.verificationUrl)}&certId=${certificateData.id}`
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(certificateData.courseName)}&organizationName=Course%20Training&issueYear=2024&issueMonth=1&certUrl=${encodeURIComponent(certificateData.verificationUrl)}&certId=${certificateData.id}`
     window.open(linkedInUrl, '_blank')
   }
 

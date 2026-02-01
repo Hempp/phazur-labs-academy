@@ -153,7 +153,7 @@ export default function InvestorsPage() {
             Building the future of tech education. Backed by world-class investors.
           </p>
           <Link
-            href="mailto:investors@phazurlabs.com"
+            href="mailto:investors@coursetraining.com"
             className="inline-flex items-center h-12 px-6 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90"
           >
             Contact Investor Relations
@@ -251,7 +251,7 @@ export default function InvestorsPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-center">Competitive Advantages</h2>
           <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-            What sets Phazur Labs apart in a crowded market.
+            What sets Course Training apart in a crowded market.
           </p>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {competitiveAdvantages.map((advantage, index) => (
@@ -305,11 +305,11 @@ export default function InvestorsPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="mailto:investors@phazurlabs.com"
+              href="mailto:investors@coursetraining.com"
               className="inline-flex items-center h-12 px-6 bg-white text-primary rounded-md font-medium hover:bg-gray-100"
             >
               <Mail className="mr-2 h-5 w-5" />
-              investors@phazurlabs.com
+              investors@coursetraining.com
             </Link>
             <Link
               href="/press"

@@ -88,7 +88,7 @@ const mockCourses = [
     id: '1',
     slug: 'full-stack-web-development',
     title: 'Full-Stack Web Development Mastery',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.9,
     reviewCount: 12500,
     level: 'Beginner',
@@ -102,7 +102,7 @@ const mockCourses = [
     id: '2',
     slug: 'ai-machine-learning',
     title: 'AI & Machine Learning Engineering',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.8,
     reviewCount: 8900,
     level: 'Intermediate',
@@ -116,7 +116,7 @@ const mockCourses = [
     id: '3',
     slug: 'cloud-architecture-devops',
     title: 'Cloud Architecture & DevOps',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.9,
     reviewCount: 6700,
     level: 'Intermediate',
@@ -130,7 +130,7 @@ const mockCourses = [
     id: '4',
     slug: 'data-science-analytics',
     title: 'Data Science & Analytics Pro',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.8,
     reviewCount: 9200,
     level: 'Beginner',
@@ -144,7 +144,7 @@ const mockCourses = [
     id: '5',
     slug: 'react-native-mobile',
     title: 'React Native Mobile Development',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.7,
     reviewCount: 5400,
     level: 'Intermediate',
@@ -158,7 +158,7 @@ const mockCourses = [
     id: '6',
     slug: 'cybersecurity-fundamentals',
     title: 'Cybersecurity Fundamentals',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.8,
     reviewCount: 4200,
     level: 'Beginner',
@@ -172,7 +172,7 @@ const mockCourses = [
     id: '7',
     slug: 'advanced-react-patterns',
     title: 'Advanced React Patterns',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.9,
     reviewCount: 3800,
     level: 'Advanced',
@@ -186,7 +186,7 @@ const mockCourses = [
     id: '8',
     slug: 'postgresql-mastery',
     title: 'PostgreSQL Database Mastery',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.7,
     reviewCount: 2900,
     level: 'Intermediate',
@@ -200,7 +200,7 @@ const mockCourses = [
     id: '9',
     slug: 'ui-ux-design-bootcamp',
     title: 'UI/UX Design Bootcamp',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     rating: 4.8,
     reviewCount: 6100,
     level: 'Beginner',
@@ -270,7 +270,7 @@ function FilterSection({
 
 // Course Card Component (Coursera-style)
 function CourseCard({ course }: { course: CourseFromApi }) {
-  const partnerName = course.instructor?.name || 'Phazur Labs'
+  const partnerName = course.instructor?.name || 'Course Training'
   const tags = course.tags || []
 
   return (

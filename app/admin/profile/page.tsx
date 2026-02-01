@@ -25,8 +25,8 @@ import toast from 'react-hot-toast'
 const currentUser = {
   id: 'admin-001',
   name: 'Sarah Johnson',
-  email: 'sarah.johnson@phazurlabs.com',
-  bio: 'Senior Administrator at Phazur Labs Academy. Passionate about education technology and student success.',
+  email: 'sarah.johnson@coursetraining.com',
+  bio: 'Senior Administrator at Course Training. Passionate about education technology and student success.',
   avatar: null as string | null,
   role: 'Super Admin',
   joinedDate: '2023-06-15',

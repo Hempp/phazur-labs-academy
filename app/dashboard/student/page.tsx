@@ -634,7 +634,7 @@ export default function StudentDashboardPage() {
       currentModule: `Module ${Math.floor(active.completed_lessons / 5) + 1}`,
       totalLessons: active.total_lessons,
       completedLessons: active.completed_lessons,
-      partner: 'Phazur Labs',
+      partner: 'Course Training',
     }
   }, [studentEnrollments])
 
@@ -650,7 +650,7 @@ export default function StudentDashboardPage() {
         progress: e.progress_percentage,
         totalLessons: e.total_lessons,
         completedLessons: e.completed_lessons,
-        partner: 'Phazur Labs',
+        partner: 'Course Training',
       }))
   }, [studentEnrollments, heroCoursre])
 

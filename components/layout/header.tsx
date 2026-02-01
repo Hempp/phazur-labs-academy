@@ -143,13 +143,13 @@ export function Header() {
             <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               <Image
                 src="/images/logo/phazur-logo-dark.png"
-                alt="Phazur Labs"
+                alt="Course Training"
                 width={36}
                 height={36}
                 className="dark:invert"
               />
               <span className="font-bold text-xl text-foreground hidden sm:block">
-                Phazur Labs
+                Course Training
               </span>
             </Link>
 

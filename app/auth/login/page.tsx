@@ -91,12 +91,12 @@ function LoginForm() {
           <Link href="/" className="flex items-center gap-2 mb-8">
             <Image
               src="/images/logo/phazur-logo-dark.png"
-              alt="Phazur Labs"
+              alt="Course Training"
               width={32}
               height={32}
               className="dark:invert"
             />
-            <span className="font-bold text-xl">Phazur Labs Academy</span>
+            <span className="font-bold text-xl">Course Training</span>
           </Link>
 
           <div className="mb-8">

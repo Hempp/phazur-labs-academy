@@ -264,7 +264,7 @@ export default function IntegrationsPage() {
             </div>
             <div>
               <h2 className="font-semibold">API Key</h2>
-              <p className="text-sm text-muted-foreground">Use this key to access the Phazur Labs API</p>
+              <p className="text-sm text-muted-foreground">Use this key to access the Course Training API</p>
             </div>
           </div>
           <a

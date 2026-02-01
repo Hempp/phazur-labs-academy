@@ -76,7 +76,7 @@ const sections = [
     title: '9. Contact Us',
     content: 'If you have questions about this privacy policy, please contact us at:',
     contact: {
-      email: 'privacy@phazurlabs.com',
+      email: 'privacy@coursetraining.com',
       address: '123 Innovation Drive, San Francisco, CA 94105'
     }
   }
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
           {/* Introduction */}
           <div className="bg-surface-secondary rounded-2xl p-8 mb-12">
             <p className="text-lg text-muted-foreground">
-              At Phazur Labs Academy, we take your privacy seriously. This policy describes how we collect,
+              At Course Training, we take your privacy seriously. This policy describes how we collect,
               use, and protect your personal information when you use our platform and services.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
           {/* Footer Note */}
           <div className="mt-12 text-center text-sm text-muted-foreground">
             <p>
-              By using Phazur Labs Academy, you acknowledge that you have read and understood this Privacy Policy.
+              By using Course Training, you acknowledge that you have read and understood this Privacy Policy.
             </p>
           </div>
         </div>

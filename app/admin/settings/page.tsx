@@ -23,9 +23,9 @@ import toast from 'react-hot-toast'
 export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [settings, setSettings] = useState({
-    siteName: 'Phazur Labs Academy',
+    siteName: 'Course Training',
     siteDescription: 'Master AI & technology with expert-led courses',
-    supportEmail: 'support@phazurlabs.com',
+    supportEmail: 'support@coursetraining.com',
     timezone: 'America/New_York',
     language: 'en',
     currency: 'USD',
@@ -46,9 +46,9 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     setSettings({
-      siteName: 'Phazur Labs Academy',
+      siteName: 'Course Training',
       siteDescription: 'Master AI & technology with expert-led courses',
-      supportEmail: 'support@phazurlabs.com',
+      supportEmail: 'support@coursetraining.com',
       timezone: 'America/New_York',
       language: 'en',
       currency: 'USD',

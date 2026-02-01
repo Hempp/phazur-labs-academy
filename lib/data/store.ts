@@ -1,4 +1,4 @@
-// Shared data store for Phazur Labs Academy
+// Shared data store for Course Training
 // This provides mock data that syncs between admin and student dashboards
 
 import {
@@ -48,7 +48,7 @@ export type {
 export const instructors: Instructor[] = [
   {
     id: 'instructor-1',
-    email: 'sarah.johnson@phazurlabs.com',
+    email: 'sarah.johnson@coursetraining.com',
     full_name: 'Sarah Johnson',
     avatar_url: '/avatars/sarah.jpg',
     role: 'instructor',
@@ -62,7 +62,7 @@ export const instructors: Instructor[] = [
   },
   {
     id: 'instructor-2',
-    email: 'michael.chen@phazurlabs.com',
+    email: 'michael.chen@coursetraining.com',
     full_name: 'Michael Chen',
     avatar_url: '/avatars/michael.jpg',
     role: 'instructor',
@@ -76,7 +76,7 @@ export const instructors: Instructor[] = [
   },
   {
     id: 'instructor-3',
-    email: 'emma.wilson@phazurlabs.com',
+    email: 'emma.wilson@coursetraining.com',
     full_name: 'Emma Wilson',
     avatar_url: '/avatars/emma.jpg',
     role: 'instructor',
@@ -90,7 +90,7 @@ export const instructors: Instructor[] = [
   },
   {
     id: 'instructor-4',
-    email: 'dr.alex.turner@phazurlabs.com',
+    email: 'dr.alex.turner@coursetraining.com',
     full_name: 'Dr. Alex Turner',
     avatar_url: '/avatars/alex.jpg',
     role: 'instructor',
@@ -104,7 +104,7 @@ export const instructors: Instructor[] = [
   },
   {
     id: 'instructor-5',
-    email: 'sophie.chen@phazurlabs.com',
+    email: 'sophie.chen@coursetraining.com',
     full_name: 'Sophie Chen',
     avatar_url: '/avatars/sophie.jpg',
     role: 'instructor',
@@ -630,7 +630,7 @@ export const certificates: Certificate[] = [
     student_name: 'Sarah Smith',
     issue_date: '2024-01-15T00:00:00Z',
     certificate_number: 'PLA-2024-001234',
-    verification_url: 'https://phazurlabs.com/verify/PLA-2024-001234',
+    verification_url: 'https://coursetraining.com/verify/PLA-2024-001234',
     pdf_url: '/certificates/PLA-2024-001234.pdf',
   },
   {
@@ -641,7 +641,7 @@ export const certificates: Certificate[] = [
     student_name: 'Emily Wilson',
     issue_date: '2024-01-10T00:00:00Z',
     certificate_number: 'PLA-2024-001089',
-    verification_url: 'https://phazurlabs.com/verify/PLA-2024-001089',
+    verification_url: 'https://coursetraining.com/verify/PLA-2024-001089',
     pdf_url: '/certificates/PLA-2024-001089.pdf',
   },
 ]

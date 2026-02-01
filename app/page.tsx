@@ -42,7 +42,7 @@ const featuredCourses = [
     id: 1,
     slug: 'full-stack-web-development',
     title: 'Full-Stack Web Development Mastery',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     partnerLogo: '/partners/phazur.svg',
     rating: 4.9,
     reviewCount: 12500,
@@ -57,7 +57,7 @@ const featuredCourses = [
     id: 2,
     slug: 'ai-machine-learning-engineering',
     title: 'AI & Machine Learning Engineering',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     partnerLogo: '/partners/phazur.svg',
     rating: 4.8,
     reviewCount: 8900,
@@ -72,7 +72,7 @@ const featuredCourses = [
     id: 3,
     slug: 'cloud-architecture-devops',
     title: 'Cloud Architecture & DevOps',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     partnerLogo: '/partners/phazur.svg',
     rating: 4.9,
     reviewCount: 6700,
@@ -87,7 +87,7 @@ const featuredCourses = [
     id: 4,
     slug: 'data-science-analytics',
     title: 'Data Science & Analytics Pro',
-    partner: 'Phazur Labs',
+    partner: 'Course Training',
     partnerLogo: '/partners/phazur.svg',
     rating: 4.8,
     reviewCount: 9200,
@@ -364,7 +364,7 @@ export default function HomePage() {
               Join learners worldwide
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              See how others have transformed their careers with Phazur Labs Academy
+              See how others have transformed their careers with Course Training Academy
             </p>
           </div>
 

@@ -64,9 +64,9 @@ export const CertificateTemplate = forwardRef<HTMLDivElement, CertificateTemplat
             {/* Logo */}
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8f] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
+                <span className="text-white font-bold text-xl">CT</span>
               </div>
-              <span className="text-2xl font-bold text-[#1e3a5f] tracking-wide">PHAZUR LABS</span>
+              <span className="text-2xl font-bold text-[#1e3a5f] tracking-wide">COURSE TRAINING</span>
             </div>
 
             <h1 className="text-5xl font-bold text-[#1e3a5f] tracking-widest mb-2">
@@ -158,7 +158,7 @@ export const CertificateTemplate = forwardRef<HTMLDivElement, CertificateTemplat
                 <div className="w-48 border-b border-gray-400 mb-2 pb-4">
                   <span className="font-script text-2xl text-gray-700 italic">Academy Director</span>
                 </div>
-                <p className="text-sm text-gray-600">Phazur Labs Academy</p>
+                <p className="text-sm text-gray-600">Course Training</p>
               </div>
             </div>
 
@@ -168,7 +168,7 @@ export const CertificateTemplate = forwardRef<HTMLDivElement, CertificateTemplat
                 Certificate ID: <span className="font-mono font-semibold text-[#1e3a5f]">{certificateId}</span>
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                Verify at: verify.phazurlabs.com/certificate/{certificateId}
+                Verify at: verify.coursetraining.com/certificate/{certificateId}
               </p>
             </div>
           </div>

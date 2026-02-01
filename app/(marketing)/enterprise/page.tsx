@@ -113,13 +113,13 @@ const plans = [
 
 const testimonials = [
   {
-    quote: "Phazur Labs has transformed how we upskill our engineering team. The certification program gave our developers credible credentials that they're proud to showcase.",
+    quote: "Course Training has transformed how we upskill our engineering team. The certification program gave our developers credible credentials that they're proud to showcase.",
     author: 'Sarah Chen',
     role: 'VP of Engineering',
     company: 'TechCorp Inc.'
   },
   {
-    quote: "We've seen a 40% reduction in onboarding time for new hires since implementing Phazur Labs training. The custom learning paths are a game-changer.",
+    quote: "We've seen a 40% reduction in onboarding time for new hires since implementing Course Training training. The custom learning paths are a game-changer.",
     author: 'Michael Roberts',
     role: 'Head of L&D',
     company: 'ScaleUp Solutions'
@@ -332,7 +332,7 @@ export default function EnterprisePage() {
               Trusted by Leading Companies
             </h2>
             <p className="text-xl text-muted-foreground">
-              See how organizations are transforming their teams with Phazur Labs
+              See how organizations are transforming their teams with Course Training
             </p>
           </div>
 
@@ -388,7 +388,7 @@ export default function EnterprisePage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Get Started Today</h2>
               <p className="text-xl text-slate-300">
-                Talk to our team about how Phazur Labs can help transform your workforce.
+                Talk to our team about how Course Training can help transform your workforce.
               </p>
             </div>
 
