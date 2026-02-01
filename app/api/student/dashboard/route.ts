@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
         course_id,
         user_id,
         progress_percentage,
-        status,
+        is_active,
         enrolled_at,
         completed_at,
         courses:course_id (
@@ -123,9 +123,12 @@ export async function GET(request: NextRequest) {
           title,
           slug,
           thumbnail_url,
-          category,
+          category_id,
           level,
           instructor_id,
+          categories:category_id (
+            name
+          ),
           users:instructor_id (
             full_name,
             avatar_url
@@ -171,11 +174,15 @@ export async function GET(request: NextRequest) {
         const instructorData = courseData?.users
         const instructor = Array.isArray(instructorData) ? instructorData[0] : instructorData
 
+        // Handle category data - can be array or object from Supabase
+        const categoryData = courseData?.categories
+        const category = Array.isArray(categoryData) ? categoryData[0] : categoryData
+
         return {
           id: enrollment.id,
           course_id: enrollment.course_id,
           progress_percentage: enrollment.progress_percentage || 0,
-          status: enrollment.status || 'active',
+          status: enrollment.is_active ? 'active' : 'inactive',
           enrolled_at: enrollment.enrolled_at,
           completed_at: enrollment.completed_at,
           last_accessed_at: lastProgress?.started_at || enrollment.enrolled_at,
@@ -184,7 +191,7 @@ export async function GET(request: NextRequest) {
             title: courseData.title,
             slug: courseData.slug,
             thumbnail_url: courseData.thumbnail_url,
-            category: courseData.category,
+            category: category?.name || null,
             level: courseData.level,
             instructor: instructor ? {
               full_name: instructor.full_name,
