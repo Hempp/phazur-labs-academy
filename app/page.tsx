@@ -40,6 +40,7 @@ const categories = [
 const featuredCourses = [
   {
     id: 1,
+    slug: 'full-stack-web-development',
     title: 'Full-Stack Web Development Mastery',
     partner: 'Phazur Labs',
     partnerLogo: '/partners/phazur.svg',
@@ -54,6 +55,7 @@ const featuredCourses = [
   },
   {
     id: 2,
+    slug: 'ai-machine-learning-engineering',
     title: 'AI & Machine Learning Engineering',
     partner: 'Phazur Labs',
     partnerLogo: '/partners/phazur.svg',
@@ -68,6 +70,7 @@ const featuredCourses = [
   },
   {
     id: 3,
+    slug: 'cloud-architecture-devops',
     title: 'Cloud Architecture & DevOps',
     partner: 'Phazur Labs',
     partnerLogo: '/partners/phazur.svg',
@@ -82,6 +85,7 @@ const featuredCourses = [
   },
   {
     id: 4,
+    slug: 'data-science-analytics',
     title: 'Data Science & Analytics Pro',
     partner: 'Phazur Labs',
     partnerLogo: '/partners/phazur.svg',
@@ -166,7 +170,7 @@ const learningGoals = [
 function CourseCard({ course }: { course: typeof featuredCourses[0] }) {
   return (
     <Link
-      href={`/courses/${course.id}`}
+      href={`/courses/${course.slug}`}
       className="group flex flex-col bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
     >
       {/* Image */}

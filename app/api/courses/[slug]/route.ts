@@ -31,6 +31,9 @@ export async function GET(
 
     const supabase = await createServerSupabaseAdmin()
 
+    // Check if the slug is a UUID (support both slug and ID lookups)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)
+
     // Fetch course with instructor info - using correct column names from schema
     const { data: course, error: courseError } = await supabase
       .from('courses')
@@ -69,7 +72,7 @@ export async function GET(
           name
         )
       `)
-      .eq('slug', slug)
+      .eq(isUuid ? 'id' : 'slug', slug)
       .single()
 
     if (courseError || !course) {

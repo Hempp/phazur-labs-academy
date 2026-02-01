@@ -348,9 +348,19 @@ function CourseCard({ course }: { course: CourseFromApi }) {
 // Main content component that uses useSearchParams
 function CoursesContent() {
   const searchParams = useSearchParams()
+
+  // Initialize filters from URL query parameters
+  const categoryFromUrl = searchParams.get('category')
+  const levelFromUrl = searchParams.get('level')
+  const goalFromUrl = searchParams.get('goal')
+
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([])
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(
+    categoryFromUrl ? [categoryFromUrl] : []
+  )
+  const [selectedLevels, setSelectedLevels] = useState<string[]>(
+    levelFromUrl ? [levelFromUrl] : []
+  )
   const [selectedDurations, setSelectedDurations] = useState<string[]>([])
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
@@ -359,6 +369,27 @@ function CoursesContent() {
   const [courses, setCourses] = useState<CourseFromApi[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Update filters when URL changes
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedSubjects([categoryFromUrl])
+    }
+    if (levelFromUrl) {
+      setSelectedLevels([levelFromUrl])
+    }
+    // Handle goal-based filtering (maps to categories)
+    if (goalFromUrl === 'career') {
+      // Career-oriented courses: development, cloud, data-science
+      setSelectedSubjects(['development', 'cloud', 'data-science'])
+    } else if (goalFromUrl === 'advance') {
+      // Advanced courses: ai-ml, security
+      setSelectedLevels(['intermediate', 'advanced'])
+    } else if (goalFromUrl === 'learn') {
+      // Learning new skills: beginner level
+      setSelectedLevels(['beginner'])
+    }
+  }, [categoryFromUrl, levelFromUrl, goalFromUrl])
 
   // Fetch courses from API
   useEffect(() => {
