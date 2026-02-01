@@ -11,7 +11,6 @@ import {
   Search,
   Grid3X3,
   List,
-  Star,
   Trophy,
   Calendar,
   ArrowRight,
@@ -24,6 +23,7 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
+import { StarRating } from '@/components/ui/star-rating';
 
 // Types for course data
 interface CourseData {
@@ -693,10 +693,7 @@ export default function StudentCoursesPage() {
                       </Link>
                       <p className="text-sm text-gray-400 mt-1">{course.instructor}</p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="text-sm font-medium text-white">{course.rating}</span>
-                    </div>
+                    <StarRating rating={course.rating} showValue size="sm" />
                   </div>
 
                   {/* Progress Bar */}

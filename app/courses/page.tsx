@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation'
 import { Header, Footer } from '@/components/layout'
 import {
   Search,
-  Star,
   Clock,
   Users,
   BookOpen,
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
+import { StarRating } from '@/components/ui/star-rating'
 
 // Course type from API
 interface CourseFromApi {
@@ -329,13 +329,12 @@ function CourseCard({ course }: { course: CourseFromApi }) {
         )}
 
         {/* Rating */}
-        <div className="flex items-center gap-1.5">
-          <Star className="w-4 h-4 fill-warning text-warning" />
-          <span className="text-sm font-medium">{course.stats.rating}</span>
-          <span className="text-sm text-muted-foreground">
-            ({course.stats.reviewCount.toLocaleString()} reviews)
-          </span>
-        </div>
+        <StarRating
+          rating={course.stats.rating}
+          showValue
+          reviewCount={course.stats.reviewCount}
+          size="sm"
+        />
 
         {/* Meta */}
         <p className="text-xs text-muted-foreground">

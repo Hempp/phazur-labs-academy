@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Header, Footer } from '@/components/layout'
 import {
-  Star,
   Clock,
   Users,
   BookOpen,
@@ -28,9 +27,11 @@ import {
   ChevronRight,
   Info,
   Loader2,
+  Star,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AddToCartButton } from '@/components/cart'
+import { StarRating } from '@/components/ui/star-rating'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { VideoPlaceholder } from '@/components/video-player/video-placeholder'
@@ -316,17 +317,7 @@ function ReviewCard({ review }: { review: typeof mockReviews[0] }) {
             <span className="text-xs text-muted-foreground">· {review.user.country}</span>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={cn(
-                    'w-3.5 h-3.5',
-                    i < review.rating ? 'text-warning fill-warning' : 'text-muted-foreground'
-                  )}
-                />
-              ))}
-            </div>
+            <StarRating rating={review.rating} size="sm" />
             <span className="text-xs text-muted-foreground">
               {new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
             </span>
@@ -615,13 +606,12 @@ export default function CourseDetailPage() {
 
               {/* Rating & Stats */}
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-warning fill-warning" />
-                  <span className="font-semibold">{course.rating}</span>
-                  <span className="text-muted-foreground">
-                    ({course.reviewCount.toLocaleString()} reviews)
-                  </span>
-                </div>
+                <StarRating
+                  rating={course.rating}
+                  showValue
+                  reviewCount={course.reviewCount}
+                  size="md"
+                />
                 <span className="text-muted-foreground">
                   {course.enrolledCount.toLocaleString()} already enrolled
                 </span>
@@ -952,15 +942,7 @@ export default function CourseDetailPage() {
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">{course.rating}</p>
                 <div className="flex justify-center mt-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        'w-5 h-5',
-                        i < Math.floor(course.rating) ? 'text-warning fill-warning' : 'text-muted-foreground'
-                      )}
-                    />
-                  ))}
+                  <StarRating rating={course.rating} size="lg" />
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   {course.reviewCount.toLocaleString()} reviews
