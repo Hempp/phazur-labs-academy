@@ -302,7 +302,11 @@ export default function CoursesPage() {
           setCourses(data.courses)
           setStats(data.stats)
           if (data.categories) {
-            setCategories(data.categories)
+            // Extract category names from objects {id, name}
+            const categoryNames = data.categories.map((c: { id: string; name: string } | string) =>
+              typeof c === 'string' ? c : c.name
+            )
+            setCategories(categoryNames)
           }
         }
         // If no courses from API, keep mock data as fallback

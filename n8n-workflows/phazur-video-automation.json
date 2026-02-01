@@ -1,0 +1,454 @@
+{
+  "name": "Phazur Labs - Automated Video Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "phazur-video-webhook",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "phazur-labs-video-gen",
+      "note": "Receives course script data:\n{\n  \"lesson_id\": \"lesson-react-1-1\",\n  \"script\": \"Welcome to React...\",\n  \"instructor\": \"sarah-chen\",\n  \"course\": \"react-patterns\"\n}"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract lesson data from webhook\nconst lessonId = $input.item.json.lesson_id;\nconst script = $input.item.json.script;\nconst instructor = $input.item.json.instructor || 'sarah-chen';\nconst course = $input.item.json.course;\n\n// Instructor voice mapping\nconst instructorVoices = {\n  'sarah-chen': {\n    name: 'en-US-Neural2-F',\n    pitch: 2.0,\n    speakingRate: 1.05,\n    description: 'Energetic female voice'\n  },\n  'marcus-williams': {\n    name: 'en-US-Neural2-D',\n    pitch: -2.0,\n    speakingRate: 0.95,\n    description: 'Authoritative male voice'\n  },\n  'elena-rodriguez': {\n    name: 'en-US-Neural2-G',\n    pitch: 1.0,\n    speakingRate: 1.0,\n    description: 'Dynamic female voice'\n  },\n  'james-park': {\n    name: 'en-US-Neural2-A',\n    pitch: -1.0,\n    speakingRate: 0.9,\n    description: 'Academic male voice'\n  },\n  'aisha-kumar': {\n    name: 'en-US-Neural2-C',\n    pitch: 3.0,\n    speakingRate: 1.1,\n    description: 'Creative female voice'\n  },\n  'alex-thompson': {\n    name: 'en-US-Neural2-I',\n    pitch: -1.5,\n    speakingRate: 0.92,\n    description: 'Serious male voice'\n  }\n};\n\nconst voiceConfig = instructorVoices[instructor] || instructorVoices['sarah-chen'];\n\nreturn {\n  lessonId,\n  script,\n  instructor,\n  course,\n  voiceConfig,\n  audioFileName: `${lessonId}-audio.mp3`,\n  videoFileName: `${lessonId}.mp4`\n};"
+      },
+      "id": "prepare-data",
+      "name": "Prepare Lesson Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "synthesize",
+        "text": "={{ $json.script }}",
+        "options": {
+          "voice": {
+            "languageCode": "en-US",
+            "name": "={{ $json.voiceConfig.name }}",
+            "ssmlGender": "NEUTRAL"
+          },
+          "audioConfig": {
+            "audioEncoding": "MP3",
+            "speakingRate": "={{ $json.voiceConfig.speakingRate }}",
+            "pitch": "={{ $json.voiceConfig.pitch }}",
+            "volumeGainDb": 0,
+            "sampleRateHertz": 24000,
+            "effectsProfileId": ["headphone-class-device"]
+          }
+        }
+      },
+      "id": "google-tts",
+      "name": "Google Cloud Text-to-Speech",
+      "type": "n8n-nodes-base.googleCloudTextToSpeech",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "googleCloudTextToSpeechOAuth2Api": {
+          "id": "google-cloud-tts-oauth",
+          "name": "Google Cloud TTS OAuth2"
+        }
+      },
+      "note": "Generate AI voice using instructor-specific voice profile"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "fileName": "={{ $json.audioFileName }}",
+        "fileContent": "={{ $binary.data }}",
+        "options": {
+          "parents": ["phazur-labs-temp-audio"]
+        }
+      },
+      "id": "save-audio-gdrive",
+      "name": "Save Audio to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "google-drive-oauth",
+          "name": "Google Drive OAuth2"
+        }
+      },
+      "note": "Store generated audio temporarily"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get instructor profile images from Google Drive folder\nconst instructor = $json.instructor;\nconst instructorPhotos = {\n  'sarah-chen': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_SARAH',\n  'marcus-williams': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_MARCUS',\n  'elena-rodriguez': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_ELENA',\n  'james-park': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_JAMES',\n  'aisha-kumar': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_AISHA',\n  'alex-thompson': 'https://drive.google.com/uc?id=INSTRUCTOR_PHOTO_ID_ALEX'\n};\n\nconst instructorPhoto = instructorPhotos[instructor] || instructorPhotos['sarah-chen'];\nconst audioUrl = $json.webViewLink;\n\nreturn {\n  ...items[0].json,\n  instructorPhoto,\n  audioUrl,\n  videoPrompt: `A professional instructor giving an educational lecture. The instructor is ${instructor.replace('-', ' ')}. They are in a modern, well-lit studio environment with a clean background. The instructor maintains eye contact with the camera while speaking, using natural gestures and expressions. Professional attire, confident demeanor, educational setting with subtle branding elements.`\n};"
+      },
+      "id": "prepare-video-data",
+      "name": "Prepare Video Generation Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aiplatform.googleapis.com/v1/projects/{{ $env.GOOGLE_PROJECT_ID }}/locations/us-central1/publishers/google/models/veo-3.1:generateVideo",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "instances",
+              "value": "=[{\n  \"prompt\": \"{{ $json.videoPrompt }}\",\n  \"video_config\": {\n    \"resolution\": \"1080p\",\n    \"duration_seconds\": 8,\n    \"aspect_ratio\": \"16:9\",\n    \"include_audio\": true\n  },\n  \"reference_image\": \"{{ $json.instructorPhoto }}\",\n  \"audio_file\": \"{{ $json.audioUrl }}\"\n}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "veo3-generate",
+      "name": "Google Veo 3 - Generate Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "google-cloud-api",
+          "name": "Google Cloud API"
+        }
+      },
+      "note": "Generate talking head video with Veo 3.1\n- 1080p resolution\n- 8 second clips\n- Uses instructor photo as reference\n- Syncs with generated audio"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Poll for video generation completion\nconst operationName = $json.name;\nconst maxAttempts = 60; // 10 minutes max (10s intervals)\nlet attempts = 0;\n\nwhile (attempts < maxAttempts) {\n  // Check operation status\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `https://aiplatform.googleapis.com/v1/${operationName}`,\n    headers: {\n      'Authorization': `Bearer ${$credentials.googleApi.oauthTokenData.access_token}`\n    }\n  });\n  \n  if (response.done) {\n    // Video is ready\n    if (response.error) {\n      throw new Error(`Video generation failed: ${response.error.message}`);\n    }\n    \n    return {\n      ...items[0].json,\n      videoUrl: response.response.generatedVideo.uri,\n      videoReady: true,\n      attempts\n    };\n  }\n  \n  // Wait 10 seconds before next check\n  await new Promise(resolve => setTimeout(resolve, 10000));\n  attempts++;\n}\n\nthrow new Error('Video generation timeout after 10 minutes');"
+      },
+      "id": "wait-for-video",
+      "name": "Wait for Video Generation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "note": "Poll every 10s for up to 10 minutes"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.videoUrl }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-video",
+      "name": "Download Generated Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "google-cloud-api",
+          "name": "Google Cloud API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "fileName": "={{ $json.videoFileName }}",
+        "fileContent": "={{ $binary.data }}",
+        "options": {
+          "parents": ["phazur-labs-course-videos"]
+        }
+      },
+      "id": "save-video-gdrive",
+      "name": "Save Video to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1850, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "google-drive-oauth",
+          "name": "Google Drive OAuth2"
+        }
+      },
+      "note": "Store final video in course videos folder"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://admin.phazurlabs.com/api/courses/upload-video",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "lesson_id",
+              "value": "={{ $json.lessonId }}"
+            },
+            {
+              "name": "video_url",
+              "value": "={{ $json.webViewLink }}"
+            },
+            {
+              "name": "instructor",
+              "value": "={{ $json.instructor }}"
+            },
+            {
+              "name": "course",
+              "value": "={{ $json.course }}"
+            },
+            {
+              "name": "duration",
+              "value": "8"
+            },
+            {
+              "name": "status",
+              "value": "published"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "upload-to-phazur",
+      "name": "Upload to Phazur Labs Admin Portal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "phazur-admin-api",
+          "name": "Phazur Labs Admin API"
+        }
+      },
+      "note": "POST video metadata to Phazur Labs admin portal API"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean up temporary audio file\nconst audioFileId = $('save-audio-gdrive').item.json.id;\n\nawait this.helpers.httpRequest({\n  method: 'DELETE',\n  url: `https://www.googleapis.com/drive/v3/files/${audioFileId}`,\n  headers: {\n    'Authorization': `Bearer ${$credentials.googleDriveOAuth2Api.oauthTokenData.access_token}`\n  }\n});\n\nreturn {\n  success: true,\n  lessonId: $json.lessonId,\n  videoUrl: $json.webViewLink,\n  instructor: $json.instructor,\n  message: 'Video generated and uploaded successfully!'\n};"
+      },
+      "id": "cleanup",
+      "name": "Cleanup Temp Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.error }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "check-for-errors",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [2250, 500],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"error\": $json.error, \"lesson_id\": $json.lessonId } }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2450, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lesson Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lesson Data": {
+      "main": [
+        [
+          {
+            "node": "Google Cloud Text-to-Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Cloud Text-to-Speech": {
+      "main": [
+        [
+          {
+            "node": "Save Audio to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Audio to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Prepare Video Generation Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Video Generation Data": {
+      "main": [
+        [
+          {
+            "node": "Google Veo 3 - Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Veo 3 - Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Wait for Video Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Video Generation": {
+      "main": [
+        [
+          {
+            "node": "Download Generated Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Generated Video": {
+      "main": [
+        [
+          {
+            "node": "Save Video to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Video to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Upload to Phazur Labs Admin Portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Phazur Labs Admin Portal": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Temp Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup Temp Files": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-28T00:00:00.000Z",
+  "versionId": "1"
+}
