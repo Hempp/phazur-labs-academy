@@ -15,7 +15,7 @@ import {
   GripVertical,
   Video,
   FileText,
-  Image,
+  Image as ImageIcon,
   X
 } from 'lucide-react'
 import Link from 'next/link'
@@ -351,7 +351,7 @@ export default function CreateCoursePage() {
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center py-8 cursor-pointer">
-                      <Image className="h-10 w-10 text-muted-foreground mb-2" />
+                      <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
                       <span className="text-sm font-medium text-foreground">Upload thumbnail</span>
                       <span className="text-xs text-muted-foreground">1280x720 recommended</span>
                       <input

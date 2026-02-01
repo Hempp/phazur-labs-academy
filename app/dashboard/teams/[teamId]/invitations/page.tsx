@@ -55,6 +55,7 @@ export default function TeamInvitationsPage({
 
   useEffect(() => {
     fetchInvitations()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId])
 
   const fetchInvitations = async () => {

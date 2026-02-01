@@ -335,6 +335,7 @@ export default function VideoLibraryUploadPage() {
       // Start uploads
       uploadingFiles.forEach((uf) => startUpload(uf))
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [metadata]
   )
 

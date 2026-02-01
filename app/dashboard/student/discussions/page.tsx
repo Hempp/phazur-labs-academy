@@ -106,7 +106,7 @@ export default function DiscussionsPage() {
             <Card key={discussion.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex gap-4">
-                  <UserAvatar name={discussion.author.name} className="h-10 w-10" />
+                  <UserAvatar user={{ name: discussion.author.name, avatar_url: discussion.author.avatar }} className="h-10 w-10" />
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
