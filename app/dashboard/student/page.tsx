@@ -256,12 +256,14 @@ function WeeklyGoalCard({
     <div className="rounded-xl border bg-background p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-foreground">Weekly goal</h3>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full">
-          <Flame className="w-4 h-4 text-amber-500" />
-          <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-            {streak} day streak
-          </span>
-        </div>
+        {streak > 0 && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+            <Flame className="w-4 h-4 text-amber-500" />
+            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+              {streak} day streak
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Progress Ring */}

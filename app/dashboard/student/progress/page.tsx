@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, BookOpen, Trophy, Target, Clock, Flame, Award } from 'lucide-react'
+import { TrendingUp, BookOpen, Target, Clock, Flame, Award, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -28,22 +28,78 @@ interface CourseProgress {
 
 export default function ProgressPage() {
   const [stats, setStats] = useState<ProgressStats>({
-    totalCourses: 6,
-    completedCourses: 1,
-    totalLessons: 86,
-    completedLessons: 23,
-    totalHours: 12.5,
-    currentStreak: 5,
-    longestStreak: 12,
-    averageQuizScore: 85,
+    totalCourses: 0,
+    completedCourses: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    totalHours: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    averageQuizScore: 0,
   })
+  const [courses, setCourses] = useState<CourseProgress[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [courses, setCourses] = useState<CourseProgress[]>([
-    { id: '1', title: 'AI Foundations & Tool Mastery', progress: 75, completedLessons: 11, totalLessons: 15, lastAccessed: new Date().toISOString() },
-    { id: '2', title: 'Building AI Agents', progress: 45, completedLessons: 7, totalLessons: 15, lastAccessed: new Date().toISOString() },
-    { id: '3', title: 'MCP Development', progress: 20, completedLessons: 3, totalLessons: 13, lastAccessed: new Date().toISOString() },
-    { id: '4', title: 'AI Workflow Architecture', progress: 10, completedLessons: 2, totalLessons: 15, lastAccessed: new Date().toISOString() },
-  ])
+  useEffect(() => {
+    async function fetchProgress() {
+      try {
+        const response = await fetch('/api/student/dashboard')
+        if (!response.ok) throw new Error('Failed to fetch')
+
+        const data = await response.json()
+
+        // Calculate stats from enrollments
+        const enrollments = data.enrollments || []
+        const totalLessons = enrollments.reduce((sum: number, e: { total_lessons: number }) => sum + (e.total_lessons || 0), 0)
+        const completedLessons = enrollments.reduce((sum: number, e: { completed_lessons: number }) => sum + (e.completed_lessons || 0), 0)
+        const completedCourses = enrollments.filter((e: { progress_percentage: number }) => e.progress_percentage === 100).length
+
+        setStats({
+          totalCourses: enrollments.length,
+          completedCourses,
+          totalLessons,
+          completedLessons,
+          totalHours: data.analytics?.total_hours_learned || data.student?.total_hours_learned || 0,
+          currentStreak: data.analytics?.current_streak || data.student?.streak_days || 0,
+          longestStreak: data.analytics?.longest_streak || 0,
+          averageQuizScore: data.analytics?.average_quiz_score || 0,
+        })
+
+        // Transform enrollments to course progress
+        const courseProgress = enrollments.map((e: {
+          course_id: string
+          course: { title: string } | null
+          progress_percentage: number
+          completed_lessons: number
+          total_lessons: number
+          last_accessed_at: string
+        }) => ({
+          id: e.course_id,
+          title: e.course?.title || 'Untitled Course',
+          progress: Math.round(e.progress_percentage || 0),
+          completedLessons: e.completed_lessons || 0,
+          totalLessons: e.total_lessons || 0,
+          lastAccessed: e.last_accessed_at,
+        }))
+
+        setCourses(courseProgress)
+      } catch (error) {
+        console.error('Failed to fetch progress:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProgress()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -120,22 +176,28 @@ export default function ProgressPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {courses.map(course => (
-            <div key={course.id} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{course.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {course.completedLessons} of {course.totalLessons} lessons
-                  </p>
+          {courses.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              No enrolled courses yet. Start learning to see your progress here!
+            </p>
+          ) : (
+            courses.map(course => (
+              <div key={course.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{course.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {course.completedLessons} of {course.totalLessons} lessons
+                    </p>
+                  </div>
+                  <Badge variant={course.progress === 100 ? 'default' : 'secondary'}>
+                    {course.progress}%
+                  </Badge>
                 </div>
-                <Badge variant={course.progress === 100 ? 'default' : 'secondary'}>
-                  {course.progress}%
-                </Badge>
+                <Progress value={course.progress} className="h-2" />
               </div>
-              <Progress value={course.progress} className="h-2" />
-            </div>
-          ))}
+            ))
+          )}
         </CardContent>
       </Card>
 

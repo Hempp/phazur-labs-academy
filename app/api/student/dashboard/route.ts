@@ -145,11 +145,18 @@ export async function GET(request: NextRequest) {
     // For each enrollment, get lesson counts
     const enrollments = await Promise.all(
       (enrollmentsData || []).map(async (enrollment) => {
-        // Get total lessons for course
-        const { count: totalLessons } = await supabase
-          .from('lessons')
-          .select('id', { count: 'exact', head: true })
+        // Get total lessons by fetching through modules (matches learn page approach)
+        // This ensures consistent counts between dashboard and course pages
+        const { data: modulesWithLessons } = await supabase
+          .from('modules')
+          .select('lessons(id)')
           .eq('course_id', enrollment.course_id)
+
+        // Count lessons from all modules
+        const totalLessons = (modulesWithLessons || []).reduce(
+          (sum, mod) => sum + (Array.isArray(mod.lessons) ? mod.lessons.length : 0),
+          0
+        )
 
         // Get completed lessons for this user
         const { count: completedLessons } = await supabase

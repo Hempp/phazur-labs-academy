@@ -585,7 +585,7 @@ export default function StudentCoursesPage() {
                   </div>
                 )}
                 <Link
-                  href={`/dashboard/student/courses/${course.id}/learn`}
+                  href={`/learn/${course.slug || course.id}`}
                   className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center">
@@ -597,7 +597,7 @@ export default function StudentCoursesPage() {
               {/* Content */}
               <div className="p-4">
                 <Link
-                  href={`/dashboard/student/courses/${course.id}/learn`}
+                  href={`/learn/${course.slug || course.id}`}
                   className="block"
                 >
                   <h3 className="font-semibold text-white group-hover:text-indigo-400 transition-colors line-clamp-2">
@@ -641,7 +641,7 @@ export default function StudentCoursesPage() {
                 {/* Next Lesson */}
                 {course.nextLesson && (
                   <Link
-                    href={`/dashboard/student/courses/${course.id}/learn`}
+                    href={`/learn/${course.slug || course.id}`}
                     className="flex items-center justify-between mt-4 p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
                   >
                     <div className="flex items-center gap-2">
@@ -686,7 +686,7 @@ export default function StudentCoursesPage() {
                         {getStatusBadge(course.status)}
                       </div>
                       <Link
-                        href={`/dashboard/student/courses/${course.id}/learn`}
+                        href={`/learn/${course.slug || course.id}`}
                         className="text-lg font-semibold text-white hover:text-indigo-400 transition-colors"
                       >
                         {course.title}
@@ -720,7 +720,7 @@ export default function StudentCoursesPage() {
                       Last accessed: {formatLastAccessed(course.lastAccessed)}
                     </span>
                     <Link
-                      href={`/dashboard/student/courses/${course.id}/learn`}
+                      href={`/learn/${course.slug || course.id}`}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                       <Play className="w-4 h-4" />

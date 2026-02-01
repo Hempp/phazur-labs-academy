@@ -2,6 +2,7 @@
 
 // Cart Button Component for Header
 // VAULT Agent - Payment Systems Integration
+// Only visible when cart has items
 
 import { useState, useEffect } from 'react'
 import { ShoppingCart } from 'lucide-react'
@@ -16,6 +17,11 @@ export default function CartButton() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Hide cart button when empty (after hydration)
+  if (mounted && itemCount === 0) {
+    return null
+  }
 
   return (
     <button
