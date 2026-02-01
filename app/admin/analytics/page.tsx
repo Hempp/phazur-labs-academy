@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
                   <Icon className={`h-5 w-5 ${colors.text}`} />
                 </div>
                 <span className={`flex items-center gap-1 text-sm font-medium ${
-                  stat.trend === 'up' ? 'text-green-500' : 'text-green-500'
+                  stat.trend === 'up' ? 'text-green-500' : 'text-red-500'
                 }`}>
                   {stat.trend === 'up' ? (
                     <TrendingUp className="h-4 w-4" />

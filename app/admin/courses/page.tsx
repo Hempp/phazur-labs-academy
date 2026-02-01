@@ -777,8 +777,12 @@ export default function CoursesPage() {
         {/* Pagination */}
         <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-muted-foreground">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredCourses.length}</span> of{' '}
-            <span className="font-medium">{courses.length}</span> courses
+            {filteredCourses.length === courses.length ? (
+              <>Showing all <span className="font-medium">{courses.length}</span> courses</>
+            ) : (
+              <>Showing <span className="font-medium">{filteredCourses.length}</span> of{' '}
+              <span className="font-medium">{courses.length}</span> courses</>
+            )}
           </p>
           <div className="flex items-center gap-2">
             <button className="p-2 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
