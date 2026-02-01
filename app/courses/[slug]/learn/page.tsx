@@ -46,30 +46,40 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { useProgress } from '@/lib/hooks/use-progress'
 
-// Mock lesson data
+// Video URL mapping for generated lessons
+const lessonVideoUrls: Record<string, string> = {
+  // React Patterns Course
+  'lesson-react-1-1': '/videos/lessons/lesson-react-1-1.mp4',
+  'lesson-react-1-2': '/videos/lessons/lesson-react-1-2.mp4',
+  'lesson-react-1-3': '/videos/lessons/lesson-react-1-3.mp4',
+  'lesson-react-2-1': '/videos/lessons/lesson-react-2-1.mp4',
+  'lesson-react-2-2': '/videos/lessons/lesson-react-2-2.mp4',
+  'lesson-react-2-3': '/videos/lessons/lesson-react-2-3.mp4',
+  'lesson-react-3-1': '/videos/lessons/lesson-react-3-1.mp4',
+  'lesson-react-3-2': '/videos/lessons/lesson-react-3-2.mp4',
+  'lesson-react-4-1': '/videos/lessons/lesson-react-4-1.mp4',
+  // TypeScript Mastery Course
+  'lesson-ts-1-1': '/videos/lessons/lesson-ts-1-1.mp4',
+}
+
+// Mock lesson data with generated videos
 const mockLessonData = {
   lesson: {
-    id: 'l5',
-    title: 'What are Compound Components?',
+    id: 'lesson-react-1-1',
+    title: 'Welcome & Course Overview',
     type: 'video' as 'video' | 'exercise' | 'quiz' | 'assignment',
-    duration: 18,
-    videoUrl: '/videos/compound-components.mp4',
+    duration: 1,
+    videoUrl: '/videos/lessons/lesson-react-1-1.mp4',
     description: `
-      In this lesson, we'll explore the Compound Components pattern in React. This pattern allows you to create components with an implicit API that works together as a cohesive unit.
+      Welcome to Advanced React Patterns! In this comprehensive course, you'll learn the most powerful patterns used by senior React developers at top tech companies.
 
-      We'll look at real-world examples like Reach UI's Tabs component and understand how to implement this pattern in your own projects.
+      We'll cover compound components, render props, custom hooks, and the latest patterns from React 18 and beyond.
     `,
     resources: [
-      { id: 'r1', title: 'Lesson Slides', type: 'pdf', url: '/resources/slides.pdf' },
-      { id: 'r2', title: 'Code Examples', type: 'zip', url: '/resources/code.zip' },
+      { id: 'r1', title: 'Course Slides', type: 'pdf', url: '/resources/slides.pdf' },
+      { id: 'r2', title: 'GitHub Repository', type: 'link', url: 'https://github.com/phazurlabs/react-patterns-course' },
     ],
-    chapters: [
-      { id: 'c1', title: 'Introduction', startTime: 0, endTime: 180 },
-      { id: 'c2', title: 'The Problem', startTime: 180, endTime: 420 },
-      { id: 'c3', title: 'Compound Components Solution', startTime: 420, endTime: 720 },
-      { id: 'c4', title: 'Implementation', startTime: 720, endTime: 960 },
-      { id: 'c5', title: 'Summary', startTime: 960, endTime: 1080 },
-    ],
+    chapters: [] as Array<{ id: string; title: string; startTime: number; endTime: number }>,
   },
   course: {
     id: '1',
@@ -78,20 +88,19 @@ const mockLessonData = {
     instructor: {
       id: 'inst-1',
       name: 'Sarah Johnson',
-      avatar: null, // Uses initials fallback in UserAvatar
+      avatar: null,
     },
-    progress: 42,
+    progress: 0,
   },
   modules: [
     {
       id: 'm1',
-      title: 'Introduction to Advanced Patterns',
+      title: 'Introduction to Design Patterns',
       duration: 45,
       lessons: [
-        { id: 'l1', title: 'Course Overview', type: 'video' as const, duration: 8, completed: true, isFreePreview: true },
-        { id: 'l2', title: 'Setting Up the Development Environment', type: 'video' as const, duration: 12, completed: true, isFreePreview: true },
-        { id: 'l3', title: 'Understanding Pattern Categories', type: 'video' as const, duration: 15, completed: true, isFreePreview: false },
-        { id: 'l4', title: 'When to Use Which Pattern', type: 'video' as const, duration: 10, completed: true, isFreePreview: false },
+        { id: 'lesson-react-1-1', title: 'Welcome & Course Overview', type: 'video' as const, duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-1-2', title: 'What are Design Patterns?', type: 'video' as const, duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-1-3', title: 'Setting Up Your Environment', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
       ],
     },
     {
@@ -99,27 +108,34 @@ const mockLessonData = {
       title: 'Compound Components Pattern',
       duration: 120,
       lessons: [
-        { id: 'l5', title: 'What are Compound Components?', type: 'video' as const, duration: 18, completed: false, isFreePreview: true },
-        { id: 'l6', title: 'Building a Tabs Component', type: 'video' as const, duration: 25, completed: false, isFreePreview: false },
-        { id: 'l7', title: 'Using Context for Implicit State', type: 'video' as const, duration: 22, completed: false, isFreePreview: false },
-        { id: 'l8', title: 'Flexible Compound Components', type: 'video' as const, duration: 20, completed: false, isFreePreview: false },
-        { id: 'l9', title: 'Real-world Examples', type: 'video' as const, duration: 25, completed: false, isFreePreview: false },
-        { id: 'l10', title: 'Exercise: Build a Menu Component', type: 'exercise' as const, duration: 10, completed: false, isFreePreview: false },
+        { id: 'lesson-react-2-1', title: 'Understanding Compound Components', type: 'video' as const, duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-2-2', title: 'Building a Tabs Component', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
+        { id: 'lesson-react-2-3', title: 'Building an Accordion Component', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
         { id: 'lesson-react-2-4', title: 'Assignment: Build a Menu Component', type: 'assignment' as const, duration: 60, completed: false, isFreePreview: false },
       ],
     },
     {
       id: 'm3',
-      title: 'Custom Hooks Deep Dive',
-      duration: 150,
+      title: 'Render Props Pattern',
+      duration: 90,
       lessons: [
-        { id: 'l11', title: 'Custom Hooks Fundamentals', type: 'video' as const, duration: 20, completed: false, isFreePreview: false },
-        { id: 'l12', title: 'Building useToggle and useBoolean', type: 'video' as const, duration: 18, completed: false, isFreePreview: false },
-        { id: 'l13', title: 'Data Fetching with Custom Hooks', type: 'video' as const, duration: 28, completed: false, isFreePreview: false },
+        { id: 'lesson-react-3-1', title: 'What are Render Props?', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
+        { id: 'lesson-react-3-2', title: 'Building a Mouse Tracker', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
+      ],
+    },
+    {
+      id: 'm4',
+      title: 'Custom Hooks Pattern',
+      duration: 60,
+      lessons: [
+        { id: 'lesson-react-4-1', title: 'Introduction to Custom Hooks', type: 'video' as const, duration: 1, completed: false, isFreePreview: false },
       ],
     },
   ],
 }
+
+// Sample video URL for demo/development when no video is available
+const PLACEHOLDER_VIDEO_URL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
@@ -357,7 +373,7 @@ export default function CourseLearnPage() {
   const [isCheckingEnrollment, setIsCheckingEnrollment] = useState(true)
   const [isFreePreviewLesson, setIsFreePreviewLesson] = useState(false)
 
-  const lessonId = searchParams.get('lesson') || 'l5'
+  const lessonId = searchParams.get('lesson') || 'lesson-react-1-1'
   const activeTab = searchParams.get('tab') || 'overview'
   const courseSlug = params.slug as string
 
@@ -475,10 +491,24 @@ export default function CourseLearnPage() {
           }
         } else {
           console.log('Using mock data - API returned:', response.status)
-          // Using mock data - set preview flag based on mock data
+          // Using mock data - update lesson data based on selected lesson
           const mockLesson = mockLessonData.modules.flatMap(m => m.lessons).find(l => l.id === lessonId)
-          if (mockLesson && 'isFreePreview' in mockLesson) {
-            setIsFreePreviewLesson(mockLesson.isFreePreview === true)
+          if (mockLesson) {
+            const videoUrl = lessonVideoUrls[lessonId] || mockLessonData.lesson.videoUrl
+            setLessonData({
+              ...mockLessonData,
+              lesson: {
+                ...mockLessonData.lesson,
+                id: lessonId,
+                title: mockLesson.title,
+                type: mockLesson.type,
+                duration: mockLesson.duration,
+                videoUrl,
+              },
+            })
+            if ('isFreePreview' in mockLesson) {
+              setIsFreePreviewLesson(mockLesson.isFreePreview === true)
+            }
           }
         }
       } catch (err) {

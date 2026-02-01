@@ -164,7 +164,7 @@ function FileUpload({
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const validateFile = (file: File): boolean => {
+  const validateFile = useCallback((file: File): boolean => {
     setError(null)
 
     // Check file type
@@ -183,7 +183,7 @@ function FileUpload({
     }
 
     return true
-  }
+  }, [allowedTypes, maxSizeMb])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -193,7 +193,7 @@ function FileUpload({
     if (file && validateFile(file)) {
       onFileSelect(file)
     }
-  }, [allowedTypes, maxSizeMb, onFileSelect])
+  }, [validateFile, onFileSelect])
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

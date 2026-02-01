@@ -45,3 +45,31 @@ next-env.d.ts
 
 # Hookify local rules
 .claude/*.local.md
+
+# Video Generation - Private Assets
+assets/instructor/voice-sample.wav
+assets/instructor/photo.jpg
+assets/instructor/*.jpg
+assets/instructor/*.png
+assets/instructor/*.wav
+assets/instructor/*.mp3
+
+# Video Generation - Temp Files
+temp/
+tools/SadTalker/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+
+# Video Generation - Large Model Files
+*.ckpt
+*.pth
+*.safetensors
+checkpoints/
+gfpgan/

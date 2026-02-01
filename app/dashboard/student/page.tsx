@@ -594,8 +594,8 @@ export default function StudentDashboardPage() {
 
   const firstName = dashboardData?.student?.full_name?.split(' ')[0] || profile?.full_name?.split(' ')[0] || 'Student'
 
-  // Derive data from API response
-  const studentAnalytics = dashboardData?.analytics || {
+  // Derive data from API response - wrapped in useMemo for stable references
+  const studentAnalytics = useMemo(() => dashboardData?.analytics || {
     total_courses_enrolled: 0,
     courses_completed: 0,
     certificates_earned: 0,
@@ -605,10 +605,11 @@ export default function StudentDashboardPage() {
     average_quiz_score: 0,
     learning_by_day: [],
     category_distribution: []
-  }
-  const studentEnrollments = dashboardData?.enrollments || []
-  const studentCertificates = dashboardData?.certificates || []
-  const upcomingLiveTrainings = dashboardData?.upcomingLiveTrainings || []
+  }, [dashboardData?.analytics])
+
+  const studentEnrollments = useMemo(() => dashboardData?.enrollments || [], [dashboardData?.enrollments])
+  const studentCertificates = useMemo(() => dashboardData?.certificates || [], [dashboardData?.certificates])
+  const upcomingLiveTrainings = useMemo(() => dashboardData?.upcomingLiveTrainings || [], [dashboardData?.upcomingLiveTrainings])
 
   // Most recent course for hero
   const heroCoursre = useMemo(() => {

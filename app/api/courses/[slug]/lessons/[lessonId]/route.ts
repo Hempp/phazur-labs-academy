@@ -14,28 +14,35 @@ const isSupabaseConfigured = () => {
   )
 }
 
-// Mock lesson data for development (matches learn page mock data structure)
+// Video URL mapping for generated lessons
+const lessonVideoUrls: Record<string, string> = {
+  'lesson-react-1-1': '/videos/lessons/lesson-react-1-1.mp4',
+  'lesson-react-1-2': '/videos/lessons/lesson-react-1-2.mp4',
+  'lesson-react-1-3': '/videos/lessons/lesson-react-1-3.mp4',
+  'lesson-react-2-1': '/videos/lessons/lesson-react-2-1.mp4',
+  'lesson-react-2-2': '/videos/lessons/lesson-react-2-2.mp4',
+  'lesson-react-2-3': '/videos/lessons/lesson-react-2-3.mp4',
+  'lesson-react-3-1': '/videos/lessons/lesson-react-3-1.mp4',
+  'lesson-react-3-2': '/videos/lessons/lesson-react-3-2.mp4',
+  'lesson-react-4-1': '/videos/lessons/lesson-react-4-1.mp4',
+}
+
+// Mock lesson data for development (with generated videos)
 const mockLessonData = {
   lesson: {
-    id: 'l5',
-    title: 'What are Compound Components?',
+    id: 'lesson-react-1-1',
+    title: 'Welcome & Course Overview',
     type: 'video' as const,
-    duration: 18,
-    videoUrl: '/videos/compound-components.mp4',
-    description: `In this lesson, we'll explore the Compound Components pattern in React. This pattern allows you to create components with an implicit API that works together as a cohesive unit.
+    duration: 1,
+    videoUrl: '/videos/lessons/lesson-react-1-1.mp4',
+    description: `Welcome to Advanced React Patterns! In this comprehensive course, you'll learn the most powerful patterns used by senior React developers at top tech companies.
 
-We'll look at real-world examples like Reach UI's Tabs component and understand how to implement this pattern in your own projects.`,
+We'll cover compound components, render props, custom hooks, and the latest patterns from React 18 and beyond.`,
     resources: [
-      { id: 'r1', title: 'Lesson Slides', type: 'pdf', url: '/resources/slides.pdf' },
-      { id: 'r2', title: 'Code Examples', type: 'zip', url: '/resources/code.zip' },
+      { id: 'r1', title: 'Course Slides', type: 'pdf', url: '/resources/slides.pdf' },
+      { id: 'r2', title: 'GitHub Repository', type: 'link', url: 'https://github.com/phazurlabs/react-patterns-course' },
     ],
-    chapters: [
-      { id: 'c1', title: 'Introduction', startTime: 0 },
-      { id: 'c2', title: 'The Problem', startTime: 180 },
-      { id: 'c3', title: 'Compound Components Solution', startTime: 420 },
-      { id: 'c4', title: 'Implementation', startTime: 720 },
-      { id: 'c5', title: 'Summary', startTime: 960 },
-    ],
+    chapters: [],
     isFreePreview: true,
   },
   course: {
@@ -45,44 +52,46 @@ We'll look at real-world examples like Reach UI's Tabs component and understand 
     instructor: {
       id: 'inst-1',
       name: 'Sarah Johnson',
-      avatar: null, // Let UserAvatar fallback handle this with initials
+      avatar: null,
     },
   },
   modules: [
     {
       id: 'm1',
-      title: 'Introduction to Advanced Patterns',
+      title: 'Introduction to Design Patterns',
       lessons: [
-        { id: 'l1', title: 'Course Overview', type: 'video', duration: 8, completed: true, isFreePreview: true },
-        { id: 'l2', title: 'Setting Up the Development Environment', type: 'video', duration: 12, completed: true, isFreePreview: false },
-        { id: 'l3', title: 'Understanding Pattern Categories', type: 'video', duration: 15, completed: true, isFreePreview: false },
-        { id: 'l4', title: 'When to Use Which Pattern', type: 'video', duration: 10, completed: true, isFreePreview: false },
+        { id: 'lesson-react-1-1', title: 'Welcome & Course Overview', type: 'video', duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-1-2', title: 'What are Design Patterns?', type: 'video', duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-1-3', title: 'Setting Up Your Environment', type: 'video', duration: 1, completed: false, isFreePreview: false },
       ],
     },
     {
       id: 'm2',
       title: 'Compound Components Pattern',
       lessons: [
-        { id: 'l5', title: 'What are Compound Components?', type: 'video', duration: 18, completed: false, isFreePreview: true },
-        { id: 'l6', title: 'Building a Tabs Component', type: 'video', duration: 25, completed: false, isFreePreview: false },
-        { id: 'l7', title: 'Using Context for Implicit State', type: 'video', duration: 22, completed: false, isFreePreview: false },
-        { id: 'l8', title: 'Flexible Compound Components', type: 'video', duration: 20, completed: false, isFreePreview: false },
-        { id: 'l9', title: 'Real-world Examples', type: 'video', duration: 25, completed: false, isFreePreview: false },
-        { id: 'l10', title: 'Exercise: Build a Menu Component', type: 'exercise', duration: 10, completed: false, isFreePreview: false },
+        { id: 'lesson-react-2-1', title: 'Understanding Compound Components', type: 'video', duration: 1, completed: false, isFreePreview: true },
+        { id: 'lesson-react-2-2', title: 'Building a Tabs Component', type: 'video', duration: 1, completed: false, isFreePreview: false },
+        { id: 'lesson-react-2-3', title: 'Building an Accordion Component', type: 'video', duration: 1, completed: false, isFreePreview: false },
       ],
     },
     {
       id: 'm3',
-      title: 'Custom Hooks Deep Dive',
+      title: 'Render Props Pattern',
       lessons: [
-        { id: 'l11', title: 'Custom Hooks Fundamentals', type: 'video', duration: 20, completed: false, isFreePreview: false },
-        { id: 'l12', title: 'Building useToggle and useBoolean', type: 'video', duration: 18, completed: false, isFreePreview: false },
-        { id: 'l13', title: 'Data Fetching with Custom Hooks', type: 'video', duration: 28, completed: false, isFreePreview: false },
+        { id: 'lesson-react-3-1', title: 'What are Render Props?', type: 'video', duration: 1, completed: false, isFreePreview: false },
+        { id: 'lesson-react-3-2', title: 'Building a Mouse Tracker', type: 'video', duration: 1, completed: false, isFreePreview: false },
+      ],
+    },
+    {
+      id: 'm4',
+      title: 'Custom Hooks Pattern',
+      lessons: [
+        { id: 'lesson-react-4-1', title: 'Introduction to Custom Hooks', type: 'video', duration: 1, completed: false, isFreePreview: false },
       ],
     },
   ],
   progress: null,
-  completedLessons: ['l1', 'l2', 'l3', 'l4'],
+  completedLessons: [],
 }
 
 // Helper to find mock lesson by ID
@@ -97,10 +106,13 @@ function getMockLesson(lessonId: string) {
         type: lesson.type,
         duration: lesson.duration,
         isFreePreview: lesson.isFreePreview,
+        videoUrl: lessonVideoUrls[lessonId] || mockLessonData.lesson.videoUrl,
       }
     }
   }
-  return mockLessonData.lesson // Default to l5 lesson data
+  // Return default with correct video URL
+  const videoUrl = lessonVideoUrls[lessonId] || mockLessonData.lesson.videoUrl
+  return { ...mockLessonData.lesson, id: lessonId, videoUrl }
 }
 
 // GET - Fetch lesson data with course context
@@ -181,8 +193,8 @@ export async function GET(
       .single()
 
     if (lessonError || !lesson) {
-      // Fallback to mock data for development with mock lesson IDs (l1, l2, etc.)
-      if (/^l\d+$/.test(lessonId)) {
+      // Fallback to mock data for development with mock lesson IDs
+      if (/^lesson-react-\d+-\d+$/.test(lessonId) || /^l\d+$/.test(lessonId)) {
         const mockLesson = getMockLesson(lessonId)
         return NextResponse.json({
           ...mockLessonData,

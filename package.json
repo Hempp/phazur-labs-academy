@@ -14,7 +14,20 @@
     "db:seed": "tsx scripts/seed.ts",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify:video-setup": "tsx scripts/verify-video-setup.ts"
+    "verify:video-setup": "tsx scripts/verify-video-setup.ts",
+    "videos:list": "tsx scripts/manage-videos.ts -- --list",
+    "videos:validate": "tsx scripts/manage-videos.ts -- --validate",
+    "videos:missing": "tsx scripts/manage-videos.ts -- --missing",
+    "upload-videos": "tsx scripts/upload-videos-r2.ts",
+    "upload-videos:s3": "tsx scripts/upload-videos-s3.ts",
+    "upload-videos:dry-run": "tsx scripts/upload-videos-r2.ts -- --dry-run",
+    "setup:video-system": "bash scripts/setup-video-system.sh",
+    "record:voice": "bash scripts/record-voice-sample.sh",
+    "generate:custom-video": "python3 scripts/custom-video-generator.py",
+    "generate:batch": "python3 scripts/batch-custom-videos.py",
+    "videos:extract-scripts": "npx tsx scripts/extract-lesson-scripts.ts",
+    "videos:generate": "python3 scripts/generate-phazur-videos.py",
+    "videos:list-lessons": "python3 scripts/generate-phazur-videos.py --list"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",
