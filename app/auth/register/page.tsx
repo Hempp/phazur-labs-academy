@@ -188,12 +188,13 @@ function RegisterForm() {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={isGoogleLoading || isGithubLoading || isLoading}
-              className="w-full flex items-center justify-center gap-3 h-11 px-4 border rounded-lg text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-3 h-11 px-4 border rounded-lg text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {isGoogleLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
               ) : (
-                <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                  <title>Google logo</title>
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -219,12 +220,13 @@ function RegisterForm() {
               type="button"
               onClick={handleGithubSignIn}
               disabled={isGoogleLoading || isGithubLoading || isLoading}
-              className="w-full flex items-center justify-center gap-3 h-11 px-4 border rounded-lg text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-3 h-11 px-4 border rounded-lg text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {isGithubLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
               ) : (
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <title>GitHub logo</title>
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
@@ -254,17 +256,19 @@ function RegisterForm() {
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <input
                   {...register('fullName')}
                   type="text"
                   id="fullName"
                   placeholder="Enter your full name"
+                  aria-invalid={!!errors.fullName}
+                  aria-describedby={errors.fullName ? "fullName-error" : undefined}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
               {errors.fullName && (
-                <p className="text-destructive text-xs mt-1">{errors.fullName.message}</p>
+                <p id="fullName-error" className="text-destructive text-xs mt-1" role="alert">{errors.fullName.message}</p>
               )}
             </div>
 
@@ -273,17 +277,19 @@ function RegisterForm() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <input
                   {...register('email')}
                   type="email"
                   id="email"
                   placeholder="Enter your email"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                   className="w-full h-11 pl-10 pr-4 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
               {errors.email && (
-                <p className="text-destructive text-xs mt-1">{errors.email.message}</p>
+                <p id="email-error" className="text-destructive text-xs mt-1" role="alert">{errors.email.message}</p>
               )}
             </div>
 
@@ -292,25 +298,29 @@ function RegisterForm() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <input
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   placeholder="Create a password"
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : "password-requirements"}
                   className="w-full h-11 pl-10 pr-12 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {/* Password Requirements */}
               {password && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
+                <div id="password-requirements" className="mt-2 grid grid-cols-2 gap-1" aria-live="polite">
                   {passwordRequirements.map((req) => (
                     <div
                       key={req.label}
@@ -318,14 +328,15 @@ function RegisterForm() {
                         req.met ? 'text-success' : 'text-muted-foreground'
                       }`}
                     >
-                      <Check className="h-3 w-3" />
+                      <Check className="h-3 w-3" aria-hidden="true" />
+                      <span className="sr-only">{req.met ? 'Requirement met:' : 'Requirement not met:'}</span>
                       {req.label}
                     </div>
                   ))}
                 </div>
               )}
               {errors.password && (
-                <p className="text-destructive text-xs mt-1">{errors.password.message}</p>
+                <p id="password-error" className="text-destructive text-xs mt-1" role="alert">{errors.password.message}</p>
               )}
             </div>
 
@@ -334,24 +345,28 @@ function RegisterForm() {
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <input
                   {...register('confirmPassword')}
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"
                   placeholder="Confirm your password"
+                  aria-invalid={!!errors.confirmPassword}
+                  aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
                   className="w-full h-11 pl-10 pr-12 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}
+                  aria-pressed={showConfirmPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-destructive text-xs mt-1">{errors.confirmPassword.message}</p>
+                <p id="confirmPassword-error" className="text-destructive text-xs mt-1" role="alert">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -360,27 +375,29 @@ function RegisterForm() {
                 {...register('agreeToTerms')}
                 type="checkbox"
                 id="agreeToTerms"
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                aria-invalid={!!errors.agreeToTerms}
+                aria-describedby={errors.agreeToTerms ? "agreeToTerms-error" : undefined}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               />
               <label htmlFor="agreeToTerms" className="text-sm text-muted-foreground">
                 I agree to the{' '}
-                <Link href="/terms" className="text-primary hover:underline">
+                <Link href="/terms" className="text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-primary hover:underline">
+                <Link href="/privacy" className="text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded">
                   Privacy Policy
                 </Link>
               </label>
             </div>
             {errors.agreeToTerms && (
-              <p className="text-destructive text-xs">{errors.agreeToTerms.message}</p>
+              <p id="agreeToTerms-error" className="text-destructive text-xs" role="alert">{errors.agreeToTerms.message}</p>
             )}
 
             <button
               type="submit"
               disabled={isLoading || isGoogleLoading || isGithubLoading}
-              className="w-full h-11 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full h-11 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {isLoading ? (
                 <>
@@ -395,7 +412,7 @@ function RegisterForm() {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary font-medium hover:underline">
+            <Link href="/auth/login" className="text-primary font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded">
               Sign in
             </Link>
           </p>
